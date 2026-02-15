@@ -6,22 +6,9 @@ import NProgress from "nprogress/nprogress.js";
 import LayoutSimple from "@/layouts/variations/Simple.vue";
 // import LayoutLanding from "@/layouts/variations/Landing.vue";
 import LayoutBackend from "@/layouts/variations/Backend.vue";
-import LayoutBackendBoxed from "@/layouts/variations/BackendBoxed.vue";
-import LayoutBackendMegaMenu from "@/layouts/variations/BackendMegaMenu.vue";
-import LayoutBackendSidebarMiniNav from "@/layouts/variations/BackendSidebarMiniNav.vue";
-
-// Frontend: Landing
-// const Landing = () => import("@/views/landing/LandingView.vue");
-
-// Backend Boxed: Dashboard
-
 
 // Backend: Dashboard
 const BackendDashboard = () => import("@/views/backend/DashboardView.vue");
-
-
-
-
 
 // Specials
 const SpecialsMaintenance = () =>
@@ -53,8 +40,6 @@ const Error503 = () => import("@/views/errors/503View.vue");
 
 // Set all routes
 const routes = [
-
-
   /*
   |
   |--------------------------------------------------------------------------
@@ -63,8 +48,8 @@ const routes = [
   |
   */
   {
-    path: "/backend",
-    redirect: "/backend/dashboard",
+    path: "/",
+    // redirect: "/backend/dashboard",
     component: LayoutBackend,
     children: [
       {
@@ -72,11 +57,11 @@ const routes = [
         name: "backend-dashboard",
         component: BackendDashboard,
       },
+
+      // other pages can be added here
     ],
   },
 
-     
-    
   /*
   |
   |--------------------------------------------------------------------------
@@ -128,15 +113,13 @@ const routes = [
         name: "auth-signin3",
         component: AuthSignIn3,
       },
-     
-     
+
       {
         path: "signup3",
         name: "auth-signup3",
         component: AuthSignUp3,
       },
-      
-   
+
       {
         path: "lock3",
         name: "auth-lock3",
@@ -148,7 +131,7 @@ const routes = [
         name: "auth-reminder3",
         component: AuthReminder3,
       },
-     
+
       {
         path: "two-factor3",
         name: "auth-two-factor3",
@@ -201,7 +184,6 @@ const routes = [
     ],
   },
 ];
-
 
 // Create Router
 const router = createRouter({
