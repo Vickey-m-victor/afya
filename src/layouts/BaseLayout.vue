@@ -5,7 +5,7 @@ import { useTemplateStore } from "@/stores/template";
 // Import all layout partials
 import BaseHeader from "@/layouts/partials/Header.vue";
 import BaseSidebar from "@/layouts/partials/Sidebar.vue";
-import BaseSideOverlay from "@/layouts/partials/SideOverlay.vue";
+// import BaseSideOverlay from "@/layouts/partials/SideOverlay.vue";
 import BaseFooter from "@/layouts/partials/Footer.vue";
 
 // Component properties
@@ -46,10 +46,8 @@ const classContainer = computed(() => {
     "sidebar-o": store.layout.sidebar && store.settings.sidebarVisibleDesktop,
     "sidebar-o-xs": store.layout.sidebar && store.settings.sidebarVisibleMobile,
     "sidebar-dark": store.layout.sidebar && store.settings.sidebarDark,
-    "side-overlay-o":
-      store.layout.sideOverlay && store.settings.sideOverlayVisible,
-    "side-overlay-hover":
-      store.layout.sideOverlay && store.settings.sideOverlayHoverable,
+    
+   
     "enable-page-overlay":
       store.layout.sideOverlay && store.settings.pageOverlay,
     "page-header-fixed": store.layout.header && store.settings.headerFixed,

@@ -24,7 +24,6 @@ const baseSearchTerm = ref("");
 store.setLayout({
   header: true,
   sidebar: false,
-  sideOverlay: false,
   footer: true,
 });
 

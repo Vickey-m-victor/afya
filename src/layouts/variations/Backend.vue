@@ -10,7 +10,6 @@ const store = useTemplateStore();
 store.setLayout({
   header: true,
   sidebar: true,
-  sideOverlay: true,
   footer: true,
 });
 

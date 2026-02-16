@@ -175,15 +175,7 @@ onUnmounted(() => {
             
               <!-- END Notifications Dropdown -->
 
-              <!-- Toggle Side Overlay -->
-              <button
-                type="button"
-                class="btn btn-sm btn-alt-secondary ms-2"
-                @click="store.sideOverlay({ mode: 'toggle' })"
-              >
-                <i class="fa fa-fw fa-list-ul fa-flip-horizontal"></i>
-              </button>
-              <!-- END Toggle Side Overlay -->
+            
             </slot>
           </div>
           <!-- END Right Section -->
