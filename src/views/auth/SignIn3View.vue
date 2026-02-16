@@ -2,6 +2,8 @@
 import { reactive, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
+import { useAuthStore } from "@/stores/auth";
+import api from "@/utils/api";
 
 // Vuelidate, for more info and examples you can check out https://github.com/vuelidate/vuelidate
 import useVuelidate from "@vuelidate/core";
@@ -10,6 +12,7 @@ import { required, minLength } from "@vuelidate/validators";
 // Main store and Router
 const store = useTemplateStore();
 const router = useRouter();
+const auth = useAuthStore();
 
 // Input state variables
 const state = reactive({
@@ -17,19 +20,7 @@ const state = reactive({
   password: null,
 });
 
-// Validation rules
-const rules = computed(() => {
-  return {
-    username: {
-      required,
-      minLength: minLength(3),
-    },
-    password: {
-      required,
-      minLength: minLength(5),
-    },
-  };
-});
+
 
 // Use vuelidate
 const v$ = useVuelidate(rules, state);
