@@ -3,13 +3,13 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
 import { useAuthStore } from "@/stores/auth"; // Ensure this is the correct path
-import { useToast } from "@/utils/iziToast";
+import { useAlert } from "@/composables/alerts";
 
+const { toastSuccess, toastError } = useAlert();
 // Main stores and Router
 const store = useTemplateStore();
 const router = useRouter();
 const authStore = useAuthStore(); // Changed variable name for clarity
-const toast = useToast();
 
 // State variables
 const username = ref("");
@@ -40,22 +40,14 @@ async function onSubmit() {
 
     localStorage.setItem("username", username.value);
 
-    toast.success({
-      title: "Success",
-      message: "Login Successful",
-    });
-
+    toastSuccess("Success", "Welcome back!");
     router.push({ name: "backend-dashboard" });
   } catch (error) {
     // Correctly map backend errors
     if (error?.response?.data?.errorPayload?.errors) {
       errors.value = error.response.data.errorPayload.errors;
     } else {
-      toast.error({
-        // Removed '$' prefix from toast call
-        title: "Login Failed",
-        message: error.response?.data?.message || "Invalid Credentials",
-      });
+      toastError("Login failed", error.response?.data?.message || "Invalid Credentials")
     }
   } finally {
     isLoading.value = false;
