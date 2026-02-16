@@ -1,29 +1,18 @@
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive,ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
 import { useAuthStore } from "@/stores/auth";
 import api from "@/utils/api";
-
-// Vuelidate, for more info and examples you can check out https://github.com/vuelidate/vuelidate
-import useVuelidate from "@vuelidate/core";
-import { required, minLength } from "@vuelidate/validators";
 
 // Main store and Router
 const store = useTemplateStore();
 const router = useRouter();
 const auth = useAuthStore();
 
-// Input state variables
-const state = reactive({
-  username: null,
-  password: null,
-});
-
-
-
-// Use vuelidate
-const v$ = useVuelidate(rules, state);
+const username = ref("");
+const password = ref("");
+const errors = ref({});
 
 // On form submission
 async function onSubmit() {
