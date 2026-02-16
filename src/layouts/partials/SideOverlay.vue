@@ -10,8 +10,6 @@ import SimpleBar from "simplebar";
 // import sales from "@/data/sales";
 // import users from "@/data/users";
 
-const salesToday = sales.today;
-const salesYesterday = sales.yesterday;
 
 // Main store
 const store = useTemplateStore();
@@ -39,7 +37,7 @@ function eventSideOverlay(event) {
 
 // Init SimpleBar (custom scrolling) and attach ESCAPE key event listener
 onMounted(() => {
-  new SimpleBar(document.getElementById("side-overlay"));
+  // new SimpleBar(document.getElementById("side-overlay"));
 
   document.addEventListener("keydown", eventSideOverlay);
 });

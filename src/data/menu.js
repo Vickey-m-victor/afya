@@ -8,7 +8,7 @@ export default {
   main: [
     {
       name: "Dashboard",
-      to: "backend-dashboard",
+      to: "dashboard",
       icon: "si si-speedometer",
     },
 
@@ -94,11 +94,11 @@ export default {
       sub: [
         {
           name: "Profile",
-          to: "backend-pages-generic-profile",
+          to: "dashboard",
         },
         {
           name: "Profile Edit",
-          to: "backend-pages-generic-profile-edit",
+          to: "dashboard",
         },
 
         {
@@ -113,10 +113,7 @@ export default {
           name: "Installation",
           to: "specials-installation",
         },
-        {
-          name: "Checkout",
-          to: "specials-checkout",
-        },
+       
         {
           name: "Coming Soon",
           to: "specials-coming-soon",
@@ -128,10 +125,7 @@ export default {
       icon: "si si-lock",
       subActivePaths: "/backend/pages/auth",
       sub: [
-        {
-          name: "All",
-          to: "backend-pages-auth",
-        },
+       
 
         {
           name: "Sign In 3",
@@ -164,10 +158,7 @@ export default {
       icon: "si si-fire",
       subActivePaths: "/backend/pages/errors",
       sub: [
-        {
-          name: "All",
-          to: "backend-pages-errors",
-        },
+   
         {
           name: "400",
           to: "error-400",
@@ -208,7 +199,7 @@ export default {
 
     {
       name: "Go Back",
-      to: "backend-dashboard",
+      to: "dashboard",
       icon: "si si-action-undo",
     },
   ],

@@ -189,7 +189,7 @@ store.mainContent({ mode: "boxed" });
                 <span class="badge rounded-pill bg-primary ms-2">3</span>
               </a>
               <RouterLink
-                :to="{ name: 'backend-pages-generic-profile' }"
+                :to="{ name: 'dashboard' }"
                 class="dropdown-item d-flex align-items-center justify-content-between"
               >
                 <span class="fs-sm fw-medium">Profile</span>
@@ -205,13 +205,13 @@ store.mainContent({ mode: "boxed" });
             <div role="separator" class="dropdown-divider m-0"></div>
             <div class="p-2">
               <RouterLink
-                :to="{ name: 'auth-lock' }"
+                :to="{ name: 'auth-lock3' }"
                 class="dropdown-item d-flex align-items-center justify-content-between"
               >
                 <span class="fs-sm fw-medium">Lock Account</span>
               </RouterLink>
               <RouterLink
-                :to="{ name: 'auth-signin' }"
+                :to="{ name: 'auth-signin3' }"
                 class="dropdown-item d-flex align-items-center justify-content-between"
               >
                 <span class="fs-sm fw-medium">Log Out</span>

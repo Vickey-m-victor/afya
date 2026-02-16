@@ -26,7 +26,7 @@ const store = useTemplateStore();
 
 // Init SimpleBar (custom scrolling)
 onMounted(() => {
-  new SimpleBar(document.getElementById("simplebar-sidebar"));
+  // new SimpleBar(document.getElementById("simplebar-sidebar"));
 });
 </script>
 

@@ -28,7 +28,7 @@ function onSubmit() {
   // ...
 
   // Go to dashboard
-  router.push({ name: "backend-pages-auth" });
+  router.push({ name: "dashboard" });
 }
 
 // Check if is number

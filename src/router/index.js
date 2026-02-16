@@ -54,7 +54,7 @@ const routes = [
     children: [
       {
         path: "dashboard",
-        name: "backend-dashboard",
+        name: "dashboard",
         component: BackendDashboard,
       },
 

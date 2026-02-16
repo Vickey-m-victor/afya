@@ -44,7 +44,7 @@ async function onSubmit() {
   }
 
   // Go to dashboard
-  router.push({ name: "backend-pages-auth" });
+  router.push({ name: "dashboard" });
 }
 </script>
 
