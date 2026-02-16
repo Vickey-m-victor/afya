@@ -1,5 +1,5 @@
 // src/composables/useAlert.js
-import alertUtil from '@/utils/alert';
+import alertUtil from "@/utils/alerts";
 
 export function useAlert() {
   // Logic for toasts
@@ -29,6 +29,6 @@ export function useAlert() {
     toastError,
     toastWarning,
     confirmAction,
-    showAlert
+    showAlert,
   };
 }
