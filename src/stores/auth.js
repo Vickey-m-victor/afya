@@ -1,9 +1,11 @@
 import { defineStore } from "pinia";
 import api from "@/utils/api";
+import authService from "@/services/authService";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: JSON.parse(localStorage.getItem("user")) || null,
+    // don't save is authenticated to ,local storage since a user can edit it, instead we will check if user is auth by checking if there is a user object in the state
     isAuthenticated: !!localStorage.getItem("user"),
     loading: false,
   }),
@@ -47,7 +49,7 @@ export const useAuthStore = defineStore("auth", {
     async login(credentials) {
       this.loading = true;
       try {
-        const response = await api.post("/iam/auth/login", credentials);
+        const response = await authService.login(credentials);
 
         console.log("LOGIN RESPONSE:", response.data); // Keep this to debug
 
@@ -95,7 +97,7 @@ export const useAuthStore = defineStore("auth", {
 // removes user data from local storage, redirect to login page
     async logout() {
       try {
-        await api.delete("/iam/auth/logout");
+        await authService.logout();
       } catch (error) {
         console.error("Logout API error", error);
       } finally {

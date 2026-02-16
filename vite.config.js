@@ -13,5 +13,17 @@ export default defineConfig({
   },
   server: {
     host: true,
+    proxy: {
+      "/v1": {
+        target: "http://localhost:8086/", //backend URL
+        changeOrigin: true,
+      },
+      "/uploads": {
+        target: "http://localhost:8086/", 
+        changeOrigin: true, 
+        rewrite: (path) => path.replace(/^\/uploads/, '/uploads'),
+      },
+    },
+    cors: true,
   },
 });
