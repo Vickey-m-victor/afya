@@ -14,16 +14,21 @@ const handleClick = () => {
   emit("click");
 };
 </script>
+
 <template>
-  <button
-    @click="handleClick"
-    :class="[
-      'btn',
-      'p-2',
-      `btn-${props.variant}`,
-      props.size ? `btn-${props.size}` : '',
-    ]"
-  >
-    {{ label }} <slot name="icon"></slot>
-  </button>
+  <div :class="[props.size]">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <button
+        @click="handleClick"
+        :class="[
+          'btn',
+          'p-2',
+          `btn-${props.variant}`,
+          props.size ? `btn-${props.size}` : '',
+        ]"
+      >
+        {{ label }} <slot name="icon"></slot>
+      </button>
+    </div>
+  </div>
 </template>

@@ -38,6 +38,10 @@ const Error404 = () => import("@/views/errors/404View.vue");
 const Error500 = () => import("@/views/errors/500View.vue");
 const Error503 = () => import("@/views/errors/503View.vue");
 
+
+//Tests
+import TestView from "@/views/Tests/ComponentsTest.vue"
+
 // Set all routes
 const routes = [
  
@@ -51,6 +55,11 @@ const routes = [
         name: "dashboard",
         component: BackendDashboard,
       },
+      {
+        path: "tests",
+        name: "tests",
+        component: TestView,
+      }
 
       // other pages can be added here
     ],

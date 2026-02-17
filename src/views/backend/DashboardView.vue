@@ -7,5 +7,5 @@
     </template>
   </BasePageHeading>
 
- 
+
 </template>
