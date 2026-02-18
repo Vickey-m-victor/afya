@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
 import { tableService } from "@/services/tableService";
 import { useAlert } from "@/composables/alerts";
+import BaseButton from "@/components/BaseButton.vue";
 
 const { toastError } = useAlert();
 
@@ -38,6 +39,7 @@ onMounted(() => {
 
 <template>
   <div class="content">
+    <BaseButton> </BaseButton>
     <BaseTable
       title="Global Users Registry"
       :data="users"

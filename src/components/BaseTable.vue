@@ -27,11 +27,11 @@ const onSort = (event, index) => {
       :ds-data="data"
       :ds-search-in="searchFields"
     >
-      <div class="row" :data-page-count="ds.dsPagecount">
+      <div class="d-flex justify-content-between" :data-page-count="ds.dsPagecount">
         <div id="datasetLength" class="col-md-1 py-2">
           <DatasetShow />
         </div>
-        <div class="col-md-4 py-2">
+        <div class="col-md-3 py-2">
           <DatasetSearch ds-search-placeholder="Search..." />
         </div>
       </div>

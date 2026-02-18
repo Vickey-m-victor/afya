@@ -1,10 +1,13 @@
-<script>
+<script setup>
 const props = defineProps({
   size: {
     type: String,
     default: "lg",
   },
-  variant: primary,
+  variant: {
+    type: String,
+    default: "primary",
+  },
   label: String,
 });
 
