@@ -67,3 +67,25 @@ onMounted(() => {
     </BaseTable>
   </div>
 </template>
+
+
+<!-- <BaseModal
+  :showModal="showCreate"
+  title="Create Banner"
+  @close="showCreate = false"
+>
+  <CreateBannerForm />
+
+  <template #footer>
+    <BaseButton
+      label="Cancel"
+      @click="showCreate = false"
+    />
+    <BaseButton
+      label="Save"
+      variant="primary"
+      @click="submitForm"
+    />
+  </template>
+</BaseModal>
+ -->
