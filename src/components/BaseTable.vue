@@ -30,6 +30,12 @@ const onSort = (event, index) => {
 <template>
   <BaseBlock :title="title" content-full>
     <Dataset v-slot="{ ds }" :ds-data="data" :ds-search-in="searchFields">
+      <div class="d-flex justify-content-end  me-3">
+        <BaseButton
+        label="Create User"
+        @click="showModal"
+        ></BaseButton>
+      </div>
       <div class="d-flex justify-content-between" :data-page-count="ds.dsPagecount">
         <div id="datasetLength" class="col-md-1 py-2">
           <DatasetShow />
@@ -38,12 +44,7 @@ const onSort = (event, index) => {
           <DatasetSearch ds-search-placeholder="Search..." />
         </div>
       </div>
-      <div class="d-flex justify-content-end me-3">
-        <BaseButton
-        label="Create User"
-        @click="showModal"
-        ></BaseButton>
-      </div>
+    
       <hr />
       <div class="table-responsive">
         <table class="table table-striped mb-0">
