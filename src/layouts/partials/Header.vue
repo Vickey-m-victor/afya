@@ -11,29 +11,29 @@ const store = useTemplateStore();
 const router = useRouter();
 
 // Reactive variables
-const baseSearchTerm = ref("");
+// const baseSearchTerm = ref("");
 
 // On form search submit functionality
-function onSubmitSearch() {
-  router.push("/backend/pages/generic/search?" + baseSearchTerm.value);
-}
+// function onSubmitSearch() {
+//   router.push("/backend/pages/generic/search?" + baseSearchTerm.value);
+// }
 
 // When ESCAPE key is hit close the header search section
-function eventHeaderSearch(event) {
-  if (event.which === 27) {
-    event.preventDefault();
-    store.headerSearch({ mode: "off" });
-  }
-}
+// function eventHeaderSearch(event) {
+//   if (event.which === 27) {
+//     event.preventDefault();
+//     store.headerSearch({ mode: "off" });
+//   }
+// }
 
 // Attach ESCAPE key event listener
 onMounted(() => {
-  document.addEventListener("keydown", eventHeaderSearch);
+  // document.addEventListener("keydown", eventHeaderSearch);
 });
 
 // Remove keydown event listener
 onUnmounted(() => {
-  document.removeEventListener("keydown", eventHeaderSearch);
+  // document.removeEventListener("keydown", eventHeaderSearch);
 });
 </script>
 
@@ -58,17 +58,17 @@ onUnmounted(() => {
               <!-- END Toggle Sidebar -->
 
               <!-- Open Search Section (visible on smaller screens) -->
-              <button
+              <!-- <button
                 type="button"
                 class="btn btn-sm btn-alt-secondary d-md-none"
                 @click="store.headerSearch({ mode: 'on' })"
               >
                 <i class="fa fa-fw fa-search"></i>
-              </button>
+              </button> -->
               <!-- END Open Search Section -->
 
               <!-- Search Form (visible on larger screens) -->
-              <form
+              <!-- <form
                 class="d-none d-md-inline-block"
                 @submit.prevent="onSubmitSearch"
               >
@@ -85,7 +85,7 @@ onUnmounted(() => {
                     <i class="fa fa-fw fa-search"></i>
                   </span>
                 </div>
-              </form>
+              </form> -->
               <!-- END Search Form -->
             </slot>
           </div>
@@ -184,7 +184,7 @@ onUnmounted(() => {
       <!-- END Header Content -->
 
       <!-- Header Search -->
-      <div
+      <!-- <div
         id="page-header-search"
         class="overlay-header bg-body-extra-light"
         :class="{ show: store.settings.headerSearch }"
@@ -210,7 +210,7 @@ onUnmounted(() => {
             </div>
           </form>
         </div>
-      </div>
+      </div> -->
       <!-- END Header Search -->
 
       <!-- Header Loader -->
