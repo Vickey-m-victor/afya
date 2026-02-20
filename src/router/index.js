@@ -9,7 +9,7 @@ import LayoutBackend from "@/layouts/variations/Backend.vue";
 
 // Backend: Dashboard
 const BackendDashboard = () => import("@/views/backend/DashboardView.vue");
-
+import TestComponents from "@/views/Tests/TestView.vue";
 // Specials
 const SpecialsMaintenance = () =>
   import("@/views/specials/MaintenanceView.vue");
@@ -59,7 +59,12 @@ const routes = [
         path: "tests",
         name: "tests",
         component: TestView,
-      }
+      },
+      {
+        path: "components",
+        name: "components",
+        component:TestComponents,
+      },
 
       // other pages can be added here
     ],

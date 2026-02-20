@@ -16,6 +16,11 @@ export default {
       to: "tests",
       icon: "si si-settings",
     },
+    {
+      name: "Components",
+      to: "components",
+      icon: "si si-settings",
+    },
   ],
 
 
