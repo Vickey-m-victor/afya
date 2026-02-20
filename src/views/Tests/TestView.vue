@@ -5,31 +5,23 @@ import BaseRadio from "@/components/BaseRadio.vue";
 import BaseLoader from "@/components/BaseLoader.vue";
 import BaseTable from "@/components/BaseTable.vue";
 import BaseDropdown from "@/components/BaseDropdown.vue";
+import BaseCard from "@/components/BaseCard.vue";
 const selectedCheckboxes = ref([]);
 const selectedRadio = ref(null);
 </script>
 
 <template>
+  <BaseDropdown
+    :items="[
+      { label: 'Edit', icon: 'fa fa-pencil-alt', action: 'edit' },
+      { divider: true },
+      { label: 'Delete', icon: 'fa fa-trash', action: 'delete' },
+    ]"
+    @select="handleUserAction"
+  />
+  <BaseDropdown label="From Right" variant="btn-alt-primary" align="end" />
 
-<BaseDropdown
-  :items="[
-    { label: 'Edit', icon: 'fa fa-pencil-alt', action: 'edit' },
-    { divider: true },
-    { label: 'Delete', icon: 'fa fa-trash', action: 'delete' },
-  ]"
-  @select="handleUserAction"
-/>
-<BaseDropdown
-  label="From Right"
-  variant="btn-alt-primary"
-  align="end"
-/>
-
-<BaseDropdown
-  label="Center"
-  variant="btn-primary"
-  align="center"
-/>
+  <BaseDropdown label="Center" variant="btn-primary" align="center" />
   <BaseCheckbox
     v-model="selectedCheckboxes"
     :options="[
@@ -51,20 +43,39 @@ const selectedRadio = ref(null);
   />
 
   <BaseLoader
-  v-if="isFetching"
-  variant="table"
-  :rows="5"
-  :columns="tableColumns.length"
-/>
+    v-if="isFetching"
+    variant="table"
+    :rows="5"
+    :columns="tableColumns.length"
+  />
 
-<BaseTable
-  v-else
-  title="Global Users Registry"
-  :data="users"
-  :columns="tableColumns"
-  :loading="isFetching"
-  :search-fields="['name', 'email']"
-/>
+  <BaseTable
+    v-else
+    title="Global Users Registry"
+    :data="users"
+    :columns="tableColumns"
+    :loading="isFetching"
+    :search-fields="['name', 'email']"
+  />
+  <div class="row">
+    <div class="col-md-3 ms-3">
+      <BaseCard title="Users">
+        <template #actions>
+          <BaseButton size="sm" label="Refresh" />
+        </template>
 
+        Table goes here…
+      </BaseCard>
+    </div>
+    <div class="col-md-3">
 
+      <BaseCard title="Report">
+        Content here
+
+        <template #footer>
+          <BaseButton label="Save" />
+        </template>
+      </BaseCard>
+    </div>
+  </div>
 </template>
