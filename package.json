@@ -56,7 +56,8 @@
     "vue-flatpickr-component": "^12.0.0",
     "vue-router": "^4.6.3",
     "vue-select": "^4.0.0-beta.3",
-    "vue-star-rating": "^2.1.0"
+    "vue-star-rating": "^2.1.0",
+    "vue3-loading-shimmer": "^1.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
