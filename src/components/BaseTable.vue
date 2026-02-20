@@ -33,7 +33,7 @@ const onSort = (event, index) => {
       <div class="d-flex justify-content-end  me-3">
         <BaseButton
         label="Create User"
-        @click="showModal"
+        @click="$emit('click')"
         ></BaseButton>
       </div>
       <div class="d-flex justify-content-between" :data-page-count="ds.dsPagecount">

@@ -1,91 +1,65 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
-import { tableService } from "@/services/tableService";
-import { useAlert } from "@/composables/alerts";
+import BaseModal from "@/components/BaseModal.vue";
+import BaseForm from "@/components/BaseForm.vue";
 
-const { toastError } = useAlert();
+const showLogin = ref(false);
 
-const isFetching = ref(true);
-const users = ref([]);
+// For testing, simple reactive fields
+const loginFields = reactive([
+  { label: "Email", type: "email", name: "email", placeholder: "Your Email", value: "" },
+  { label: "Password", type: "password", name: "password", placeholder: "Your Password", value: "" },
+]);
 
+const handleLogin = (data) => {
+  console.log("Form submitted:", data);
+  showLogin.value = false;
+};
+
+// Fake table data
+const users = ref([{ name: "Alice", email: "alice@test.com", status: "Active" }]);
 const tableColumns = [
   { name: "Name", field: "name" },
-  { name: "Email Address", field: "email" },
+  { name: "Email", field: "email" },
   { name: "Status", field: "status" },
   { name: "Actions", field: "actions" },
 ];
-
-async function fetchUsers() {
-  isFetching.value = true;
-  try {
-    const response = await tableService.getAll();
-    // Assuming your backend returns data in a 'data' field
-    users.value = response.data.dataPayload?.data || response.data;
-  } catch (error) {
-    toastError("Error", "Could not load users from server");
-    console.error(error);
-  } finally {
-    // 4. Turn off the shimmer effect
-    isFetching.value = false;
-  }
-}
-
-onMounted(() => {
-  fetchUsers();
-});
 </script>
 
 <template>
   <div class="content">
-    
     <BaseTable
-      title="Global Users Registry"
+      title="Users"
       :data="users"
       :columns="tableColumns"
-      :loading="isFetching"
-      :search-fields="['name', 'email']"
+      @click="showLogin = true"
     >
+      <!-- Status badge -->
       <template #cell(status)="{ row }">
-        <span
-          :class="
-            row.status === 'Active' ? 'badge bg-success' : 'badge bg-warning'
-          "
-        >
+        <span :class="row.status === 'Active' ? 'badge bg-success' : 'badge bg-warning'">
           {{ row.status }}
         </span>
       </template>
 
+      <!-- Actions buttons -->
       <template #cell(actions)="{ row }">
-        <button class="btn btn-sm btn-alt-primary me-1" title="Edit">
+        <button class="btn btn-sm btn-alt-primary me-1" @click="showLogin = true">
           <i class="fa fa-pencil-alt"></i>
         </button>
-        <button class="btn btn-sm btn-alt-danger" title="Delete">
-          <i class="fa fa-trash"></i>
+      </template>
+
+      <!-- Table slot for "Create User" -->
+      <template #header-actions>
+        <button class="btn btn-primary" @click="showLogin = true">
+          Create User
         </button>
       </template>
     </BaseTable>
+
+    <!-- Modal -->
+    <BaseModal :showModal="showLogin" title="Login" @close="showLogin = false">
+      <BaseForm :fields="loginFields" submitLabel="Login" @submit="handleLogin" />
+    </BaseModal>
   </div>
 </template>
-
-
-<!-- <BaseModal
-  :showModal="showCreate"
-  title="Create Banner"
-  @close="showCreate = false"
->
-  <CreateBannerForm />
-
-  <template #footer>
-    <BaseButton
-      label="Cancel"
-      @click="showCreate = false"
-    />
-    <BaseButton
-      label="Save"
-      variant="primary"
-      @click="submitForm"
-    />
-  </template>
-</BaseModal>
- -->

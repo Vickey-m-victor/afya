@@ -8,6 +8,10 @@ const props = defineProps({
     type: String,
     default: "primary",
   },
+  type: {
+    type: String,
+    default: 'button' // can be submit, button
+  },
   label: String,
 });
 
@@ -23,6 +27,7 @@ const handleClick = () => {
     <div class="d-flex justify-content-between align-items-center mb-3">
       <button
         @click="handleClick"
+        :type="props.type"
         :class="[
           'btn',
           'p-2',

@@ -27,7 +27,7 @@ const close = () => emit("close");
 <template>
   <div
     v-if="showModal"
-    class="modal"
+    class="modal d-block"
     id="modal-block-vcenter"
     tabindex="-1"
     role="dialog"
@@ -57,7 +57,7 @@ const close = () => emit("close");
         </BaseBlock>
         <div class="block-content block-content-full text-end bg-body">
           <slot name="footer">
-            <BaseButton label="Close" @click="close"> </BaseButton>
+            <BaseButton label="Close" variant="secondary" @click="close"> </BaseButton>
           </slot>
         </div>
       </div>
