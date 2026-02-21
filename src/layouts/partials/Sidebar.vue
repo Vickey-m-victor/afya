@@ -1,14 +1,14 @@
 <script setup>
 import { onMounted } from "vue";
-import { useTemplateStore } from "@/stores/template";
+import { useTemplateStore } from "~/omnicore/stores/template";
 
-import BaseNavigation from "@/components/BaseNavigation.vue";
+import BaseNavigation from "#/components/BaseNavigation.vue";
 
 // SimpleBar, for more info and examples you can check out https://github.com/Grsmto/simplebar/tree/master/packages/simplebar-vue
 import SimpleBar from "simplebar";
 
 // Grab menu navigation arrays
-import menu from "@/data/menu";
+import menu from "#/data/menu";
 
 const navigation = menu.main;
 

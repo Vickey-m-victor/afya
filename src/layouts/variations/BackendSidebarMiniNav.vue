@@ -1,18 +1,20 @@
 <script setup>
 import { onBeforeRouteLeave } from "vue-router";
-import { useTemplateStore } from "@/stores/template";
+import { useTemplateStore } from "~/omnicore/stores/template";
+import { useAuthStore } from "~/omnicore/stores/auth";
 
-import BaseNavigation from "@/components/BaseNavigation.vue";
+import BaseNavigation from "#/components/BaseNavigation.vue";
 
-import BaseLayout from "@/layouts/BaseLayout.vue";
+import BaseLayout from "#/layouts/BaseLayout.vue";
 
 // Grab menu navigation arrays
-import menu from "@/data/menu";
+import menu from "#/data/menu";
 
 const navigation = menu.main;
 
 // Main store
 const store = useTemplateStore();
+const authStore = useAuthStore();
 
 // Set default elements for this layout
 store.setLayout({
@@ -26,6 +28,11 @@ store.setLayout({
 store.sidebarStyle({ mode: "light" });
 store.sidebarMini({ mode: "off" });
 store.mainContent({ mode: "narrow" });
+
+// Logout handler
+const handleLogout = async () => {
+  await authStore.logout();
+};
 
 // Before leaving this page
 onBeforeRouteLeave(() => {
@@ -66,7 +73,7 @@ onBeforeRouteLeave(() => {
           <a class="mini-nav-item" href="javascript:void(0)">
             <i class="si si-settings fs-sm"></i>
           </a>
-          <a class="mini-nav-item" href="javascript:void(0)">
+          <a class="mini-nav-item" href="javascript:void(0)" @click.prevent="handleLogout">
             <i class="si si-logout fs-sm"></i>
           </a>
         </nav>

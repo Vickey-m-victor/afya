@@ -2,17 +2,19 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 
-// You can use the following starter router instead of the default one as a clean starting point
-// import router from "./router/starter";
-import router from "./router";
+// Router from omnicore
+import router from "~/omnicore/router.js";
+
+// Auth store for initialization
+import { useAuthStore } from "~/omnicore/stores/auth";
 
 // Template components
-import BaseBlock from "@/components/BaseBlock.vue";
-import BaseBackground from "@/components/BaseBackground.vue";
-import BasePageHeading from "@/components/BasePageHeading.vue";
+import BaseBlock from "#/components/BaseBlock.vue";
+import BaseBackground from "#/components/BaseBackground.vue";
+import BasePageHeading from "#/components/BasePageHeading.vue";
 
 // Template directives
-import clickRipple from "@/directives/clickRipple";
+import clickRipple from "#/directives/clickRipple";
 
 // Bootstrap framework
 import * as bootstrap from "bootstrap";
@@ -30,8 +32,13 @@ app.component("BasePageHeading", BasePageHeading);
 app.directive("click-ripple", clickRipple);
 
 // Use Pinia and Vue Router
-app.use(createPinia());
+const pinia = createPinia();
+app.use(pinia);
 app.use(router);
+
+// Initialize auth store (restore session from localStorage)
+const authStore = useAuthStore();
+authStore.initStore();
 
 // ..and finally mount it!
 app.mount("#app");

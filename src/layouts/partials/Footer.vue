@@ -1,5 +1,5 @@
 <script setup>
-import { useTemplateStore } from "@/stores/template";
+import { useTemplateStore } from "~/omnicore/stores/template";
 
 // Main store
 const store = useTemplateStore();

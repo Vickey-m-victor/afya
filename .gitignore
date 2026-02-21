@@ -27,3 +27,5 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+# Configuration files
+afya365.cfg

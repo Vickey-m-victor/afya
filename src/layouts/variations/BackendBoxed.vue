@@ -1,15 +1,15 @@
 <script setup>
 import { ref } from "vue";
-import { useTemplateStore } from "@/stores/template";
+import { useTemplateStore } from "~/omnicore/stores/template";
 
-import BaseLayout from "@/layouts/BaseLayout.vue";
-import BaseNavigation from "@/components/BaseNavigation.vue";
+import BaseLayout from "#/layouts/BaseLayout.vue";
+import BaseNavigation from "#/components/BaseNavigation.vue";
 
 // Grab example data
-// import notifications from "@/data/notifications";
+// import notifications from "#/data/notifications";
 
 // Grab menu navigation arrays
-// import menu from "@/data/menu";
+// import menu from "#/data/menu";
 
 const navigation = menu.boxed;
 
@@ -204,13 +204,13 @@ store.mainContent({ mode: "boxed" });
             <div role="separator" class="dropdown-divider m-0"></div>
             <div class="p-2">
               <RouterLink
-                :to="{ name: 'auth-lock3' }"
+                :to="{ name: 'iam/auth/lock' }"
                 class="dropdown-item d-flex align-items-center justify-content-between"
               >
                 <span class="fs-sm fw-medium">Lock Account</span>
               </RouterLink>
               <RouterLink
-                :to="{ name: 'auth-signin3' }"
+                :to="{ name: 'iam/auth/signin' }"
                 class="dropdown-item d-flex align-items-center justify-content-between"
               >
                 <span class="fs-sm fw-medium">Log Out</span>

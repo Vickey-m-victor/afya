@@ -1,12 +1,12 @@
 <script setup>
 import { computed, onMounted } from "vue";
-import { useTemplateStore } from "@/stores/template";
+import { useTemplateStore } from "~/omnicore/stores/template";
 
 // Import all layout partials
-import BaseHeader from "@/layouts/partials/Header.vue";
-import BaseSidebar from "@/layouts/partials/Sidebar.vue";
-// import BaseSideOverlay from "@/layouts/partials/SideOverlay.vue";
-import BaseFooter from "@/layouts/partials/Footer.vue";
+import BaseHeader from "#/layouts/partials/Header.vue";
+import BaseSidebar from "#/layouts/partials/Sidebar.vue";
+// import BaseSideOverlay from "#/layouts/partials/SideOverlay.vue";
+import BaseFooter from "#/layouts/partials/Footer.vue";
 
 // Component properties
 defineProps({
@@ -98,20 +98,6 @@ onMounted(() => {
       @click="store.sideOverlay({ mode: 'close' })"
     ></div>
     <!-- END Page Overlay -->
-
-    <!-- Side Overlay -->
-    <BaseSideOverlay v-if="store.layout.sideOverlay">
-      <template #header>
-        <slot name="side-overlay-header"></slot>
-      </template>
-
-      <template #content>
-        <slot name="side-overlay-content"></slot>
-      </template>
-
-      <slot name="side-overlay"></slot>
-    </BaseSideOverlay>
-    <!-- END Side Overlay -->
 
     <!-- Sidebar -->
     <BaseSidebar

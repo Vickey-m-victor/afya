@@ -1,13 +1,15 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import { useTemplateStore } from "@/stores/template";
+import { useTemplateStore } from "~/omnicore/stores/template";
+import { useAuthStore } from "~/omnicore/stores/auth";
 
 // Grab example data
-// import notifications from "@/data/notifications";
+// import notifications from "#/data/notifications";
 
 // Main store and Router
 const store = useTemplateStore();
+const authStore = useAuthStore();
 const router = useRouter();
 
 // Reactive variables
@@ -16,6 +18,10 @@ const baseSearchTerm = ref("");
 // On form search submit functionality
 function onSubmitSearch() {
   router.push("/backend/pages/generic/search?" + baseSearchTerm.value);
+}
+
+async function onLogout() {
+  await authStore.logout();
 }
 
 // When ESCAPE key is hit close the header search section
@@ -155,17 +161,18 @@ onUnmounted(() => {
                   <div role="separator" class="dropdown-divider m-0"></div>
                   <div class="p-2">
                     <RouterLink
-                      :to="{ name: 'auth-lock3' }"
+                      :to="{ name: 'iam/auth/lock' }"
                       class="dropdown-item d-flex align-items-center justify-content-between"
                     >
                       <span class="fs-sm fw-medium">Lock Account</span>
                     </RouterLink>
-                    <RouterLink
-                      :to="{ name: 'auth-signin3' }"
+                    <a
+                      href="#"
                       class="dropdown-item d-flex align-items-center justify-content-between"
+                      @click.prevent="onLogout"
                     >
                       <span class="fs-sm fw-medium">Log Out</span>
-                    </RouterLink>
+                    </a>
                   </div>
                 </div>
               </div>
