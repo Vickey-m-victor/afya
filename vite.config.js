@@ -14,16 +14,16 @@ export default defineConfig({
   server: {
     host: true,
     proxy: {
-      "/v1": {
-        target: "http://localhost:8086/", //backend URL
+      "/v2": {
+        target:import.meta.env.VITE_APP_BASE_URL,
         changeOrigin: true,
       },
       "/uploads": {
-        target: "http://localhost:8086/", 
+        target: import.meta.env.VITE_APP_BASE_URL, 
         changeOrigin: true, 
         rewrite: (path) => path.replace(/^\/uploads/, '/uploads'),
       },
     },
-    cors: true,
+    cors: false,
   },
 });

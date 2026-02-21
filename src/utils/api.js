@@ -8,7 +8,10 @@ import axios from 'axios';
 // });
 
 const api = axios.create({
-    baseURL: 'http://localhost:8086/v2',
+    baseURL: import.meta.env.VITE_APP_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 // Add a request interceptor to include the token in the headers

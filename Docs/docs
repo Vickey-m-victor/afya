@@ -6,5 +6,28 @@ modules.
 1. clinical
     - 
 2. hrm
+    - doctors, nurses, support staff, admin etc.
+    - shifts, scheduling.
+    - payroll
+    - licensing.
+    - performance 
 3. Electronic data capture.
-4.
+
+4. patient management/ emr.ehr
+    - reg, history
+    - appointments, scheduling
+    - medical notes/ allergies , medical history. 
+    - lab results.
+5. Finace
+    - invoice
+    - insurance
+    - billing
+6. Security & Compliance
+    - HIPAA/GDPR compliance
+    - Role-based access control (RBAC)
+    - Audit logs & activity tracking
+    - End-to-end encryption
+7. Patient Portal
+    - appointment booking
+    - billing, payments.
+    - 
