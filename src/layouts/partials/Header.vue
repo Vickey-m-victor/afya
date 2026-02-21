@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
+import { useAuthStore } from "@/stores/auth"; // Import the auth store
 
 // Grab example data
 // import notifications from "@/data/notifications";
@@ -10,22 +11,25 @@ import { useTemplateStore } from "@/stores/template";
 const store = useTemplateStore();
 const router = useRouter();
 
-// Reactive variables
-// const baseSearchTerm = ref("");
 
-// On form search submit functionality
-// function onSubmitSearch() {
-//   router.push("/backend/pages/generic/search?" + baseSearchTerm.value);
-// }
+// Main stores and Router
+const authStore = useAuthStore(); // Initialize auth store
 
-// When ESCAPE key is hit close the header search section
-// function eventHeaderSearch(event) {
-//   if (event.which === 27) {
-//     event.preventDefault();
-//     store.headerSearch({ mode: "off" });
-//   }
-// }
+// Define the logout function
+const logOut = async () => {
+  try {
+    await authStore.logout(); // Triggers API call and state cleanup
+    // The store's logout action already redirects to /signin3
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
+// COMPUTED: Extract dynamic user data from the store
+const currentUser = computed(() => authStore.user || {});
 
+const userDisplayName = computed(() => {
+  return currentUser.value.username || localStorage.getItem("username") || "User";
+});
 // Attach ESCAPE key event listener
 onMounted(() => {
   // document.addEventListener("keydown", eventHeaderSearch);
@@ -110,7 +114,7 @@ onUnmounted(() => {
                     alt="Header Avatar"
                     style="width: 21px"
                   />
-                  <span class="d-none d-sm-inline-block ms-2">John</span>
+                  <span class="d-none d-sm-inline-block ms-2">{{ userDisplayName  }}</span>
                   <i
                     class="fa fa-fw fa-angle-down d-none d-sm-inline-block opacity-50 ms-1 mt-1"
                   ></i>
@@ -127,7 +131,7 @@ onUnmounted(() => {
                       src="/assets/media/avatars/avatar10.jpg"
                       alt="Header Avatar"
                     />
-                    <p class="mt-2 mb-0 fw-medium">John Smith</p>
+                    <p class="mt-2 mb-0 fw-medium">{{ userDisplayName  }}</p>
                     <p class="mb-0 text-muted fs-sm fw-medium">Web Developer</p>
                   </div>
                   <div class="p-2">
@@ -160,12 +164,12 @@ onUnmounted(() => {
                     >
                       <span class="fs-sm fw-medium">Lock Account</span>
                     </RouterLink>
-                    <RouterLink
-                      :to="{ name: 'auth-signin3' }"
+                    <a
+
                       class="dropdown-item d-flex align-items-center justify-content-between"
-                    >
+                      @click.prevent="logOut"                    >
                       <span class="fs-sm fw-medium">Log Out</span>
-                    </RouterLink>
+                    </a>
                   </div>
                 </div>
               </div>

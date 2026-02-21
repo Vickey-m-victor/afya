@@ -1,10 +1,10 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
-
-// You can use the following starter router instead of the default one as a clean starting point
-// import router from "./router/starter";
 import router from "./router";
+
+
+
 
 // Template components
 import BaseBlock from "@/components/BaseBlock.vue";
@@ -16,6 +16,9 @@ import clickRipple from "@/directives/clickRipple";
 
 // Bootstrap framework
 import * as bootstrap from "bootstrap";
+import { setupAuthGuard } from "./router/guard";
+
+
 window.bootstrap = bootstrap;
 
 // Craft new application
@@ -32,6 +35,6 @@ app.directive("click-ripple", clickRipple);
 // Use Pinia and Vue Router
 app.use(createPinia());
 app.use(router);
-
+setupAuthGuard(router);
 // ..and finally mount it!
 app.mount("#app");

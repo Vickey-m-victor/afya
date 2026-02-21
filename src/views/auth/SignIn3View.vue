@@ -17,37 +17,36 @@ const password = ref("");
 const errors = ref({});
 const isLoading = ref(false); // Must be a ref to use in template
 
-// On form submission
 async function onSubmit() {
-  errors.value = {}; // Reset errors
-  isLoading.value = true; // Use .value for refs
+  errors.value = {}; 
+  isLoading.value = true; 
 
   try {
-    const response = await authStore.login(
-      {
-        username: username.value,
-        password: password.value,
-      },
-      {
-        withCredentials: true,
-      }
-    );
-
-    // Call setUser on the instance, not the class
-    authStore.setUser({
-      username: response.data.dataPayload?.data?.username || username.value,
+    const response = await authStore.login({
+      username: username.value,
+      password: password.value,
     });
 
+    // Save user state
+    authStore.setUser({
+      username: response.dataPayload?.data?.username || username.value,
+    });
     localStorage.setItem("username", username.value);
 
-    toastSuccess("Success", "Welcome back!");
-    router.push({ name: "backend-dashboard" });
+    // Dynamic Success Message
+    const successMsg = response.message || "Welcome back!";
+    toastSuccess("Success", successMsg);
+    
+    // Redirect to the dashboard (Ensure the name matches router/index.js precisely)
+    router.push({ name: "dashboard" }); 
+    
   } catch (error) {
-    // Correctly map backend errors
     if (error?.response?.data?.errorPayload?.errors) {
       errors.value = error.response.data.errorPayload.errors;
     } else {
-      toastError("Login failed", error.response?.data?.message || "Invalid Credentials")
+      // Safely extract the backend error message, fallback to default
+      const backendError = error?.response?.data?.message || "Invalid Credentials";
+      toastError("Login Failed", backendError);
     }
   } finally {
     isLoading.value = false;

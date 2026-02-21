@@ -1,21 +1,30 @@
-// src/composables/useAlert.js
+// src/composables/alerts.js
 import alertUtil from "@/utils/alerts";
 
 export function useAlert() {
-  // Logic for toasts
+  // Helper to guarantee a valid string for iziToast
+  const safeMessage = (msg) => {
+    if (msg === null || msg === undefined) return "";
+    if (typeof msg === "object") return JSON.stringify(msg);
+    return String(msg);
+  };
+
   const toastSuccess = (title, message) => {
-    alertUtil.toast.success({ title, message });
+    // If only one argument is provided, treat it as the message
+    if (message === undefined) { message = title; title = "Success"; }
+    alertUtil.toast.success({ title, message: safeMessage(message) });
   };
 
   const toastError = (title, message) => {
-    alertUtil.toast.error({ title, message });
+    if (message === undefined) { message = title; title = "Error"; }
+    alertUtil.toast.error({ title, message: safeMessage(message) });
   };
 
   const toastWarning = (title, message) => {
-    alertUtil.toast.warning({ title, message });
+    if (message === undefined) { message = title; title = "Warning"; }
+    alertUtil.toast.warning({ title, message: safeMessage(message) });
   };
 
-  // Logic for dialogs/popups
   const confirmAction = async (title, text) => {
     return await alertUtil.dialog.confirm(title, text);
   };

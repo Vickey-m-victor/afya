@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import api from "@/utils/api";
 import authService from "@/services/authService";
-
+import router from "@/router";
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: JSON.parse(localStorage.getItem("user")) || null,
@@ -66,7 +66,7 @@ export const useAuthStore = defineStore("auth", {
         } else {
           console.warn("No token found in login response! Check console logs.");
         }
-        // ------------------------------------
+       
 
         // 2. Extract User Data 
         let userData =
@@ -103,7 +103,7 @@ export const useAuthStore = defineStore("auth", {
       } finally {
         this.clearUser();
        //redirect to login page after logout
-        window.location.href = "/signin3";
+       router.push({ name: 'auth-signin3' });
       }
     },
   },
