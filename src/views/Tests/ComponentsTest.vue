@@ -1,30 +1,55 @@
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
-import BaseModal from "@/components/BaseModal.vue";
-import BaseForm from "@/components/BaseForm.vue";
+import { tableService } from "@/services/tableService"; //
+import { useAlert } from "@/composables/alerts"; //
 
-const showLogin = ref(false);
+const { toastError } = useAlert();
+const users = ref([]);
+const isFetching = ref(true);
 
-// For testing, simple reactive fields
-const loginFields = reactive([
-  { label: "Email", type: "email", name: "email", placeholder: "Your Email", value: "" },
-  { label: "Password", type: "password", name: "password", placeholder: "Your Password", value: "" },
-]);
-
-const handleLogin = (data) => {
-  console.log("Form submitted:", data);
-  showLogin.value = false;
-};
-
-// Fake table data
-const users = ref([{ name: "Alice", email: "alice@test.com", status: "Active" }]);
 const tableColumns = [
   { name: "Name", field: "name" },
   { name: "Email", field: "email" },
   { name: "Status", field: "status" },
   { name: "Actions", field: "actions" },
 ];
+
+//get data from backend.
+async function fetchUsers() {
+  isFetching.value = true;
+  try {
+    const response = await tableService.getAll(); //
+    const rawData = response.data.dataPayload?.data;
+
+    if (Array.isArray(rawData)) {
+      users.value = rawData.map((user) => ({
+        name: `${user.profile?.first_name} ${user.profile?.last_name}`,
+        email: user.profile?.email_address,
+        status: user.status === "active" ? "Active" : "Inactive",
+        ...user,
+      }));
+    } else if (rawData) {
+      // Handling single object payload for testing
+      users.value = [
+        {
+          name: `${rawData.profile?.first_name} ${rawData.profile?.last_name}`,
+          email: rawData.profile?.email_address,
+          status: rawData.status === "active" ? "Active" : "Inactive",
+        },
+      ];
+    }
+  } catch (error) {
+    const errorMsg = error.response?.data?.message || "Could not load users";
+    toastError("Error", errorMsg); //
+  } finally {
+    isFetching.value = false;
+  }
+}
+
+onMounted(() => {
+  fetchUsers();
+});
 </script>
 
 <template>
@@ -33,33 +58,30 @@ const tableColumns = [
       title="Users"
       :data="users"
       :columns="tableColumns"
-      @click="showLogin = true"
+      :loading="isFetching"
     >
       <!-- Status badge -->
       <template #cell(status)="{ row }">
-        <span :class="row.status === 'Active' ? 'badge bg-success' : 'badge bg-warning'">
+        <span
+          :class="
+            row.status === 'Active' ? 'badge bg-success' : 'badge bg-warning'
+          "
+        >
           {{ row.status }}
         </span>
       </template>
 
       <!-- Actions buttons -->
       <template #cell(actions)="{ row }">
-        <button class="btn btn-sm btn-alt-primary me-1" @click="showLogin = true">
+        <button class="btn btn-sm btn-alt-primary me-1">
           <i class="fa fa-pencil-alt"></i>
         </button>
       </template>
 
       <!-- Table slot for "Create User" -->
       <template #header-actions>
-        <button class="btn btn-primary" @click="showLogin = true">
-          Create User
-        </button>
+        <button class="btn btn-primary">Create User</button>
       </template>
     </BaseTable>
-
-    <!-- Modal -->
-    <BaseModal :showModal="showLogin" title="Login" @close="showLogin = false">
-      <BaseForm :fields="loginFields" submitLabel="Login" @submit="handleLogin" />
-    </BaseModal>
   </div>
 </template>

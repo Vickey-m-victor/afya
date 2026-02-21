@@ -51,20 +51,19 @@ export const useAuthStore = defineStore("auth", {
       try {
         const response = await authService.login(credentials);
 
-        console.log("LOGIN RESPONSE:", response.data); // Keep this to debug
 
         // --- 1. SAVE THE TOKEN (NEW CODE) ---
-        const token =
-          response.data?.token ||
-          response.data?.dataPayload?.token ||
-          response.data?.access_token;
+        const token = response.data?.dataPayload?.data?.access_token || 
+        response.data?.access_token || 
+        response.data?.token;
 
         if (token) {
           localStorage.setItem("token", token);
+          localStorage.getItem('token',token); //
           // Configure axios default header immediately for subsequent requests in this session
           api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         } else {
-          console.warn("No token found in login response! Check console logs.");
+          console.warn("No token found in login response! Check console logs.", response.data);
         }
        
 
@@ -83,11 +82,7 @@ export const useAuthStore = defineStore("auth", {
 
         // 3. Set User State
         this.setUser(userData);
-
-        const safeUsername = userData.username || userData.email || "User";
-        localStorage.setItem("username", safeUsername);
-
-        return userData;
+        return response.data;
       } catch (error) {
         throw error;
       } finally {

@@ -34,7 +34,7 @@ async function onSubmit() {
     localStorage.setItem("username", username.value);
 
     // Dynamic Success Message
-    const successMsg = response.message || "Welcome back!";
+    const successMsg = response.message;
     toastSuccess("Success", successMsg);
     
     // Redirect to the dashboard (Ensure the name matches router/index.js precisely)
