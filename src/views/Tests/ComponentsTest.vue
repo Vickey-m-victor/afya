@@ -40,7 +40,7 @@ async function fetchUsers() {
       ];
     }
   } catch (error) {
-    const errorMsg = error.response?.data?.message || "Could not load users";
+    const errorMsg = error.response?.data?.message;
     toastError("Error", errorMsg); //
   } finally {
     isFetching.value = false;
