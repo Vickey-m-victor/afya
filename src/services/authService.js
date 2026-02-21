@@ -7,9 +7,9 @@ const authService = {
    */
 
   login(credentials) {
-    return api.post("/iam/auth/login", credentials, {
-      withCredentials: true, // Include cookies in the request
-    });
+    return api.post("/iam/auth/login", credentials, 
+      // Include cookies in the request
+    );
   },
   logout() {
     return api.post("/iam/auth/logout");

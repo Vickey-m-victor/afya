@@ -1,21 +1,14 @@
 import axios from 'axios';
-// how to use this api instance in your components:
-// import api from '@/utils/api';
-// api.get('/your-endpoint').then(response => {
-//     console.log(response.data);
-// }).catch(error => {
-//     console.error('API error:', error);
-// });
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_APP_BASE_URL,
+    baseURL: "/v2", // This will be proxied to the backend in development
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true, 
 });
 
 // Add a request interceptor to include the token in the headers
-
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -36,9 +29,8 @@ api.interceptors.response.use(
     },
     (error) => {
         if (error.response && error.response.status === 401) {
-            // Handle unauthorized access, e.g., redirect to login page
             console.error('Unauthorized access - redirecting to login');
-            // You can add your redirection logic here
+            // Redirect logic here
         }
         return Promise.reject(error);
     }
