@@ -7,7 +7,6 @@ import {
   DatasetSearch,
   DatasetShow,
 } from "vue-dataset";
-import BaseButton from "./BaseButton.vue";
 const props = defineProps({
   // list of objects which will come from the backend.
   data: { type: Array, required: true, default: () => [] },
@@ -30,13 +29,13 @@ const onSort = (event, index) => {
 <template>
   <BaseBlock :title="title" content-full>
     <Dataset v-slot="{ ds }" :ds-data="data" :ds-search-in="searchFields">
-      <div class="d-flex justify-content-end  me-3">
-        <BaseButton
-        label="Create User"
-        @click="$emit('click')"
-        ></BaseButton>
+      <div class="d-flex justify-content-end me-3">
+        <slot name="header-actions"></slot>
       </div>
-      <div class="d-flex justify-content-between" :data-page-count="ds.dsPagecount">
+      <div
+        class="d-flex justify-content-between"
+        :data-page-count="ds.dsPagecount"
+      >
         <div id="datasetLength" class="col-md-1 py-2">
           <DatasetShow />
         </div>
@@ -44,7 +43,7 @@ const onSort = (event, index) => {
           <DatasetSearch ds-search-placeholder="Search..." />
         </div>
       </div>
-    
+
       <hr />
       <div class="table-responsive">
         <table class="table table-striped mb-0">

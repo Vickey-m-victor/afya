@@ -75,12 +75,18 @@ function handleClick(item) {
 
     <!-- Menu -->
     <div class="dropdown-menu" :class="[alignmentClass, menuClass]">
-      
       <!-- ✅ Auto items mode -->
       <template v-if="items.length">
         <template v-for="(item, index) in items" :key="index">
           <div v-if="item.divider" class="dropdown-divider"></div>
-
+          <RouterLink
+            v-if="item.to"
+            :to="item.to"
+            class="dropdown-item d-flex align-items-center"
+          >
+            <i v-if="item.icon" :class="item.icon + ' me-2'"></i>
+            {{ item.label }}
+          </RouterLink>
           <button
             v-else
             type="button"

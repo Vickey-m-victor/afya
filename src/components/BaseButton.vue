@@ -23,20 +23,18 @@ const handleClick = () => {
 </script>
 
 <template>
-  <div :class="[props.size]">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <button
-        @click="handleClick"
-        :type="props.type"
-        :class="[
-          'btn',
-          'p-2',
-          `btn-${props.variant}`,
-          props.size ? `btn-${props.size}` : '',
-        ]"
-      >
-        {{ label }} <slot name="icon"></slot>
-      </button>
-    </div>
-  </div>
+  <button
+    :type="type"
+    @click="$emit('click')"
+    class="btn"
+    :class="[
+      `btn-${variant}`,
+      size ? `btn-${size}` : ''
+    ]"
+    v-click-ripple
+  >
+    <slot name="icon"></slot>
+    {{ label }}
+    <slot></slot>
+  </button>
 </template>
