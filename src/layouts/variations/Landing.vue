@@ -1,7 +1,7 @@
 <script setup>
-import { useTemplateStore } from "~/omnicore/stores/template";
+import { useTemplateStore } from "@/stores/template";
 
-import BaseLayout from "#/layouts/BaseLayout.vue";
+import BaseLayout from "@/layouts/BaseLayout.vue";
 
 // Main store
 const store = useTemplateStore();

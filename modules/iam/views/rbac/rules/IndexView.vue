@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import DataTable from "#/components/DataTable/DataTable.vue";
-import { useDataTable } from "#/composables/useDataTable";
+import DataTable from "@/components/DataTable/DataTable.vue";
+import { useDataTable } from "@/composables/useDataTable";
 import ruleService from "../../../services/ruleService";
 import RulesForm from "../../../components/RulesForm.vue";
 
@@ -173,7 +173,7 @@ onMounted(() => {
       @change-sort="handleSort"
     >
       <template #cell-rule_name="{ row }">
-        <i class="fa fa-gavel text-secondary me-2"></i>
+        <!-- <i class="fa fa-gavel text-secondary me-2"></i> -->
         {{ row.rule_name }}
       </template>
 

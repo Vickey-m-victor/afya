@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import DataTable from "#/components/DataTable/DataTable.vue";
-import { useDataTable } from "#/composables/useDataTable";
+import DataTable from "@/components/DataTable/DataTable.vue";
+import { useDataTable } from "@/composables/useDataTable";
 import userService from "../../services/userService";
 import UsersForm from "../../components/UsersForm.vue";
 
@@ -26,9 +26,11 @@ const {
 });
 
 const tableColumns = [
-  { field: "user_id", header: "ID", width: "80px", headerClass: "text-center", cellClass: "text-center" },
   { field: "username", header: "Username", cellClass: "fw-semibold" },
-  { field: "email", header: "Email" },
+  { field: "profile.first_name", header: "First Name" },
+  { field: "profile.last_name", header: "Last Name" },
+  { field: "profile.email_address", header: "Email" },
+  { field: "profile.mobile_number", header: "Mobile" },
   { field: "status", header: "Status", width: "120px", headerClass: "text-center", cellClass: "text-center" },
 ];
 
@@ -204,9 +206,48 @@ onMounted(() => {
       @change-per-page="handlePerPageChange"
       @change-sort="handleSort"
     >
+      <template #cell-username="{ row }">
+        <div class="d-flex align-items-center">
+          <!-- <div 
+            class="rounded-circle bg-primary-light d-flex align-items-center justify-content-center me-2"
+            style="width: 32px; height: 32px; min-width: 32px;"
+          > -->
+            <!-- <i class="fa fa-user text-primary"></i> -->
+          </div>
+          <span class="">{{ row.username }}</span>
+        <!-- </div> -->
+      </template>
+
+      <template #cell-profile.first_name="{ row }">
+        {{ row.profile?.first_name || '-' }}
+      </template>
+
+      <template #cell-profile.last_name="{ row }">
+        {{ row.profile?.last_name || '-' }}
+      </template>
+
+      <template #cell-profile.email_address="{ row }">
+        <span v-if="row.profile?.email_address">
+          <i class="fa fa-envelope text-muted me-1"></i>
+          {{ row.profile.email_address }}
+        </span>
+        <span v-else class="text-muted">-</span>
+      </template>
+
+      <template #cell-profile.mobile_number="{ row }">
+        <span v-if="row.profile?.mobile_number">
+          <i class="fa fa-phone text-muted me-1"></i>
+          {{ row.profile.mobile_number }}
+        </span>
+        <span v-else class="text-muted">-</span>
+      </template>
+
       <template #cell-status="{ row }">
-        <span class="badge" :class="statusBadgeClass(row.status)">
-          {{ row.status }}
+        <span 
+          class="badge" 
+          :class="`bg-${row.status?.theme || 'secondary'}`"
+        >
+          {{ row.status?.label || row.status || 'Unknown' }}
         </span>
       </template>
     </DataTable>

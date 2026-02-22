@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useTemplateStore } from "~/omnicore/stores/template";
+import { useTemplateStore } from "@/stores/template";
 
 // Main store and Router
 const store = useTemplateStore();

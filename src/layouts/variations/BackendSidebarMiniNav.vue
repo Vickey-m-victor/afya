@@ -1,14 +1,14 @@
 <script setup>
 import { onBeforeRouteLeave } from "vue-router";
-import { useTemplateStore } from "~/omnicore/stores/template";
-import { useAuthStore } from "~/omnicore/stores/auth";
+import { useTemplateStore } from "@/stores/template";
+import { useAuthStore } from "@/stores/auth";
 
-import BaseNavigation from "#/components/BaseNavigation.vue";
+import BaseNavigation from "@/components/BaseNavigation.vue";
 
-import BaseLayout from "#/layouts/BaseLayout.vue";
+import BaseLayout from "@/layouts/BaseLayout.vue";
 
 // Grab menu navigation arrays
-import menu from "#/data/menu";
+import menu from "@/data/menu";
 
 const navigation = menu.main;
 

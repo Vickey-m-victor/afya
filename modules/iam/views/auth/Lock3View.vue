@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, computed } from "vue";
 import { useRouter } from "vue-router";
-import { useTemplateStore } from "~/omnicore/stores/template";
+import { useTemplateStore } from "@/stores/template";
 
 // Vuelidate, for more info and examples you can check out https://github.com/vuelidate/vuelidate
 import useVuelidate from "@vuelidate/core";

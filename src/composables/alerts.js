@@ -1,5 +1,5 @@
-// app/omnicore/composables/alerts.js
-import alertUtil from "~/omnicore/utils/alerts";
+// src/composables/alerts.js
+import alertUtil from "@/utils/alerts";
 
 export function useAlert() {
   // Logic for toasts

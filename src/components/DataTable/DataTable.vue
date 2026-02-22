@@ -1,7 +1,7 @@
 <script setup>
-import DataTableHeader from "#/components/DataTable/DataTableHeader.vue";
-import DataTableBody from "#/components/DataTable/DataTableBody.vue";
-import DataTableFooter from "#/components/DataTable/DataTableFooter.vue";
+import DataTableHeader from "@/components/DataTable/DataTableHeader.vue";
+import DataTableBody from "@/components/DataTable/DataTableBody.vue";
+import DataTableFooter from "@/components/DataTable/DataTableFooter.vue";
 
 const props = defineProps({
   title: {

@@ -2,23 +2,42 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 
-// Router from omnicore
-import router from "~/omnicore/router.js";
+// App router
+import router from "@/router.js";
 
 // Auth store for initialization
-import { useAuthStore } from "~/omnicore/stores/auth";
+import { useAuthStore } from "@/stores/auth";
 
 // Template components
-import BaseBlock from "#/components/BaseBlock.vue";
-import BaseBackground from "#/components/BaseBackground.vue";
-import BasePageHeading from "#/components/BasePageHeading.vue";
+import BaseBlock from "@/components/BaseBlock.vue";
+import BaseBackground from "@/components/BaseBackground.vue";
+import BasePageHeading from "@/components/BasePageHeading.vue";
 
 // Template directives
-import clickRipple from "#/directives/clickRipple";
+import clickRipple from "@/directives/clickRipple";
 
 // Bootstrap framework
 import * as bootstrap from "bootstrap";
 window.bootstrap = bootstrap;
+
+// Keep canonical hash-mode URLs and avoid duplicated path + hash URLs
+function normalizeHashModeUrl() {
+  const { pathname, search, hash } = window.location;
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+
+  if (normalizedPath === "/") {
+    return;
+  }
+
+  if (hash && hash.startsWith("@/")) {
+    window.history.replaceState(null, "", `/${search}${hash}`);
+    return;
+  }
+
+  window.history.replaceState(null, "", `/${search}#${pathname}`);
+}
+
+normalizeHashModeUrl();
 
 // Craft new application
 const app = createApp(App);

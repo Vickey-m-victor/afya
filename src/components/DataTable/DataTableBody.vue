@@ -1,5 +1,5 @@
 <script setup>
-import DataTableActionButtons from "#/components/DataTable/DataTableActionButtons.vue";
+import DataTableActionButtons from "@/components/DataTable/DataTableActionButtons.vue";
 
 const props = defineProps({
   columns: {
