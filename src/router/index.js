@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 
 import NProgress from "nprogress/nprogress.js";
-import authRoutes from "~/iam/router.js";
+import { authRoutes } from "~/iam/router.js";
 // Main layout variations
 import LayoutSimple from "@/layouts/variations/Simple.vue";
 // import LayoutLanding from "@/layouts/variations/Landing.vue";
@@ -18,7 +18,6 @@ const SpecialsInstallation = () =>
   import("@/views/specials/InstallationView.vue");
 const SpecialsComingSoon = () => import("@/views/specials/ComingSoonView.vue");
 
-
 // Errors
 const Error400 = () => import("@/views/errors/400View.vue");
 const Error401 = () => import("@/views/errors/401View.vue");
@@ -27,12 +26,10 @@ const Error404 = () => import("@/views/errors/404View.vue");
 const Error500 = () => import("@/views/errors/500View.vue");
 const Error503 = () => import("@/views/errors/503View.vue");
 
-
 //Tests
-import TestView from "@/views/Tests/ComponentsTest.vue"
+import TestView from "@/views/Tests/ComponentsTest.vue";
 
 const routes = [
- 
   {
     path: "/",
     // redirect: "/backend/dashboard",
@@ -51,14 +48,15 @@ const routes = [
       {
         path: "components",
         name: "components",
-        component:TestComponents,
+        component: TestComponents,
       },
 
       // other pages can be added here
     ],
   },
 
-  
+  ...authRoutes,
+
   {
     path: "/specials",
     component: LayoutSimple,
@@ -86,7 +84,6 @@ const routes = [
       },
     ],
   },
-
 
   {
     path: "/errors",
@@ -124,8 +121,6 @@ const routes = [
       },
     ],
   },
-  ...authRoutes,
-
 ];
 
 // Create Router
