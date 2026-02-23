@@ -1,5 +1,5 @@
 // src/router/guard.js
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "~/iam/stores/auth";
 
 export function setupAuthGuard(router) {
   router.beforeEach((to, from, next) => {

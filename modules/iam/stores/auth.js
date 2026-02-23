@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import api from "@/utils/api";
-import authService from "@/services/authService";
+import authService from "~/iam/services/authService";
 import router from "@/router";
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -9,7 +9,7 @@ export const useAuthStore = defineStore("auth", {
     isAuthenticated: !!localStorage.getItem("user"),
     loading: false,
   }),
-  //checks is a user has a spefic role 
+  //checks is a user has a spefic role
   getters: {
     hasRole: (state) => (roleName) => {
       return state.user?.roles?.includes(roleName);
@@ -17,7 +17,7 @@ export const useAuthStore = defineStore("auth", {
   },
 
   actions: {
-    //user and token stored in local storage 
+    //user and token stored in local storage
     setUser(userData) {
       this.user = userData;
       this.isAuthenticated = true;
@@ -51,23 +51,25 @@ export const useAuthStore = defineStore("auth", {
       try {
         const response = await authService.login(credentials);
 
-
         // --- 1. SAVE THE TOKEN (NEW CODE) ---
-        const token = response.data?.dataPayload?.data?.access_token || 
-        response.data?.access_token || 
-        response.data?.token;
+        const token =
+          response.data?.dataPayload?.data?.access_token ||
+          response.data?.access_token ||
+          response.data?.token;
 
         if (token) {
           localStorage.setItem("token", token);
-          localStorage.getItem('token',token); //
+          localStorage.getItem("token", token); //
           // Configure axios default header immediately for subsequent requests in this session
           api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         } else {
-          console.warn("No token found in login response! Check console logs.", response.data);
+          console.warn(
+            "No token found in login response! Check console logs.",
+            response.data
+          );
         }
-       
 
-        // 2. Extract User Data 
+        // 2. Extract User Data
         let userData =
           response.data?.dataPayload?.data ||
           response.data?.user ||
@@ -89,7 +91,7 @@ export const useAuthStore = defineStore("auth", {
         this.loading = false;
       }
     },
-// removes user data from local storage, redirect to login page
+    // removes user data from local storage, redirect to login page
     async logout() {
       try {
         await authService.logout();
@@ -97,8 +99,8 @@ export const useAuthStore = defineStore("auth", {
         console.error("Logout API error", error);
       } finally {
         this.clearUser();
-       //redirect to login page after logout
-       router.push({ name: 'auth-signin3' });
+        //redirect to login page after logout
+        router.push({ name: "auth-signin3" });
       }
     },
   },
