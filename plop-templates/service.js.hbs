@@ -1,0 +1,21 @@
+import api from "@/utils/api";
+
+const {{camelCase entityName}}Service = {
+  getAll() {
+    return api.get("{{endpoint}}");
+  },
+  getById(id) {
+    return api.get(`{{endpoint}}/${id}`);
+  },
+  create(data) {
+    return api.post("{{endpoint}}", data);
+  },
+  update(id, data) {
+    return api.put(`{{endpoint}}/${id}`, data);
+  },
+  delete(id) {
+    return api.delete(`{{endpoint}}/${id}`);
+  }
+};
+
+export default {{camelCase entityName}}Service;

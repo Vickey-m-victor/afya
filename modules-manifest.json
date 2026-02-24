@@ -1,0 +1,79 @@
+{
+  "modules": [
+    {
+      "name": "iam",
+      "submodules": [
+        {
+          "name": "permission",
+          "endpoint": "/iam/rbac/permissions",
+          "type": "table"
+        },
+        {
+          "name": "role",
+          "endpoint": "/iam/rbac/roles",
+          "type": "table"
+        },
+        {
+          "name": "group",
+          "endpoint": "/iam/rbac/groups",
+          "type": "table"
+        },
+        {
+          "name": "rule",
+          "endpoint": "/iam/rbac/rule",
+          "type": "table"
+        },
+        {
+          "name": "user",
+          "endpoint": "/iam/users",
+          "type": "table"
+        }
+      ]
+    },
+    {
+      "name": "admin",
+      "submodules": [
+        {
+          "name": "accessLog",
+          "endpoint": "/admin/logs/access",
+          "type": "table"
+        },
+        {
+          "name": "auditTrail",
+          "endpoint": "/admin/audit/trail",
+          "type": "table"
+        },
+        {
+          "name": "errorLog",
+          "endpoint": "/admin/logs/error",
+          "type": "table"
+        },
+        {
+          "name": "settingsGeneral",
+          "endpoint": "/admin/settings/general",
+          "type": "form"
+        },
+        {
+          "name": "settingsMailer",
+          "endpoint": "/admin/settings/mailer",
+          "type": "form"
+        },
+        {
+          "name": "settingsTheme",
+          "endpoint": "/admin/settings/theme",
+          "type": "form"
+        },
+        {
+          "name": "settingsSecurity",
+          "endpoint": "/admin/settings/security",
+          "type": "form"
+        },
+        {
+          "name": "taskManager",
+          "endpoint": "/admin/task/manager",
+          "type": "table"
+        }
+      ]
+    }
+  ]
+}

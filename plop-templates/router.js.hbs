@@ -1,0 +1,10 @@
+const {{pascalCase entityName}}View = () => import("~/{{camelCase moduleName}}/views/{{pascalCase entityName}}View.vue");
+
+export const {{camelCase entityName}}Routes = [
+  {
+    // Example: /iam/roles
+    path: "/{{dashCase moduleName}}/{{dashCase entityName}}s",
+    name: "{{dashCase moduleName}}-{{dashCase entityName}}s",
+    component: {{pascalCase entityName}}View,
+  }
+];
