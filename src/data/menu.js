@@ -21,6 +21,98 @@ export default {
       to: "components",
       icon: "si si-settings",
     },
+    {
+      name: "IAM & Admin",
+      heading: true,
+    },
+    {
+      name: "Access Control",
+      icon:  "si si-lock",
+      subActivePaths: "/iam/accesscontrol",
+      sub: [
+    {
+      name: "Groups",
+      to: "iam-groups",
+      icon: "si si-users",
+    },
+    {
+      name: "Permissions",
+      to: "iam-permissions",
+      icon: "si si-lock",
+    },
+    {
+      name: "Roles",
+      to: "iam-roles",
+      icon: "si si-briefcase",
+    },
+    {
+      name: "Rules",
+      to: "iam-rules",
+      icon: "si si-shield",
+    },
+    {
+      name: "Users",
+      to: "iam-users",
+      icon: "si si-user", 
+
+    },
+      ],
+    },
+    
+    {
+      name: "Log Management",
+      icon: "si si-docs",
+      subActivePaths: "/iam/logmanagement",
+      sub: [
+    {
+      name: "Access Logs",
+      to: "admin-access-logs",
+      icon: "si si-notebook",
+    },
+    {
+      name: "Audit Trails",
+      to: "admin-audit-trails",
+      icon: "si si-docs",
+    },
+    {
+      name: "Error Logs",
+      to: "admin-error-logs",
+      icon: "si si-wrench",
+    },
+      ],
+    },
+    {
+      name: "Settings",
+      icon: "si si-settings",
+      subActivePaths: "/admin/settings",
+      sub: [
+    {
+      name: "Settings - General",
+      to: "admin-settings-generals",
+      icon: "si si-settings",
+    },
+    {
+      name: "Settings - Mailer",
+      to: "admin-settings-mailers",
+      icon: "si si-envelope-letter",
+    },
+    {
+      name: "Settings - Security",
+      to: "admin-settings-securitys",
+      icon: "si si-shield",
+    },
+    {
+      name: "Settings - Theme",
+      to: "admin-settings-themes",
+      icon: "si si-palette",
+    },
+      ],
+    },
+    {
+      name: "Task Manager",
+      to: "admin-task-managers",
+      icon: "si si-rocket",
+    }   
   ],
 
 
