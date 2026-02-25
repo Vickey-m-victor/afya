@@ -1,14 +1,19 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import BaseForm from "@/components/BaseForm.vue";
 import BaseBlock from "@/components/BaseBlock.vue";
-import { useSettingsThemeStore } from "~/admin/stores/settingsThemeStore";
-
-const store = useSettingsThemeStore();
+import { useSettingsGeneralStore } from "~/admin/stores/settingsGeneralStore";
+import SettingsForm from "~/admin/components/SettingsForm.vue";
+const store = useSettingsGeneralStore();
 const formData = ref({});
 
 const formFields = reactive([
-  { label: "Example Setting", type: "text", name: "example" },
+  { label: "Business Name", type: "text", name: "business_name" },
+  { label: "Physical Address", type: "text", name: "physical_address" },
+  { label: "Postal Address", type: "text", name: "postal_address" },
+  { label: "Email address", type: "text", name: "email_address" },
+  { label: "Website", type: "text", name: "website" },
+  { label: "Mobile Number", type: "text", name: "primary_mobile_number" },
+
 ]);
 
 const handleSave = () => {
@@ -22,11 +27,11 @@ onMounted(() => {
 
 <template>
   <div class="content">
-    <BasePageHeading title="SettingsTheme Settings" />
+    <BasePageHeading title="General Settings" />
     <div class="row">
-      <div class="col-md-8">
-        <BaseBlock title="Configuration">
-          <BaseForm 
+      <div class="col-md-12">
+        <BaseBlock >
+          <SettingsForm 
             v-model="formData" 
             :fields="formFields" 
             submitLabel="Save Settings" 

@@ -1,14 +1,18 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import BaseForm from "@/components/BaseForm.vue";
 import BaseBlock from "@/components/BaseBlock.vue";
-import { useSettingsMailerStore } from "~/admin/stores/settingsMailerStore";
-
-const store = useSettingsMailerStore();
+import { useSettingsGeneralStore } from "~/admin/stores/settingsGeneralStore";
+import SettingsForm from "~/admin/components/SettingsForm.vue";
+const store = useSettingsGeneralStore();
 const formData = ref({});
 
 const formFields = reactive([
-  { label: "Example Setting", type: "text", name: "example" },
+  { label: "smtp_server", type: "text", name: "smtp_server" },
+  { label: "smtp_port", type: "text", name: "smtp_port" },
+  { label: "smtp_username", type: "text", name: "smtp_username" },
+  { label: "smtp_password", type: "text", name: "smtp_password" },
+  { label: "email_encryption", type: "text", name: "email_encryption" },
+
 ]);
 
 const handleSave = () => {
@@ -22,11 +26,11 @@ onMounted(() => {
 
 <template>
   <div class="content">
-    <BasePageHeading title="SettingsMailer Settings" />
+    <BasePageHeading title="General Settings" />
     <div class="row">
-      <div class="col-md-8">
-        <BaseBlock title="Configuration">
-          <BaseForm 
+      <div class="col-md-12">
+        <BaseBlock >
+          <SettingsForm 
             v-model="formData" 
             :fields="formFields" 
             submitLabel="Save Settings" 
