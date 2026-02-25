@@ -94,9 +94,9 @@ onMounted(() => {
       :columns="tableColumns"
       :loading="store.loading"
     >
-      <template #header-actions>
+      <!-- <template #header-actions>
         <BaseButton label="Create AccessLog" variant="primary" @click="openCreateModal" />
-      </template>
+      </template> -->
 
       <template #cell(status)="{ row }">
         <span class="badge" :class="row.status === 'active' ? 'bg-success' : 'bg-warning'">

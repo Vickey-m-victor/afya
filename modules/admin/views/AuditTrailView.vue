@@ -21,23 +21,23 @@ const tableColumns = [
   { name: "System User", field: "user" },
   { name: "IP Address", field: "ip_info.ip_address" },
   { name: "Country", field: "ip_info.country" },
-  { name: "Country Code", field: "ip_info.country_code" },
-  { name: "Region Code", field: "ip_info.region_code" },
-  { name: "Region Name", field: "ip_info.region_name" },
-  { name: "City", field: "ip_info.city" },
-  { name: "ZIP Code", field: "ip_info.zip_code" },
-  { name: "Latitude", field: "ip_info.latitude" },
-  { name: "Longitude", field: "ip_info.longitude" },
-  { name: "Time Zone", field: "ip_info.time_zone" },
-  { name: "ISP", field: "ip_info.isp" },
+  // { name: "Country Code", field: "ip_info.country_code" },
+  // { name: "Region Code", field: "ip_info.region_code" },
+  // { name: "Region Name", field: "ip_info.region_name" },
+  // { name: "City", field: "ip_info.city" },
+  // { name: "ZIP Code", field: "ip_info.zip_code" },
+  // { name: "Latitude", field: "ip_info.latitude" },
+  // { name: "Longitude", field: "ip_info.longitude" },
+  // { name: "Time Zone", field: "ip_info.time_zone" },
+  // { name: "ISP", field: "ip_info.isp" },
   { name: "Organization", field: "ip_info.organization" },
-  { name: "Autonomous System", field: "ip_info.autonomous_system" },
-  { name: "Field Name", field: "field_name" },
+  // { name: "Autonomous System", field: "ip_info.autonomous_system" },
+  // { name: "Field Name", field: "field_name" },
   { name: "Old Value", field: "old_value" },
   { name: "New Value", field: "new_value" },
   { name: "Audit Time", field: "audit_time" },
-  { name: "Operation", field: "operation" },
-  { name: "Request Method", field: "request_method" },
+  // { name: "Operation", field: "operation" },
+  // { name: "Request Method", field: "request_method" },
   { name: "Actions", field: "actions" },
 ];
 
@@ -109,9 +109,9 @@ onMounted(() => {
       :columns="tableColumns"
       :loading="store.loading"
     >
-      <template #header-actions>
+      <!-- <template #header-actions>
         <BaseButton label="Create AuditTrail" variant="primary" @click="openCreateModal" />
-      </template>
+      </template> -->
 
       <template #cell(status)="{ row }">
         <span class="badge" :class="row.status === 'active' ? 'bg-success' : 'bg-warning'">
