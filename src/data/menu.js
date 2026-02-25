@@ -87,25 +87,26 @@ export default {
       subActivePaths: "/admin/settings",
       sub: [
     {
-      name: "Settings - General",
+      name: "General",
       to: "admin-settings-generals",
       icon: "si si-settings",
     },
     {
-      name: "Settings - Mailer",
+      name: "Mailer",
       to: "admin-settings-mailers",
       icon: "si si-envelope-letter",
     },
     {
-      name: "Settings - Security",
+      name: "Security",
       to: "admin-settings-securitys",
       icon: "si si-shield",
     },
     {
-      name: "Settings - Theme",
+      name: "Theme",
       to: "admin-settings-themes",
-      icon: "si si-palette",
+      icon: "si si-magic-wand",
     },
+  
       ],
     },
     {

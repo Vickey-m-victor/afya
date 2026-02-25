@@ -18,7 +18,7 @@ const updateField = (name, value) => {
       <label class="form-label" :for="field.name">{{ field.label }}</label>
       <input
         :type="field.type"
-        class="form-control form-control-alt"
+        class="form-control"
         :id="field.name"
         :value="modelValue[field.name]"
         @input="updateField(field.name, $event.target.value)"

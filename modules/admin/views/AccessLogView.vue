@@ -75,7 +75,7 @@ const handleSave = async () => {
     }
     showModal.value = false;
   } catch (error) {
-    toastError("Error", error.response?.data?.message || "Failed to save data");
+    toastError("Error", error.response?.data?.message);
   }
 };
 
