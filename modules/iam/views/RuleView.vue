@@ -17,7 +17,6 @@ const isEditing = ref(false);
 
 // --- Table Configuration ---
 const tableColumns = [
-  { name: "Rule ID", field: "id" },
   { name: "Rule Name", field: "rule_name" },
   { name: "Description", field: "description" },
   { name: "Actions", field: "actions" },
@@ -27,6 +26,9 @@ const tableColumns = [
 const formData = ref({});
 
 const formFields = reactive([
+{ label: "Rule Name", type: "text", name: "rule_name", placeholder: "Enter rule name" },
+{ label: "Description", type: "text", name: "description", placeholder: "Enter description" },
+
 ]);
 
 // --- Handlers ---

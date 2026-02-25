@@ -27,6 +27,10 @@ const tableColumns = [
 const formData = ref({});
 
 const formFields = reactive([
+{ label: "Permission Id", type: "text", name: "permission_id", placeholder: "Enter permission id" },
+{ label: "Permission Name", type: "text", name: "permission_name", placeholder: "Enter permission name" },  
+{ label: "Description", type: "text", name: "description", placeholder: "Enter Description" },
+
 ]);
 
 // --- Handlers ---

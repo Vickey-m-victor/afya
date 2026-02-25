@@ -18,12 +18,12 @@ const isEditing = ref(false);
 // --- Table Configuration ---
 const tableColumns = [
   { name: "Username", field: "username" },
-  { name: "First name", field: "profile.first_name" },
-  { name: "Middle name", field: "profile.middle_name" },
-  { name: "Last name", field: "profile.last_name" },
+  // { name: "First name", field: "profile.first_name" },
+  // { name: "Middle name", field: "profile.middle_name" },
+  // { name: "Last name", field: "profile.last_name" },
   { name: "Email address", field: "profile.email_address" },
   { name: "Phone number", field: "profile.phone_number" },
-  { name: "Profile picture", field: "profile.profile_picture" },
+  // { name: "Profile picture", field: "profile.profile_picture" },
   { name: "Status", field: "status" },
   { name: "Actions", field: "actions" },
 ];
@@ -32,6 +32,14 @@ const tableColumns = [
 const formData = ref({});
 
 const formFields = reactive([
+{ label: "Username", type: "text", name: "username", placeholder: "Enter user name" },
+{ label: "First Name", type: "text", name: "first_name", placeholder: "Enter first name" },
+{ label: "Middle Name", type: "text", name: "middle_name", placeholder: "Enter middle name" },
+{ label: "Last Name", type: "text", name: "last_name", placeholder: "Enter rule last" },
+{ label: "Email address", type: "text", name: "email_address", placeholder: "Enter email address" },
+{ label: "Phone Number", type: "text", name: "phone_number", placeholder: "Enter phone number" },
+
+
 ]);
 
 // --- Handlers ---

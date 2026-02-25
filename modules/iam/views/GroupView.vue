@@ -24,9 +24,12 @@ const tableColumns = [
 ];
 
 // --- Form Configuration ---
+// --- Form Configuration ---
 const formData = ref({});
 
 const formFields = reactive([
+  { label: "Group Name", type: "text", name: "group_name", placeholder: "Enter Group Name" },
+  { label: "Description", type: "text", name: "description", placeholder: "Enter Description" },
 ]);
 
 // --- Handlers ---
