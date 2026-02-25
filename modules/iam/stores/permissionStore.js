@@ -14,9 +14,25 @@ export const usePermissionStore = defineStore("permission", {
         this.items = response.data?.dataPayload?.data || response.data;
       } catch (error) {
         console.error(error);
+        throw error;
       } finally {
         this.loading = false;
       }
+    },
+    async create(payload) {
+      const response = await permissionService.create(payload);
+      await this.fetchAll(); 
+      return response;
+    },
+    async update(id, payload) {
+      const response = await permissionService.update(id, payload);
+      await this.fetchAll(); 
+      return response;
+    },
+    async delete(id) {
+      const response = await permissionService.delete(id);
+      await this.fetchAll(); 
+      return response;
     }
   }
 });

@@ -14,9 +14,25 @@ export const useAuditTrailStore = defineStore("auditTrail", {
         this.items = response.data?.dataPayload?.data || response.data;
       } catch (error) {
         console.error(error);
+        throw error;
       } finally {
         this.loading = false;
       }
+    },
+    async create(payload) {
+      const response = await auditTrailService.create(payload);
+      await this.fetchAll(); 
+      return response;
+    },
+    async update(id, payload) {
+      const response = await auditTrailService.update(id, payload);
+      await this.fetchAll(); 
+      return response;
+    },
+    async delete(id) {
+      const response = await auditTrailService.delete(id);
+      await this.fetchAll(); 
+      return response;
     }
   }
 });

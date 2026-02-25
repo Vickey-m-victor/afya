@@ -6,27 +6,142 @@
         {
           "name": "permission",
           "endpoint": "/iam/rbac/permissions",
-          "type": "table"
+          "type": "table",
+          "columns": [
+            {
+              "field": "permission_id",
+              "label": "Permission ID",
+              "type": "text"
+            },
+            {
+              "field": "permission_name",
+              "label": "Permission Name",
+              "type": "text"
+            },
+            {
+              "field": "description",
+              "label": "Description",
+              "type": "text"
+            }
+          ],
+          "formFields": []
         },
         {
           "name": "role",
           "endpoint": "/iam/rbac/roles",
-          "type": "table"
+          "type": "table",
+          "columns": [
+            {
+              "field": "role_id",
+              "label": "Role ID",
+              "type": "text"
+            },
+            {
+              "field": "role_name",
+              "label": "Role Name",
+              "type": "text"
+            },
+            {
+              "field": "description",
+              "label": "Description",
+              "type": "text"
+            }
+          ],
+          "formFields": []
         },
         {
           "name": "group",
           "endpoint": "/iam/rbac/groups",
-          "type": "table"
+          "type": "table",
+          "columns": [
+            {
+              "field": "group_name",
+              "label": "Group Name",
+              "type": "text"
+            },
+            {
+              "field": "ruleName",
+              "label": "Rule Name",
+              "type": "text"
+            },
+            {
+              "field": "description",
+              "label": "Description",
+              "type": "text"
+            }
+          ],
+          "formFields": []
         },
         {
           "name": "rule",
           "endpoint": "/iam/rbac/rule",
-          "type": "table"
+          "type": "table",
+          "columns": [
+            {
+              "field": "id",
+              "label": "Rule ID",
+              "type": "text"
+            },
+            {
+              "field": "rule_name",
+              "label": "Rule Name",
+              "type": "text"
+            },
+            {
+              "field": "description",
+              "label": "Description",
+              "type": "text"
+            }
+          ],
+          "formFields": []
         },
         {
           "name": "user",
           "endpoint": "/iam/users",
-          "type": "table"
+          "type": "table",
+          "columns": [
+            {
+              "field": "username",
+              "label": "Username",
+              "type": "text"
+            },
+            {
+              "field": "profile.first_name",
+              "label": "First name",
+              "type": "text"
+            },
+            {
+              "field": "profile.middle_name",
+              "label": "Middle name",
+              "type": "text"
+            },
+            {
+              "field": "profile.last_name",
+              "label": "Last name",
+              "type": "text"
+            },
+            {
+              "field": "profile.email_address",
+              "label": "Email address",
+              "type": "text"
+            },
+            {
+              "field": "profile.phone_number",
+              "label": "Phone number",
+              "type": "text"
+            },
+            {
+              "field": "profile.profile_picture",
+              "label": "Profile picture",
+              "type": "text"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "text"
+            }
+          ],
+          "formFields": []
         }
       ]
     },
@@ -36,42 +151,496 @@
         {
           "name": "accessLog",
           "endpoint": "/admin/logs/access",
-          "type": "table"
+          "type": "table",
+          "columns": [
+            {
+              "field": "access_id",
+              "label": "Access Id",
+              "type": "number"
+            },
+            {
+              "field": "user",
+              "label": "User ",
+              "type": "text"
+            },
+            {
+              "field": "description",
+              "label": "Description",
+              "type": "text"
+            },
+            {
+              "field": "ip_address",
+              "label": "Ip Address",
+              "type": "text"
+            },
+            {
+              "field": "user_agent",
+              "label": "User Agent",
+              "type": "text"
+            },
+            {
+              "field": "access_time",
+              "label": "Access Time",
+              "type": "text"
+            }
+          ],
+          "formFields": []
         },
         {
           "name": "auditTrail",
           "endpoint": "/admin/audit/trail",
-          "type": "table"
+          "type": "table",
+          "columns": [
+            {
+              "field": "audit_id",
+              "label": "Audit ID",
+              "type": "number"
+            },
+            {
+              "field": "user",
+              "label": "System User",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.ip_address",
+              "label": "IP Address",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.country",
+              "label": "Country",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.country_code",
+              "label": "Country Code",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.region_code",
+              "label": "Region Code",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.region_name",
+              "label": "Region Name",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.city",
+              "label": "City",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.zip_code",
+              "label": "ZIP Code",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.latitude",
+              "label": "Latitude",
+              "type": "number"
+            },
+            {
+              "field": "ip_info.longitude",
+              "label": "Longitude",
+              "type": "number"
+            },
+            {
+              "field": "ip_info.time_zone",
+              "label": "Time Zone",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.isp",
+              "label": "ISP",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.organization",
+              "label": "Organization",
+              "type": "text"
+            },
+            {
+              "field": "ip_info.autonomous_system",
+              "label": "Autonomous System",
+              "type": "text"
+            },
+            {
+              "field": "field_name",
+              "label": "Field Name",
+              "type": "text"
+            },
+            {
+              "field": "old_value",
+              "label": "Old Value",
+              "type": "text"
+            },
+            {
+              "field": "new_value",
+              "label": "New Value",
+              "type": "text"
+            },
+            {
+              "field": "audit_time",
+              "label": "Audit Time",
+              "type": "text"
+            },
+            {
+              "field": "operation",
+              "label": "Operation",
+              "type": "text"
+            },
+            {
+              "field": "request_method",
+              "label": "Request Method",
+              "type": "text"
+            }
+          ],
+          "formFields": []
         },
         {
           "name": "errorLog",
           "endpoint": "/admin/logs/error",
-          "type": "table"
+          "type": "table",
+          "columns": [
+            {
+              "field": "id",
+              "label": "Id",
+              "type": "text"
+            },
+            {
+              "field": "level",
+              "label": "Level",
+              "type": "number"
+            },
+            {
+              "field": "category",
+              "label": "Category",
+              "type": "text"
+            },
+            {
+              "field": "log_time",
+              "label": "Log Time",
+              "type": "text"
+            },
+            {
+              "field": "is_resolved",
+              "label": "Is Resolved",
+              "type": "number"
+            }
+          ],
+          "formFields": []
         },
         {
           "name": "settingsGeneral",
           "endpoint": "/admin/settings/general",
-          "type": "form"
+          "type": "form",
+          "columns": [
+            {
+              "field": "business_name",
+              "label": "Business Name",
+              "type": "text"
+            },
+            {
+              "field": "physical_address",
+              "label": "Physical Address",
+              "type": "text"
+            },
+            {
+              "field": "postal_address",
+              "label": "Postal Address",
+              "type": "text"
+            },
+            {
+              "field": "email_address",
+              "label": "Email Address",
+              "type": "text"
+            },
+            {
+              "field": "website",
+              "label": "Website",
+              "type": "text"
+            },
+            {
+              "field": "primary_mobile_number",
+              "label": "Primary Mobile Number",
+              "type": "text"
+            }
+          ],
+          "formFields": [
+            {
+              "field": "business_name",
+              "label": "Business Name",
+              "type": "text"
+            },
+            {
+              "field": "physical_address",
+              "label": "Physical Address",
+              "type": "text"
+            },
+            {
+              "field": "postal_address",
+              "label": "Postal Address",
+              "type": "text"
+            },
+            {
+              "field": "email_address",
+              "label": "Email Address",
+              "type": "text"
+            },
+            {
+              "field": "website",
+              "label": "Website",
+              "type": "text"
+            },
+            {
+              "field": "primary_mobile_number",
+              "label": "Primary Mobile Number",
+              "type": "text"
+            }
+          ]
         },
         {
           "name": "settingsMailer",
           "endpoint": "/admin/settings/mailer",
-          "type": "form"
+          "type": "form",
+          "columns": [
+            {
+              "field": "from_name",
+              "label": "From Name",
+              "type": "text"
+            },
+            {
+              "field": "smtp_server",
+              "label": "SMTP Server",
+              "type": "text"
+            },
+            {
+              "field": "smtp_port",
+              "label": "Port",
+              "type": "number"
+            },
+            {
+              "field": "smtp_username",
+              "label": "SMTP Username",
+              "type": "text"
+            },
+            {
+              "field": "smtp_password",
+              "label": "Password",
+              "type": "text"
+            },
+            {
+              "field": "email_encryption",
+              "label": "Encryption",
+              "type": "text"
+            }
+          ],
+          "formFields": [
+            {
+              "field": "from_name",
+              "label": "From Name",
+              "type": "text"
+            },
+            {
+              "field": "smtp_server",
+              "label": "SMTP Server",
+              "type": "text"
+            },
+            {
+              "field": "smtp_port",
+              "label": "Port",
+              "type": "number"
+            },
+            {
+              "field": "smtp_username",
+              "label": "SMTP Username",
+              "type": "text"
+            },
+            {
+              "field": "smtp_password",
+              "label": "Password",
+              "type": "text"
+            },
+            {
+              "field": "email_encryption",
+              "label": "Encryption",
+              "type": "text"
+            }
+          ]
         },
         {
           "name": "settingsTheme",
           "endpoint": "/admin/settings/theme",
-          "type": "form"
+          "type": "form",
+          "columns": [
+            {
+              "field": "defaultPageSize",
+              "label": "Default Page Size",
+              "type": "number"
+            },
+            {
+              "field": "pageSizeLimit",
+              "label": "Page Size Limit",
+              "type": "number"
+            }
+          ],
+          "formFields": [
+            {
+              "field": "defaultPageSize",
+              "label": "Default Page Size",
+              "type": "number"
+            },
+            {
+              "field": "pageSizeLimit",
+              "label": "Page Size Limit",
+              "type": "number"
+            }
+          ]
         },
         {
           "name": "settingsSecurity",
           "endpoint": "/admin/settings/security",
-          "type": "form"
+          "type": "form",
+          "columns": [
+            {
+              "field": "otp_expiry",
+              "label": "OTP Expiry",
+              "type": "number"
+            },
+            {
+              "field": "trusted_device_duration",
+              "label": "Trusted Device Duration",
+              "type": "number"
+            },
+            {
+              "field": "maximum_login_attempts",
+              "label": "Maximum Login Attempts",
+              "type": "number"
+            },
+            {
+              "field": "profile_lock_duration",
+              "label": "Account Lock Duration",
+              "type": "number"
+            },
+            {
+              "field": "two_factor_auth",
+              "label": "Two-Factor Authentication",
+              "type": "text"
+            }
+          ],
+          "formFields": [
+            {
+              "field": "otp_expiry",
+              "label": "OTP Expiry",
+              "type": "number"
+            },
+            {
+              "field": "trusted_device_duration",
+              "label": "Trusted Device Duration",
+              "type": "number"
+            },
+            {
+              "field": "maximum_login_attempts",
+              "label": "Maximum Login Attempts",
+              "type": "number"
+            },
+            {
+              "field": "profile_lock_duration",
+              "label": "Account Lock Duration",
+              "type": "number"
+            },
+            {
+              "field": "two_factor_auth",
+              "label": "Two-Factor Authentication",
+              "type": "text"
+            }
+          ]
         },
         {
           "name": "taskManager",
           "endpoint": "/admin/task/manager",
-          "type": "table"
+          "type": "table",
+          "columns": [
+            {
+              "field": "task_id",
+              "label": "Task ID",
+              "type": "number"
+            },
+            {
+              "field": "task_title",
+              "label": "Task Title",
+              "type": "text"
+            },
+            {
+              "field": "service_name",
+              "label": "Service Name",
+              "type": "text"
+            },
+            {
+              "field": "status.label",
+              "label": "Label",
+              "type": "text"
+            },
+            {
+              "field": "status.theme",
+              "label": "Theme",
+              "type": "text"
+            }
+          ],
+          "formFields": [
+            {
+              "field": "task_title",
+              "label": "Task Title",
+              "type": "text"
+            },
+            {
+              "field": "system_service",
+              "label": "Service",
+              "type": "text"
+            },
+            {
+              "field": "is_recurring",
+              "label": "Is Recurring",
+              "type": "text"
+            },
+            {
+              "field": "schedule_type",
+              "label": "Schedule Type",
+              "type": "text"
+            },
+            {
+              "field": "schedule_value",
+              "label": "Schedule Value",
+              "type": "text"
+            },
+            {
+              "field": "service_payload.to",
+              "label": "Recipient Email",
+              "type": "text"
+            },
+            {
+              "field": "service_payload.cc",
+              "label": "CC Email",
+              "type": "text"
+            },
+            {
+              "field": "service_payload.subject",
+              "label": "Email Subject",
+              "type": "text"
+            },
+            {
+              "field": "service_payload.body",
+              "label": "Email Body",
+              "type": "text"
+            },
+            {
+              "field": "service_payload.template",
+              "label": "Email Template",
+              "type": "text"
+            }
+          ]
         }
       ]
     }

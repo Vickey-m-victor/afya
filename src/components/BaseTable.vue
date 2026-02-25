@@ -27,7 +27,8 @@ const onSort = (event, index) => {
 </script>
 
 <template>
-  <BaseBlock :title="title" content-full>
+  <BaseBlock  content-full>
+    <!-- :title="title" -->
     <Dataset v-slot="{ ds }" :ds-data="data" :ds-search-in="searchFields">
       <div class="d-flex justify-content-end me-3">
         <slot name="header-actions"></slot>

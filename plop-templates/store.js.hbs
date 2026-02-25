@@ -14,9 +14,25 @@ export const use{{pascalCase entityName}}Store = defineStore("{{camelCase entity
         this.items = response.data?.dataPayload?.data || response.data;
       } catch (error) {
         console.error(error);
+        throw error;
       } finally {
         this.loading = false;
       }
+    },
+    async create(payload) {
+      const response = await {{camelCase entityName}}Service.create(payload);
+      await this.fetchAll(); 
+      return response;
+    },
+    async update(id, payload) {
+      const response = await {{camelCase entityName}}Service.update(id, payload);
+      await this.fetchAll(); 
+      return response;
+    },
+    async delete(id) {
+      const response = await {{camelCase entityName}}Service.delete(id);
+      await this.fetchAll(); 
+      return response;
     }
   }
 });

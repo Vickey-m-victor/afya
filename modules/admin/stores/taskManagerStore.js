@@ -14,9 +14,25 @@ export const useTaskManagerStore = defineStore("taskManager", {
         this.items = response.data?.dataPayload?.data || response.data;
       } catch (error) {
         console.error(error);
+        throw error;
       } finally {
         this.loading = false;
       }
+    },
+    async create(payload) {
+      const response = await taskManagerService.create(payload);
+      await this.fetchAll(); 
+      return response;
+    },
+    async update(id, payload) {
+      const response = await taskManagerService.update(id, payload);
+      await this.fetchAll(); 
+      return response;
+    },
+    async delete(id) {
+      const response = await taskManagerService.delete(id);
+      await this.fetchAll(); 
+      return response;
     }
   }
 });
