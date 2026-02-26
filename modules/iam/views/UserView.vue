@@ -112,6 +112,7 @@ onMounted(() => {
       :showModal="showModal" 
       :title="isEditing ? 'Edit User' : 'Create User'" 
       @close="showModal = false"
+      
     >
       <UsersForm 
         v-model="formData" 

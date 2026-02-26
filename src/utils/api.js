@@ -1,4 +1,5 @@
 import axios from "axios";
+import router from "@/router";
 
 const api = axios.create({
   baseURL: "/v2", // This will be proxied to the backend in development
@@ -33,7 +34,10 @@ api.interceptors.response.use(
         localStorage.removeItem("user");
         localStorage.removeItem("username");
 
-        
+        if (router.currentRoute.value.name !== "auth-signin3") {
+          router.push({ name: "auth-signin3" });
+        }
+      
     }
     return Promise.reject(error);
   }

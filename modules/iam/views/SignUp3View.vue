@@ -20,6 +20,15 @@ const state = reactive({
   terms: null,
 });
 
+// "first_name": "John",
+//   "middle_name": "Michael",
+//   "last_name": "Doe",
+//   "email_address": "john.doe@example.com",
+//   "mobile_number": "+2541700000000",
+//   "username": "johndoe",
+//   "password": "@dmiN1234$",
+//   "confirm_password": "@dmiN1234$"
+
 // Validation rules
 const rules = computed(() => {
   return {

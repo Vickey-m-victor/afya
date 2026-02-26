@@ -16,7 +16,7 @@ const props = defineProps({
   },
   position: {
     type: String,
-    default: "modal-centered",
+    default: "modal-dialog-centered",
   },
 });
 const emit = defineEmits([ "close"]);
@@ -27,13 +27,14 @@ const close = () => emit("close");
 <template>
   <div
     v-if="showModal"
-    class="modal d-block"
+    class="modal fade show d-block"
     id="modal-block-vcenter"
     tabindex="-1"
     role="dialog"
     aria-labelledby="modal-block-vcenter"
     aria-hidden="true"
     @click.self="close"
+    style="background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);"
   >
     <div class="modal-dialog" :class="[size, position]" role="document">
       <div class="modal-content">
