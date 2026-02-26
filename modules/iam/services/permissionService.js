@@ -1,9 +1,11 @@
 import api from "@/utils/api";
 
 const permissionService = {
-  getAll() {
-    return api.get("/iam/rbac/permissions");
-  },
+     getAll(searchQuery = "") {
+       // If there is a search query, attach it. Otherwise, just fetch all.
+       const url = searchQuery ? `/iam/rbac/permissions?q=${searchQuery}` : "/iam/rbac/permissions";
+       return api.get(url);
+     },
   getById(id) {
     return api.get(`/iam/rbac/permissions/${id}`);
   },

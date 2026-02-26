@@ -34,6 +34,10 @@ const formFields = reactive([
 
 ]);
 
+const handleSearch = (query) => {
+  // Pass the query to your store to fetch new data
+  store.fetchAll(query);
+};
 // --- Handlers ---
 const openCreateModal = () => {
   isEditing.value = false;
@@ -95,6 +99,8 @@ onMounted(() => {
       :data="store.items"
       :columns="tableColumns"
       :loading="store.loading"
+      @search="handleSearch"
+
     >
       <template #header-actions>
         <BaseButton label="Create Role" variant="primary" @click="openCreateModal" />

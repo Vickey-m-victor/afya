@@ -46,6 +46,11 @@ const openEditModal = (row) => {
   showModal.value = true;
 };
 
+const handleSearch = (query) => {
+  // Pass the query to your store to fetch new data
+  store.fetchAll(query);
+};
+
 // 💡 NEW: Delete Handler
 const handleDelete = async (row) => {
   // Assuming the ID field is 'id' or 'uuid'. Adjust if your backend uses something like 'role_id'
@@ -93,6 +98,8 @@ onMounted(() => {
       :data="store.items"
       :columns="tableColumns"
       :loading="store.loading"
+      @search="handleSearch"
+
     >
       <template #header-actions>
         <BaseButton label="Create Group" variant="primary" @click="openCreateModal" />

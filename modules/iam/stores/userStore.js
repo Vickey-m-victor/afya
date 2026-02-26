@@ -7,13 +7,14 @@ export const useUserStore = defineStore("user", {
     loading: false,
   }),
   actions: {
-    async fetchAll() {
+  
+    async fetchAll(searchQuery = "") {
       this.loading = true;
       try {
-        const response = await userService.getAll();
+        // Assuming your service allows passing a query parameter like ?q=admin
+        const response = await userService.getAll(searchQuery); 
         this.items = response.data?.dataPayload?.data || response.data;
       } catch (error) {
-        console.error(error);
         throw error;
       } finally {
         this.loading = false;

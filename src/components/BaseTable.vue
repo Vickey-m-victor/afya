@@ -1,35 +1,44 @@
 <script setup>
+import { ref, watch } from "vue";
 import {
   Dataset,
   DatasetItem,
   DatasetInfo,
   DatasetPager,
-  DatasetSearch,
   DatasetShow,
 } from "vue-dataset";
+
 const props = defineProps({
-  // list of objects which will come from the backend.
   data: { type: Array, required: true, default: () => [] },
-  // table headers to be created.
   columns: { type: Array, required: true },
-  // for the shimmer effect, if loaading is true.
   loading: { type: Boolean, default: false },
   title: { type: String, default: "" },
-  searchFields: { type: Array, default: () => [] },
 });
 
-const emit = defineEmits(["click", "close", "refresh"]);
+// 💡 NEW: Added "search" to the emitted events
+const emit = defineEmits(["click", "close", "refresh", "search"]);
+
+// --- Backend Search Logic (Debounce) ---
+const searchQuery = ref("");
+let debounceTimer = null;
+
+// Watch the input. Every time it changes, restart the 500ms timer.
+watch(searchQuery, (newValue) => {
+  clearTimeout(debounceTimer); // Stop the previous timer
+  debounceTimer = setTimeout(() => {
+    // If 500ms pass without typing, tell the parent view to search the backend!
+    emit("search", newValue);
+  }, 500); 
+});
 
 const onSort = (event, index) => {
-  // Logic for sorting can be added here if needed manually,
-  // but vue-dataset usually handles this via headers.
+  // Sorting logic
 };
 </script>
 
 <template>
-  <BaseBlock  content-full>
-    <!-- :title="title" -->
-    <Dataset v-slot="{ ds }" :ds-data="data" :ds-search-in="searchFields">
+  <BaseBlock content-full>
+    <Dataset v-slot="{ ds }" :ds-data="data">
       <div class="d-flex justify-content-end me-3">
         <slot name="header-actions"></slot>
       </div>
@@ -40,8 +49,13 @@ const onSort = (event, index) => {
         <div id="datasetLength" class="col-md-1 py-2">
           <DatasetShow />
         </div>
-        <div class="col-md-3 py-2">
-          <DatasetSearch ds-search-placeholder="Search..." />
+        <div class="col-md-4 py-2">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search ..."
+            v-model="searchQuery"
+          />
         </div>
       </div>
 

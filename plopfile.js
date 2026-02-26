@@ -30,8 +30,8 @@ export default function (plop) {
             path: `${basePath}/services/${sub.name}Service.js`,
             templateFile: "plop-templates/service.js.hbs",
             data: Object.assign({}, data, sub), // Pass columns and formFields to the service template
-            // skipIfExists: true,
-            force: true,
+            skipIfExists: true,
+            // force: true,
           });
 
           // Action B: Create Store
@@ -40,8 +40,8 @@ export default function (plop) {
             path: `${basePath}/stores/${sub.name}Store.js`,
             templateFile: "plop-templates/store.js.hbs",
             data: Object.assign({}, data, sub),
-            // skipIfExists: true,
-            force: true,
+            skipIfExists: true,
+            // force: true,
           });
 
           // Action C: Create View (It checks if it should use the Table or Form template)
@@ -51,8 +51,8 @@ export default function (plop) {
             path: `${basePath}/views/${plop.getHelper("pascalCase")(sub.name)}View.vue`,
             templateFile: `plop-templates/${templateName}`,
             data: Object.assign({}, data, sub),
-            // skipIfExists: true,
-            force: true,
+            skipIfExists: true,
+            // force: true,
           });
           // Action D: Create Router
           actions.push({
@@ -60,8 +60,8 @@ export default function (plop) {
             path: `${basePath}/routers/${sub.name}Router.js`,
             templateFile: "plop-templates/router.js.hbs",
             data: Object.assign({}, data, sub),
-            // skipIfExists: true,
-            force: true,
+            skipIfExists: true,
+            // force: true,
           });
         });
       });

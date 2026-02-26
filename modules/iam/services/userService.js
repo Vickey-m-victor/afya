@@ -1,9 +1,12 @@
 import api from "@/utils/api";
 
 const userService = {
-  getAll() {
-    return api.get("/iam/users");
-  },
+    // 💡 Make sure you are appending the query parameter here!
+    getAll(searchQuery = "") {
+      // If there is a search query, attach it. Otherwise, just fetch all.
+      const url = searchQuery ? `/iam/users?q=${searchQuery}` : "/iam/users";
+      return api.get(url);
+    },
   getById(username) {
     return api.get(`/iam/user/${username}`); // Endpoint uses username as ID
   },

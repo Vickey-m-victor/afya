@@ -30,13 +30,13 @@ api.interceptors.response.use(
       console.error("Unauthorized access - redirecting to login");
       
         // Clear token and user data on 401
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        localStorage.removeItem("username");
+        // localStorage.removeItem("token");
+        // localStorage.removeItem("user");
+        // localStorage.removeItem("username");
 
-        if (router.currentRoute.value.name !== "auth-signin3") {
-          router.push({ name: "auth-signin3" });
-        }
+        // if (router.currentRoute.value.name !== "auth-signin3") {
+        //   router.push({ name: "auth-signin3" });
+        // }
       
     }
     return Promise.reject(error);

@@ -1,9 +1,11 @@
 import api from "@/utils/api";
 
 const ruleService = {
-  getAll() {
-    return api.get("/iam/rbac/rule");
-  },
+     getAll(searchQuery = "") {
+       // If there is a search query, attach it. Otherwise, just fetch all.
+       const url = searchQuery ? `/iam/rbac/rules?q=${searchQuery}` : "/iam/rbac/rules";
+       return api.get(url);
+     },
   getById(id) {
     return api.get(`/iam/rbac/rule/${id}`);
   },

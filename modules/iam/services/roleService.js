@@ -1,9 +1,11 @@
 import api from "@/utils/api";
 
 const roleService = {
-  getAll() {
-    return api.get("/iam/rbac/roles");
-  },
+     getAll(searchQuery = "") {
+       // If there is a search query, attach it. Otherwise, just fetch all.
+       const url = searchQuery ? `/iam/rbac/roles?q=${searchQuery}` : "/iam/rbac/roles";
+       return api.get(url);
+     },
   getById(id) {
     return api.get(`/iam/rbac/roles/${id}`);
   },

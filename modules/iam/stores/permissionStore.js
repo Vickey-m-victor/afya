@@ -7,10 +7,10 @@ export const usePermissionStore = defineStore("permission", {
     loading: false,
   }),
   actions: {
-    async fetchAll() {
+    async fetchAll(searchQuery) {
       this.loading = true;
       try {
-        const response = await permissionService.getAll();
+        const response = await permissionService.getAll(searchQuery);
         this.items = response.data?.dataPayload?.data || response.data;
       } catch (error) {
         console.error(error);
