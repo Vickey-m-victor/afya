@@ -33,6 +33,16 @@ export const useUserStore = defineStore("user", {
       const response = await userService.delete(id);
       await this.fetchAll(); 
       return response;
+    },
+    async ban(id) {
+      const response = await userService.ban(id);
+      await this.fetchAll(); 
+      return response;
+    },
+    async restore(id) {
+      const response = await userService.restore(id);
+      await this.fetchAll(); 
+      return response;
     }
   }
 });

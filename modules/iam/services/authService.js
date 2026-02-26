@@ -12,7 +12,7 @@ const authService = {
     );
   },
   logout() {
-    return api.post("/iam/auth/logout");
+    return api.post("/iam/auth/logout",{device:"current"});
   },
 
   refresh() {

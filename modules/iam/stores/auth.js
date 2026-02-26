@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import api from "@/utils/api";
 import authService from "~/iam/services/authService";
 import router from "@/router";
+
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: JSON.parse(localStorage.getItem("user")) || null,
@@ -29,21 +30,19 @@ export const useAuthStore = defineStore("auth", {
       this.isAuthenticated = false;
       localStorage.removeItem("user");
       localStorage.removeItem("username");
+      localStorage.removeItem("token");
     },
     //check if user is auth
     async checkAuth() {
-      this.loading = true;
-      try {
-        const response = await api.get("/iam/auth/refresh");
-        const userData = response.data.dataPayload?.data || response.data.user;
-        this.setUser(userData);
-        return true;
-      } catch (error) {
+      const token = localStorage.getItem("token");
+      if (!token) {
         this.clearUser();
         return false;
-      } finally {
-        this.loading = false;
       }
+      
+      // Optional: You can call a "/me" endpoint here if you want fresh user data on reload
+      this.isAuthenticated = true;
+      return true;
     },
     // will send the login request to the backend and handle the response, including saving the token and user data to local storage, and updating the store's state accordingly.
     async login(credentials) {
@@ -51,38 +50,20 @@ export const useAuthStore = defineStore("auth", {
       try {
         const response = await authService.login(credentials);
 
-        // --- 1. SAVE THE TOKEN (NEW CODE) ---
-        const token =
-          response.data?.dataPayload?.data?.access_token ||
-          response.data?.access_token ||
-          response.data?.token;
+        // Extract Token safely
+        const token = response.data?.dataPayload?.data?.access_token;
 
         if (token) {
+          // 💡 FIX 5: Removed the broken getItem typo you had here
           localStorage.setItem("token", token);
-          localStorage.getItem("token", token); //
-          // Configure axios default header immediately for subsequent requests in this session
-          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        } else {
-          console.warn(
-            "No token found in login response! Check console logs.",
-            response.data
-          );
         }
 
-        // 2. Extract User Data
-        let userData =
-          response.data?.dataPayload?.data ||
-          response.data?.user ||
-          response.data;
-
-        if (!userData) userData = {};
-
-        // Inject username if missing
+        // Extract User Data safely
+        let userData = response.data?.dataPayload?.data || {};
         if (!userData.username && credentials.username) {
           userData.username = credentials.username;
         }
 
-        // 3. Set User State
         this.setUser(userData);
         return response.data;
       } catch (error) {
