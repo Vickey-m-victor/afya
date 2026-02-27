@@ -7,7 +7,7 @@ export const useRuleStore = defineStore("rule", {
     loading: false,
   }),
   actions: {
-    async fetchAll(searchQuery) {
+    async fetchAll(searchQuery="") {
       this.loading = true;
       try {
         const response = await ruleService.getAll(searchQuery);

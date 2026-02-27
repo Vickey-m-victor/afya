@@ -7,7 +7,7 @@ export const useGroupStore = defineStore("group", {
     loading: false,
   }),
   actions: {
-    async fetchAll(searchQuery) {
+    async fetchAll(searchQuery="") {
       this.loading = true;
       try {
         const response = await groupService.getAll(searchQuery);
