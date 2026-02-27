@@ -7,10 +7,10 @@ export const useAuditTrailStore = defineStore("auditTrail", {
     loading: false,
   }),
   actions: {
-    async fetchAll() {
+    async fetchAll(searchQuery = "") {
       this.loading = true;
       try {
-        const response = await auditTrailService.getAll();
+        const response = await auditTrailService.getAll(searchQuery);
         this.items = response.data?.dataPayload?.data || response.data;
       } catch (error) {
         console.error(error);

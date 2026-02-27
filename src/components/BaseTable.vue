@@ -38,7 +38,11 @@ const onSort = (event, index) => {
 
 <template>
   <BaseBlock content-full>
-    <Dataset v-slot="{ ds }" :ds-data="data">
+    <Dataset   
+    v-slot="{ ds }" 
+    :ds-data="Array.isArray(data) ? data : []"
+    :ds-search="''" 
+    >
       <div class="d-flex justify-content-end me-3">
         <slot name="header-actions"></slot>
       </div>
@@ -76,7 +80,7 @@ const onSort = (event, index) => {
             </tr>
           </thead>
 
-          <tbody v-if="loading">
+          <tbody v-if="loading" key="shimmer-body">
             <tr v-for="n in 5" :key="`shimmer-${n}`">
               <td v-for="i in columns.length + 1" :key="`cell-${i}`">
                 <div class="shimmer"></div>
@@ -84,7 +88,21 @@ const onSort = (event, index) => {
             </tr>
           </tbody>
 
-          <DatasetItem v-else tag="tbody" class="fs-sm">
+          <tbody v-else-if="!loading && (!data || data.length === 0)" key="empty-body">
+            <tr>
+              <td :colspan="columns.length + 1" class="text-center py-5 text-muted">
+                <i class="fa fa-folder-open fs-1 mb-3 opacity-50"></i>
+                <p class="mb-0">No records found.</p>
+              </td>
+            </tr>
+          </tbody>
+
+          <DatasetItem 
+            v-show="!loading && data && data.length > 0" 
+            tag="tbody" 
+            class="fs-sm"
+            key="dataset-body"
+          >
             <template #default="{ row, rowIndex }">
               <tr>
                 <th scope="row">{{ rowIndex + 1 }}</th>

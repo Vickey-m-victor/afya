@@ -1,7 +1,6 @@
 import api from "@/utils/api";
 
 const userService = {
-    // 💡 Make sure you are appending the query parameter here!
     getAll(searchQuery = "") {
       // If there is a search query, attach it. Otherwise, just fetch all.
       const url = searchQuery ? `/iam/users?q=${searchQuery}` : "/iam/users";

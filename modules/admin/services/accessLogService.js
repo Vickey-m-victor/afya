@@ -1,9 +1,11 @@
 import api from "@/utils/api";
 
 const accessLogService = {
-  getAll() {
-    return api.get("/admin/logs/access");
-  },
+ getAll(searchQuery = "") {
+      // If there is a search query, attach it. Otherwise, just fetch all.
+      const url = searchQuery ? `/admin/logs/access?q=${searchQuery}` : "/admin/logs/access";
+      return api.get(url);
+    },
   getById(id) {
     return api.get(`/admin/logs/access/${id}`);
   },

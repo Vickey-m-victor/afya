@@ -7,10 +7,10 @@ export const useErrorLogStore = defineStore("errorLog", {
     loading: false,
   }),
   actions: {
-    async fetchAll() {
+    async fetchAll(searchQuery = "") {
       this.loading = true;
       try {
-        const response = await errorLogService.getAll();
+        const response = await errorLogService.getAll(searchQuery);
         this.items = response.data?.dataPayload?.data || response.data;
       } catch (error) {
         console.error(error);

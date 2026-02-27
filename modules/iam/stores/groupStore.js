@@ -9,9 +9,16 @@ export const useGroupStore = defineStore("group", {
   actions: {
     async fetchAll(searchQuery="") {
       this.loading = true;
+      
+      // 💡 FIX 3: Instantly clear array to prevent Ghost Data
+      this.items = []; 
+      
       try {
         const response = await groupService.getAll(searchQuery);
-        this.items = response.data?.dataPayload?.data || response.data;
+        let fetchedData = response.data?.dataPayload?.data || response.data;
+        
+        // 💡 FIX 4: Safety check! If the backend returns null/Object, force it to be an empty array []
+        this.items = Array.isArray(fetchedData) ? fetchedData : [];
       } catch (error) {
         console.error(error);
         throw error;
@@ -24,6 +31,7 @@ export const useGroupStore = defineStore("group", {
       await this.fetchAll(); 
       return response;
     },
+    // ... update and delete remain exactly the same
     async update(id, payload) {
       const response = await groupService.update(id, payload);
       await this.fetchAll(); 

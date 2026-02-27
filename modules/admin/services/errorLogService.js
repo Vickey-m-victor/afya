@@ -1,9 +1,11 @@
 import api from "@/utils/api";
 
 const errorLogService = {
-  getAll() {
-    return api.get("/admin/logs/error");
-  },
+  getAll(searchQuery = "") {
+       // If there is a search query, attach it. Otherwise, just fetch all.
+       const url = searchQuery ? `/admin/logs/error?q=${searchQuery}` : "/admin/logs/error";
+       return api.get(url);
+     },
   getById(id) {
     return api.get(`/admin/logs/error/${id}`);
   },

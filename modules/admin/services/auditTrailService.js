@@ -1,9 +1,11 @@
 import api from "@/utils/api";
 
 const auditTrailService = {
-  getAll() {
-    return api.get("/admin/audit/trail");
-  },
+ getAll(searchQuery = "") {
+      // If there is a search query, attach it. Otherwise, just fetch all.
+      const url = searchQuery ? `/admin/audit/trail?q=${searchQuery}` : "/admin/audit/trail";
+      return api.get(url);
+    },
   getById(id) {
     return api.get(`/admin/audit/trail/${id}`);
   },
