@@ -48,6 +48,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  actionIcons: {
+    type: Object,
+    default: () => ({}),
+  },
   totalCount: {
     type: Number,
     default: null,
@@ -91,6 +95,10 @@ const emit = defineEmits([
   "view",
   "edit",
   "delete",
+  "manage",
+  "toggleStatus",
+  "ban",
+  "manageGroups",
   "search",
   "change-page",
   "change-per-page",
@@ -122,12 +130,17 @@ const emit = defineEmits([
       :loading="loading"
       :row-key="rowKey"
       :actions="actions"
+      :action-icons="actionIcons"
       :empty-text="emptyText"
       :sort-by="sortBy"
       :sort-dir="sortDir"
       @view="emit('view', $event)"
       @edit="emit('edit', $event)"
+      @manage="emit('manage', $event)"
       @delete="emit('delete', $event)"
+      @toggleStatus="emit('toggleStatus', $event)"
+      @ban="emit('ban', $event)"
+      @manageGroups="emit('manageGroups', $event)"
       @change-sort="emit('change-sort', $event)"
     >
       <template #loading>
@@ -144,7 +157,10 @@ const emit = defineEmits([
         #[`cell-${column.field}`]="slotProps"
       >
         <slot :name="`cell-${column.field}`" v-bind="slotProps">
-          {{ slotProps.value }}
+          <template v-if="slotProps.value && typeof slotProps.value === 'object' && slotProps.value.label">
+            <span :class="`badge bg-${slotProps.value.theme || 'secondary'}`">{{ slotProps.value.label }}</span>
+          </template>
+          <template v-else>{{ slotProps.value }}</template>
         </slot>
       </template>
     </DataTableBody>

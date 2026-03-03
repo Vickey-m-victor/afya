@@ -4,37 +4,62 @@ defineProps({
     type: Array,
     default: () => ["view", "edit", "delete"],
   },
+  actionIcons: {
+    type: Object,
+    default: () => ({}),
+  },
+  actionLabels: {
+    type: Object,
+    default: () => ({}),
+  },
   row: {
     type: Object,
     required: true,
   },
 });
 
-const emit = defineEmits(["view", "edit", "delete"]);
+const emit = defineEmits([
+  "manage",
+  "view",
+  "edit",
+  "delete",
+  "toggleStatus",
+  "ban",
+  "manageGroups",
+]);
+
+const defaultConfig = {
+  view: { icon: "fa fa-eye", color: "text-primary", label: "View" },
+  edit: { icon: "fa fa-pencil", color: "text-success", label: "Edit" },
+  delete: { icon: "fa fa-trash", color: "text-danger", label: "Delete" },
+  manage: { icon: "fa fa-wrench", color: "text-info", label: "Manage" },
+  manageGroups: { icon: "fa fa-users", color: "text-info", label: "Groups" },
+  toggleStatus: { icon: "fa fa-toggle-on", color: "text-warning", label: "Toggle Status" },
+  ban: { icon: "fa fa-ban", color: "text-danger", label: "Ban" },
+};
+
+function getIcon(action, actionIcons) {
+  return actionIcons[action] || defaultConfig[action]?.icon || "fa fa-cog";
+}
+
+function getColor(action) {
+  return defaultConfig[action]?.color || "text-secondary";
+}
+
+function getLabel(action, actionLabels) {
+  return actionLabels[action] || defaultConfig[action]?.label || action;
+}
 </script>
 
 <template>
   <div class="d-flex align-items-center justify-content-center gap-2">
-    <i
-      v-if="actions.includes('view')"
-      class="fa fa-eye action-icon text-primary"
-      @click="emit('view', row)"
-      title="View"
-    ></i>
-
-    <i
-      v-if="actions.includes('edit')"
-      class="fa fa-pencil action-icon text-success"
-      @click="emit('edit', row)"
-      title="Edit"
-    ></i>
-
-    <i
-      v-if="actions.includes('delete')"
-      class="fa fa-trash action-icon text-danger"
-      @click="emit('delete', row)"
-      title="Delete"
-    ></i>
+    <template v-for="action in actions" :key="action">
+      <i
+        :class="[getIcon(action, actionIcons), 'action-icon', getColor(action)]"
+        @click="emit(action, row)"
+        :title="getLabel(action, actionLabels)"
+      ></i>
+    </template>
   </div>
 </template>
 

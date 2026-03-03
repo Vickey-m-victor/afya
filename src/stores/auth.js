@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import { encrypt, decrypt, decodeJWT } from "@/helpers/crypto";
-import axiosInstance from "@/helpers/axiosInstance";
-import authService from "@/services/authService";
+import { useApi } from "@/helpers/useApi";
 import router from "@/router";
 import { useAlert } from "@/composables/alerts";
 
@@ -14,6 +13,7 @@ export const useAuthStore = defineStore("auth", {
       ipAddr: null,
       menus: {},
       permissions: [],
+      profile: null,
     },
     config: {
       refresh: {
@@ -103,15 +103,20 @@ export const useAuthStore = defineStore("auth", {
 
     setUserData(userData) {
       if (userData) {
-        const { menus = {}, permissions = [] } = userData;
+        const { menus = {}, permissions = [], profile = null, username, last_login_at, last_login_ip } = userData;
         this.user.menus = menus;
         this.user.permissions = permissions;
+        this.user.profile = profile;
+        if (username) this.user.username = username;
 
         if (this.config.fetchData.cache) {
           const encryptedMenus = encrypt(JSON.stringify(menus));
           const encryptedPermissions = encrypt(JSON.stringify(permissions));
           localStorage.setItem("user.menus", encryptedMenus);
           localStorage.setItem("user.permissions", encryptedPermissions);
+          if (profile) {
+            localStorage.setItem("user.profile", encrypt(JSON.stringify(profile)));
+          }
         }
       } else {
         console.warn("User data is missing or invalid.");
@@ -121,6 +126,7 @@ export const useAuthStore = defineStore("auth", {
     loadCachedUserData() {
       const encryptedMenus = localStorage.getItem("user.menus");
       const encryptedPermissions = localStorage.getItem("user.permissions");
+      const encryptedProfile = localStorage.getItem("user.profile");
 
       if (encryptedMenus) {
         try {
@@ -135,6 +141,14 @@ export const useAuthStore = defineStore("auth", {
           this.user.permissions = JSON.parse(decrypt(encryptedPermissions));
         } catch (error) {
           console.error("Failed to decrypt permissions:", error);
+        }
+      }
+
+      if (encryptedProfile) {
+        try {
+          this.user.profile = JSON.parse(decrypt(encryptedProfile));
+        } catch (error) {
+          console.error("Failed to decrypt profile:", error);
         }
       }
     },
@@ -196,20 +210,24 @@ export const useAuthStore = defineStore("auth", {
       const { toastSuccess, toastError } = useAlert();
 
       if (callApi) {
+        const { request } = useApi("/iam/auth/logout", {
+          method: "POST",
+          autoFetch: false,
+        });
+
         try {
-          const response = await authService.logout();
+          const response = await request({ device: "web" });
           const successMessage =
-            response?.data?.dataPayload?.alertify?.message ||
-            response?.data?.alertifyPayload?.message ||
-            response?.data?.message ||
+            response?.dataPayload?.alertify?.message ||
+            response?.alertifyPayload?.message ||
+            response?.message ||
             "Logged out successfully.";
           toastSuccess("Success", successMessage);
           console.log("Logout API call successful");
         } catch (e) {
           const errorMessage =
-            e?.response?.data?.errorPayload?.message ||
-            e?.response?.data?.alertifyPayload?.message ||
-            e?.response?.data?.message ||
+            e?.errorPayload?.message ||
+            e?.alertifyPayload?.message ||
             e?.message ||
             "Logout failed.";
           toastError("Logout failed", errorMessage);
@@ -269,17 +287,18 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async refreshToken() {
+      const { data: responseData, request } = useApi(this.config.refreshEndpoint, {
+        method: "POST",
+        autoFetch: false,
+      });
+
       try {
-        const response = await axiosInstance.post(
-          this.config.refreshEndpoint,
-          null,
-          { withCredentials: true }
-        );
+        await request();
         return (
-          response.data?.dataPayload?.data?.access_token ||
-          response.data?.dataPayload?.token ||
-          response.data?.token ||
-          response.data?.access_token
+          responseData.value?.dataPayload?.data?.access_token ||
+          responseData.value?.dataPayload?.token ||
+          responseData.value?.token ||
+          responseData.value?.access_token
         );
       } catch (err) {
         throw err;
@@ -307,9 +326,14 @@ export const useAuthStore = defineStore("auth", {
 
       if (!force && this.hasUserData()) return;
 
+      const { data: responseData, request } = useApi(this.config.userEndpoint, {
+        method: "GET",
+        autoFetch: false,
+      });
+
       try {
-        const response = await axiosInstance.get(this.config.userEndpoint);
-        this.setUserData(response.data?.dataPayload || response.data);
+        await request();
+        this.setUserData(responseData.value?.dataPayload || responseData.value);
         if (background) {
           console.log("User data fetched in background");
         }
@@ -328,30 +352,76 @@ export const useAuthStore = defineStore("auth", {
       );
     },
 
-    // Legacy login method for backward compatibility - wraps authService
+    // Login method - uses useApi for authentication
     async login(credentials) {
       this.loading = true;
+      const {
+        data: responseData,
+        error: apiError,
+        status,
+        request,
+      } = useApi(this.config.loginEndpoint, {
+        method: "POST",
+        autoFetch: false,
+      });
+
       try {
-        const response = await authService.login(credentials);
+        await request(credentials);
+        const payload = responseData.value || {};
+
+        if (status.value === "error") {
+          const normalizedError =
+            apiError.value && typeof apiError.value === "object"
+              ? apiError.value
+              : { message: "Login failed." };
+
+          if (!normalizedError.errorPayload) {
+            normalizedError.errorPayload = {};
+          }
+
+          if (!normalizedError.errorPayload.errors) {
+            if (
+              normalizedError.password ||
+              normalizedError.username ||
+              normalizedError.email
+            ) {
+              normalizedError.errorPayload.errors = normalizedError;
+            }
+          }
+
+          if (!normalizedError.errorPayload.message) {
+            normalizedError.errorPayload.message =
+              normalizedError.message || "Login failed.";
+          }
+
+          throw normalizedError;
+        }
+
+        // Backend may return HTTP 200 with auth/validation errors in payload
+        if (payload?.errorPayload?.errors || payload?.errorPayload?.message) {
+          throw payload;
+        }
 
         const token =
-          response.data?.dataPayload?.data?.access_token ||
-          response.data?.token ||
-          response.data?.dataPayload?.token ||
-          response.data?.access_token;
+          payload?.dataPayload?.data?.access_token ||
+          payload?.token ||
+          payload?.dataPayload?.token ||
+          payload?.access_token;
 
         if (token) {
           const username = credentials.username || credentials.email || "User";
           this.setToken(token, username);
         } else {
-          console.warn("No token found in login response!");
+          throw {
+            errorPayload: {
+              message: "No token found in login response.",
+            },
+          };
         }
 
         // Extract and set user data if available
         let userData =
-          response.data?.dataPayload?.data ||
-          response.data?.user ||
-          response.data;
+          payload?.dataPayload?.data || payload?.user || payload;
 
         if (userData && (userData.menus || userData.permissions)) {
           this.setUserData(userData);
@@ -366,7 +436,7 @@ export const useAuthStore = defineStore("auth", {
           }
         }
 
-        return response.data;
+        return payload;
       } catch (error) {
         throw error;
       } finally {

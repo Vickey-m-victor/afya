@@ -2,7 +2,11 @@
 import { ref, onMounted } from "vue";
 import DataTable from "@/components/DataTable/DataTable.vue";
 import { useDataTable } from "@/composables/useDataTable";
-import logService from "../../services/logService";
+import { useApi } from "@/helpers/useApi";
+import { useModalStore } from "@/stores/modal";
+import AuditTrailDetailModal from "../../components/log/AuditTrailDetailModal.vue";
+
+const modalStore = useModalStore();
 
 const {
   searchQuery,
@@ -10,25 +14,25 @@ const {
   perPage,
   sortBy,
   sortDir,
+  totalCount,
+  totalPages,
   perPageOptions,
   setSearchDebounced,
   setPage,
   setPerPage,
   setSort,
+  syncFromResponse,
+  buildQueryParams,
 } = useDataTable({
-  initialPage: 1,
-  initialPerPage: 20,
-  perPageOptions: [10, 20, 50, 100],
   initialSortBy: "audit_time",
   initialSortDir: "desc",
-  searchDebounceMs: 300,
 });
 
 const tableColumns = [
-  { field: "audit_id", header: "ID", width: "90px", headerClass: "text-center", cellClass: "text-center" },
+  { field: "audit_id", header: "ID", width: "80px", headerClass: "text-center", cellClass: "text-center" },
   { field: "user", header: "User", cellClass: "fw-semibold" },
   { field: "operation", header: "Operation", width: "120px", headerClass: "text-center", cellClass: "text-center" },
-  { field: "request_method", header: "Method", width: "120px", headerClass: "text-center", cellClass: "text-center" },
+  { field: "request_method", header: "Method", width: "110px", headerClass: "text-center", cellClass: "text-center" },
   { field: "field_name", header: "Field" },
   { field: "new_value", header: "New Value" },
   { field: "audit_time", header: "Audit Time", width: "180px" },
@@ -36,32 +40,20 @@ const tableColumns = [
 
 const logs = ref([]);
 const loading = ref(false);
-const totalCount = ref(0);
-const totalPages = ref(1);
-
-const showModal = ref(false);
-const selectedLog = ref(null);
 
 const fetchAuditTrail = async () => {
   loading.value = true;
+  const { data: responseData, request } = useApi("/admin/audit/trail", {
+    method: "GET",
+    autoFetch: false,
+  });
+
   try {
-    const params = {
-      page: currentPage.value,
-      "per-page": perPage.value,
-      sort_by: sortBy.value,
-      sort_dir: sortDir.value,
-    };
-
-    if (searchQuery.value) {
-      params._search = searchQuery.value;
-    }
-
-    const response = await logService.getAuditTrail(params);
-    const payload = logService.normalizePayload(response);
-
-    logs.value = payload.data;
-    totalCount.value = payload.totalCount;
-    totalPages.value = payload.totalPages;
+    await request(null, buildQueryParams());
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    syncFromResponse(payload);
+    const rawData = payload?.data;
+    logs.value = Array.isArray(rawData) ? rawData : Object.values(rawData || {});
   } catch (error) {
     console.error("Failed to fetch audit trail:", error);
   } finally {
@@ -96,35 +88,35 @@ function operationBadgeClass(operation) {
 }
 
 function methodBadgeClass(method) {
-  if (method === "GET") return "bg-info";
+  if (method === "GET") return "bg-info text-dark";
   if (method === "POST") return "bg-primary";
-  if (method === "PATCH" || method === "PUT") return "bg-warning";
+  if (method === "PATCH" || method === "PUT") return "bg-warning text-dark";
   if (method === "DELETE") return "bg-danger";
   return "bg-secondary";
 }
 
 function truncateValue(value, maxLength = 40) {
   if (value === null || value === undefined) return "-";
-  const stringValue = String(value);
-  return stringValue.length > maxLength ? `${stringValue.slice(0, maxLength)}...` : stringValue;
+  const s = String(value);
+  return s.length > maxLength ? `${s.slice(0, maxLength)}…` : s;
 }
 
 async function handleView(log) {
-  try {
-    const response = await logService.getAuditLog(log.audit_id);
-    const payload = response.data?.dataPayload || response.data || {};
-    selectedLog.value = payload?.data || payload;
-  } catch (error) {
-    console.error("Failed to fetch audit log details:", error);
-    selectedLog.value = log;
-  }
-
-  showModal.value = true;
-}
-
-function closeModal() {
-  showModal.value = false;
-  selectedLog.value = null;
+  modalStore.openModal({
+    component: AuditTrailDetailModal,
+    props: {
+      auditId: log.audit_id,
+      summary: log,
+    },
+    title: `Audit Entry #${log.audit_id}`,
+    size: "xl",
+    centered: true,
+    scrollable: true,
+    bodyClass: "p-0",
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+  });
 }
 
 onMounted(() => {
@@ -175,71 +167,8 @@ onMounted(() => {
         <span :title="row.new_value || ''">{{ truncateValue(row.new_value) }}</span>
       </template>
     </DataTable>
-
-    <div
-      class="modal"
-      :class="{ show: showModal }"
-      :style="{ display: showModal ? 'block' : 'none' }"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Audit Log Details</h5>
-            <button type="button" class="btn-close" @click="closeModal"></button>
-          </div>
-          <div class="modal-body" v-if="selectedLog">
-            <dl class="row mb-0">
-              <dt class="col-sm-3">ID</dt>
-              <dd class="col-sm-9">{{ selectedLog.audit_id }}</dd>
-
-              <dt class="col-sm-3">User</dt>
-              <dd class="col-sm-9">{{ selectedLog.user || '-' }}</dd>
-
-              <dt class="col-sm-3">Operation</dt>
-              <dd class="col-sm-9">{{ selectedLog.operation || '-' }}</dd>
-
-              <dt class="col-sm-3">Request Method</dt>
-              <dd class="col-sm-9">{{ selectedLog.request_method || '-' }}</dd>
-
-              <dt class="col-sm-3">Field</dt>
-              <dd class="col-sm-9">{{ selectedLog.field_name || '-' }}</dd>
-
-              <dt class="col-sm-3">Old Value</dt>
-              <dd class="col-sm-9"><pre class="mb-0 text-wrap">{{ selectedLog.old_value ?? '-' }}</pre></dd>
-
-              <dt class="col-sm-3">New Value</dt>
-              <dd class="col-sm-9"><pre class="mb-0 text-wrap">{{ selectedLog.new_value ?? '-' }}</pre></dd>
-
-              <dt class="col-sm-3">IP Address</dt>
-              <dd class="col-sm-9"><code>{{ selectedLog?.ip_info?.ip_address || '-' }}</code></dd>
-
-              <dt class="col-sm-3">Audit Time</dt>
-              <dd class="col-sm-9">{{ selectedLog.audit_time || '-' }}</dd>
-            </dl>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary btn-sm" @click="closeModal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-backdrop" :class="{ show: showModal }" v-if="showModal"></div>
   </div>
 </template>
 
 <style scoped>
-.modal.show {
-  display: block;
-}
-
-.modal-backdrop.show {
-  opacity: 0.5;
-}
-
-pre {
-  white-space: pre-wrap;
-  word-break: break-word;
-}
 </style>

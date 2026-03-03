@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { layouts } from "@/layouts/layouts.js";
+import GlobalModal from "@/components/GlobalModal.vue";
 
 const route = useRoute();
 
@@ -14,6 +15,9 @@ const layoutComponent = computed(() => {
 <template>
   <component :is="layoutComponent" v-if="layoutComponent" />
   <RouterView v-else />
+  
+  <!-- Global modal container -->
+  <GlobalModal />
 </template>
 
 <style lang="scss">

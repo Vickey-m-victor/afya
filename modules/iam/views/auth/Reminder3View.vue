@@ -2,7 +2,7 @@
 import { reactive, computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
-import authService from "@/services/authService";
+import { useApi } from "@/helpers/useApi";
 import { useAlert } from "@/composables/alerts";
 
 // Vuelidate, for more info and examples you can check out https://github.com/vuelidate/vuelidate
@@ -42,11 +42,26 @@ async function onSubmit() {
   isLoading.value = true;
   errors.value = {};
 
+  const { request, error, status } = useApi("/iam/auth/request-password-reset", {
+    method: "POST",
+    autoFetch: false,
+  });
+
   try {
-    const response = await authService.requestPasswordReset(state.reminder);
+    await request({ username: state.reminder });
+
+    // useApi doesn't throw by default, so we check if it returned an error
+    if (status.value === 'error' || error.value) {
+      // We throw a structured error so it maps perfectly to the catch block logic below
+      throw { 
+        errorPayload: { 
+          errors: typeof error.value === 'object' && !Array.isArray(error.value) ? error.value : null,
+          message: Array.isArray(error.value) ? error.value[0] : (typeof error.value === 'string' ? error.value : null)
+        } 
+      };
+    }
     
-    const successMessage = response?.data?.dataPayload?.alertify?.message || 
-                          "Password reset instructions have been sent to your email address.";
+    const successMessage = "Password reset instructions have been sent to your email address.";
     
     toastSuccess("Success", successMessage);
     
@@ -54,17 +69,22 @@ async function onSubmit() {
     setTimeout(() => {
       router.push({ name: "iam/auth/signin" });
     }, 3000);
-  } catch (error) {
-    console.error("Password reset request failed:", error);
+  } catch (err) {
+    console.error("Password reset request failed:", err);
     
     // Map backend field-specific errors
-    if (error?.response?.data?.errorPayload?.errors) {
-      errors.value = error.response.data.errorPayload.errors;
+    if (err?.errorPayload?.errors && Object.keys(err.errorPayload.errors).length > 0) {
+       // Only assign to form errors if they contain field names like 'username'
+       if (err.errorPayload.errors.message && Object.keys(err.errorPayload.errors).length === 1) {
+           toastError("Password Reset Failed", err.errorPayload.errors.message);
+       } else {
+           errors.value = err.errorPayload.errors;
+       }
     } else {
       // Show general error as toast
-      const backendMessage = error?.response?.data?.errorPayload?.message || 
-                            error?.response?.data?.message;
-      const fallbackMessage = error?.message || "Failed to send password reset request. Please try again.";
+      const backendMessage = err?.errorPayload?.message || 
+                            err?.message;
+      const fallbackMessage = "Failed to send password reset request. Please try again.";
       toastError("Password Reset Failed", backendMessage || fallbackMessage);
     }
   } finally {

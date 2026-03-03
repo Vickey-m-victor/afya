@@ -1,7 +1,9 @@
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
+import { useAuthStore } from "@/stores/auth";
+import { useAlert } from "@/composables/alerts";
 
 // Vuelidate, for more info and examples you can check out https://github.com/vuelidate/vuelidate
 import useVuelidate from "@vuelidate/core";
@@ -10,11 +12,18 @@ import { required, minLength } from "@vuelidate/validators";
 // Main store and Router
 const store = useTemplateStore();
 const router = useRouter();
+const authStore = useAuthStore();
+const { toastError } = useAlert();
 
 // Input state variables
 const state = reactive({
+  username: "",
   password: null,
 });
+
+const isSubmitting = reactive({ value: false });
+
+const usernameDisplay = computed(() => state.username || "Unknown user");
 
 // Validation rules
 const rules = computed(() => {
@@ -34,13 +43,48 @@ async function onSubmit() {
   const result = await v$.value.$validate();
 
   if (!result) {
-    // notify user form is invalid
     return;
   }
 
-  // Go to dashboard
-  router.push({ name: "dashboard" });
+  isSubmitting.value = true;
+
+  try {
+    await authStore.login({
+      username: state.username,
+      password: state.password,
+    });
+
+    sessionStorage.removeItem("lock.username");
+    router.push({ name: "dashboard" });
+  } catch (error) {
+    const backendErrors = error?.errorPayload?.errors;
+    if (backendErrors?.password) {
+      toastError("Unlock failed", backendErrors.password);
+      return;
+    }
+
+    const message =
+      error?.errorPayload?.message ||
+      error?.message ||
+      "Could not unlock account. Please try again.";
+
+    toastError("Unlock failed", message);
+  } finally {
+    isSubmitting.value = false;
+  }
 }
+
+onMounted(() => {
+  state.username =
+    sessionStorage.getItem("lock.username") ||
+    authStore.user?.username ||
+    localStorage.getItem("user.username") ||
+    "";
+
+  if (!state.username) {
+    router.push({ name: "iam/auth/signin" });
+  }
+});
 </script>
 
 <template>
@@ -121,7 +165,7 @@ async function onSubmit() {
                 src="/assets/media/avatars/avatar10.jpg"
                 alt=""
               />
-              <p class="fw-semibold text-center my-2">user@example.com</p>
+              <p class="fw-semibold text-center my-2">{{ usernameDisplay }}</p>
             </div>
             <!-- END Header -->
 
@@ -140,6 +184,7 @@ async function onSubmit() {
                         'is-invalid': v$.password.$errors.length,
                       }"
                       v-model="state.password"
+                      :disabled="isSubmitting.value"
                       @blur="v$.password.$touch"
                     />
                     <div
@@ -150,9 +195,9 @@ async function onSubmit() {
                     </div>
                   </div>
                   <div class="text-center">
-                    <button type="submit" class="btn btn-lg btn-alt-success">
+                    <button type="submit" class="btn btn-lg btn-alt-success" :disabled="isSubmitting.value">
                       <i class="fa fa-fw fa-lock-open me-1 opacity-50"></i>
-                      Unlock
+                      {{ isSubmitting.value ? "Unlocking..." : "Unlock" }}
                     </button>
                   </div>
                 </form>
