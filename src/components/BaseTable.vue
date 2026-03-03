@@ -1,22 +1,27 @@
 <script setup>
 import { ref, watch } from "vue";
-import {
-  Dataset,
-  DatasetItem,
-  DatasetInfo,
-  DatasetPager,
-  DatasetShow,
-} from "vue-dataset";
-
+import { Dataset, DatasetItem, DatasetShow } from "vue-dataset";
+import BasePagination from "@/components/BasePagination.vue"
 const props = defineProps({
   data: { type: Array, required: true, default: () => [] },
   columns: { type: Array, required: true },
   loading: { type: Boolean, default: false },
   title: { type: String, default: "" },
+  pagination: {
+    type: Object,
+    default: () => ({
+      currentPage: 1,
+      totalPages: 1,
+      perPage: 25,
+      totalCount: 0
+    })
+  }
 });
 
 // 💡 NEW: Added "search" to the emitted events
-const emit = defineEmits(["click", "close", "refresh", "search"]);
+const emit = defineEmits(["click", "close", "refresh", "search", "page-change"]);
+
+
 
 // --- Backend Search Logic (Debounce) ---
 const searchQuery = ref("");
@@ -28,7 +33,7 @@ watch(searchQuery, (newValue) => {
   debounceTimer = setTimeout(() => {
     // If 500ms pass without typing, tell the parent view to search the backend!
     emit("search", newValue);
-  }, 500); 
+  }, 500);
 });
 
 const onSort = (event, index) => {
@@ -38,10 +43,10 @@ const onSort = (event, index) => {
 
 <template>
   <BaseBlock content-full>
-    <Dataset   
-    v-slot="{ ds }" 
-    :ds-data="Array.isArray(data) ? data : []"
-    :ds-search="''" 
+    <Dataset
+      v-slot="{ ds }"
+      :ds-data="Array.isArray(data) ? data : []"
+      :ds-search="''"
     >
       <div class="d-flex justify-content-end me-3">
         <slot name="header-actions"></slot>
@@ -88,18 +93,24 @@ const onSort = (event, index) => {
             </tr>
           </tbody>
 
-          <tbody v-else-if="!loading && (!data || data.length === 0)" key="empty-body">
+          <tbody
+            v-else-if="!loading && (!data || data.length === 0)"
+            key="empty-body"
+          >
             <tr>
-              <td :colspan="columns.length + 1" class="text-center py-5 text-muted">
+              <td
+                :colspan="columns.length + 1"
+                class="text-center py-5 text-muted"
+              >
                 <i class="fa fa-folder-open fs-1 mb-3 opacity-50"></i>
                 <p class="mb-0">No records found.</p>
               </td>
             </tr>
           </tbody>
 
-          <DatasetItem 
-            v-show="!loading && data && data.length > 0" 
-            tag="tbody" 
+          <DatasetItem
+            v-show="!loading && data && data.length > 0"
+            tag="tbody"
             class="fs-sm"
             key="dataset-body"
           >
@@ -123,8 +134,15 @@ const onSort = (event, index) => {
       <div
         class="d-flex flex-md-row flex-column justify-content-between align-items-center"
       >
-        <DatasetInfo class="py-3 fs-sm" />
-        <DatasetPager class="flex-wrap py-3 fs-sm" />
+      <BasePagination 
+        :current-page="pagination.currentPage"
+        :total-pages="pagination.totalPages"
+        :per-page="pagination.perPage"
+        :total-items="pagination.totalCount"
+        :show-info="true"
+        type="numbers"
+        @page-change="(page) => emit('page-change', page)"
+      />
       </div>
     </Dataset>
   </BaseBlock>

@@ -48,9 +48,13 @@ const openEditModal = (row) => {
 
 const handleSearch = (query) => {
   // Pass the query to your store to fetch new data
-  store.fetchAll(query);
+  store.fetchAll(query,1);
 };
 
+// 💡 NEW: Handle Page Changes
+const handlePageChange = (newPage) => {
+  store.fetchAll("", newPage); 
+};
 // 💡 NEW: Delete Handler
 const handleDelete = async (row) => {
   // Assuming the ID field is 'id' or 'uuid'. Adjust if your backend uses something like 'role_id'
@@ -99,6 +103,7 @@ onMounted(() => {
       :columns="tableColumns"
       :loading="store.loading"
       @search="handleSearch"
+      @page-change="handlePageChange"
 
     >
       <template #header-actions>

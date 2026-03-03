@@ -5,20 +5,34 @@ export const useGroupStore = defineStore("group", {
   state: () => ({
     items: [],
     loading: false,
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      perPage: 25,
+      totalCount: 0
+    }
   }),
   actions: {
-    async fetchAll(searchQuery="") {
+    async fetchAll(searchQuery = "", page = 1) {
       this.loading = true;
-      
-      // 💡 FIX 3: Instantly clear array to prevent Ghost Data
       this.items = []; 
       
       try {
-        const response = await groupService.getAll(searchQuery);
-        let fetchedData = response.data?.dataPayload?.data || response.data;
+        // 💡 FIX 2: Just call the service method with both parameters!
+        const response = await groupService.getAll(searchQuery, page); 
         
-        // 💡 FIX 4: Safety check! If the backend returns null/Object, force it to be an empty array []
-        this.items = Array.isArray(fetchedData) ? fetchedData : [];
+        const payload = response.data?.dataPayload;
+        this.items = Array.isArray(payload?.data) ? payload.data : [];
+        
+        // Save the pagination info!
+        if (payload) {
+          this.pagination = {
+            currentPage: payload.currentPage || 1,
+            totalPages: payload.totalPages || 1,
+            perPage: payload.perPage || 25,
+            totalCount: payload.totalCount || 0
+          };
+        }
       } catch (error) {
         console.error(error);
         throw error;

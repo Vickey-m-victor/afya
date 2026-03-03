@@ -1,14 +1,15 @@
 import api from "@/utils/api";
 
 const groupService = {
- getAll(searchQuery = "") {
-       // If there is a search query, attach it. Otherwise, just fetch all.
-       const url = searchQuery ? `/iam/rbac/groups?q=${searchQuery}` : "/iam/rbac/groups";
-       return api.get(url);
-     },
+  getAll(searchQuery = "", page = 1) {
+    const queryParam = searchQuery ? `&q=${searchQuery}` : '';
+    const url = `/iam/rbac/groups?page=${page}${queryParam}`;
+    return api.get(url);
+  },
   getById(id) {
     return api.get(`/iam/rbac/groups/${id}`);
   },
+  
   create(data) {
     return api.post("/iam/rbac/groups", data);
   },
