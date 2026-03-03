@@ -45,11 +45,11 @@ export default {
       to: "iam-roles",
       icon: "si si-briefcase",
     },
-    {
-      name: "Rules",
-      to: "iam-rules",
-      icon: "si si-shield",
-    },
+    // {
+    //   name: "Rules",
+    //   to: "iam-rules",
+    //   icon: "si si-shield",
+    // },
     {
       name: "Users",
       to: "iam-users",

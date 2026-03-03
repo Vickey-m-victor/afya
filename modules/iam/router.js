@@ -1,9 +1,9 @@
 //auth routes for iam module
-import SignIn3View from "~/iam/views/SignIn3View.vue";
-import SignUp3View from "~/iam/views/SignUp3View.vue";
-import Lock3View from "~/iam//views/Lock3View.vue";
-import TwoFactor3View from "~/iam//views/TwoFactor3View.vue";
-import Reminder3View from "~/iam//views/Reminder3View.vue";
+const SignIn3View = () => import("~/iam/views/SignIn3View.vue");
+const SignUp3View = () => import("~/iam/views/SignUp3View.vue");
+const Lock3View = () => import("~/iam/views/Lock3View.vue");
+const TwoFactor3View = () => import("~/iam/views/TwoFactor3View.vue");
+const Reminder3View = () => import("~/iam/views/Reminder3View.vue");
 
 export const authRoutes = [
   {
@@ -20,7 +20,7 @@ export const authRoutes = [
         component: SignUp3View,
       },
       {
-        path: "lock3",
+        path: "auth-lock",
         name: "auth-lock3",
         component: Lock3View,
       },

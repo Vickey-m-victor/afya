@@ -109,9 +109,9 @@ onMounted(() => {
       </template>
 
       <template #cell(actions)="{ row }">
-        <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)">
+        <!-- <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)">
           <i class="fa fa-pencil-alt"></i>
-        </button>
+        </button> -->
         <button class="btn btn-sm btn-alt-danger" @click="handleDelete(row)">
           <i class="fa fa-trash"></i>
         </button>
