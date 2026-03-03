@@ -38,7 +38,7 @@ const handleSave = async () => {
   }
 };
 
-onMounted(async () => {git 
+onMounted(async () => { 
   try {
     await store.fetchAll();
     
@@ -56,7 +56,7 @@ onMounted(async () => {git
 
 <template>
   <div class="content">
-    <BasePageHeading title="Security Settings" subtitle="Manage your application's security policies" />
+    <BasePageHeading title="Security Settings" />
     
     <div class="row">
       <div class="col-md-8">

@@ -14,7 +14,7 @@ const updateField = (name, value) => {
 </script>
 
 <template>
-  <BaseBlock title="Form" content-full>
+  <BaseBlock  content-full>
     <div class="row">
       <div class="col-lg-12 space-y-5">
         

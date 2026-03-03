@@ -1,9 +1,13 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import BaseBlock from "@/components/BaseBlock.vue";
-import { useSettingsGeneralStore } from "~/admin/stores/settingsGeneralStore";
+import { useSettingsMailerStore } from "~/admin/stores/settingsMailerStore";
 import SettingsForm from "~/admin/components/SettingsForm.vue";
-const store = useSettingsGeneralStore();
+import { useAlert } from "@/composables/alerts";
+
+const { toastError, toastSuccess} = useAlert();
+
+const store = useSettingsMailerStore();
 const formData = ref({});
 
 const formFields = reactive([
@@ -15,12 +19,37 @@ const formFields = reactive([
 
 ]);
 
-const handleSave = () => {
-  console.log("Saving data:", formData.value);
+
+const handleSave = async () => {
+  try {
+    // 💡 FIX 3: Check if data already exists (has an ID) to determine if we Update or Create
+    const recordId = formData.value.id || formData.value.uuid || formData.value.security_id;
+
+    if (recordId) {
+      await store.update(recordId, formData.value);
+    } else {
+      await store.create(formData.value);
+    }
+
+    toastSuccess("Success", "General Settings updated successfully!");
+  } catch (error) {
+    toastError("Error", error.response?.data?.message || "Failed to save settings");
+  }
 };
 
-onMounted(() => {
-  store.fetchAll();
+onMounted(async () => { 
+  try {
+    await store.fetchAll();
+    
+    // 💡 FIX 4: Pre-fill the form with the fetched data
+    if (Array.isArray(store.items) && store.items.length > 0) {
+      formData.value = { ...store.items[0] }; 
+    } else if (store.items && !Array.isArray(store.items)) {
+      formData.value = { ...store.items };
+    }
+  } catch (error) {
+    toastError("Error", "Failed to load general settings");
+  }
 });
 </script>
 
