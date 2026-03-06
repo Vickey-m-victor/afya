@@ -1,11 +1,15 @@
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive, computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useTemplateStore } from "~/omnicore/stores/template";
+import { useTemplateStore } from "@/stores/template";
+import authService from "@/services/authService";
+import { useAlert } from "@/composables/alerts";
 
 // Vuelidate, for more info and examples you can check out https://github.com/vuelidate/vuelidate
 import useVuelidate from "@vuelidate/core";
 import { required, minLength } from "@vuelidate/validators";
+
+const { toastSuccess, toastError } = useAlert();
 
 // Main store and Router
 const store = useTemplateStore();
@@ -15,6 +19,10 @@ const router = useRouter();
 const state = reactive({
   reminder: null,
 });
+
+// Loading and error states
+const isLoading = ref(false);
+const errors = ref({});
 
 // Validation rules
 const rules = computed(() => {
@@ -31,15 +39,37 @@ const v$ = useVuelidate(rules, state);
 
 // On form submission
 async function onSubmit() {
-  const result = await v$.value.$validate();
+  isLoading.value = true;
+  errors.value = {};
 
-  if (!result) {
-    // notify user form is invalid
-    return;
+  try {
+    const response = await authService.requestPasswordReset(state.reminder);
+    
+    const successMessage = response?.data?.dataPayload?.alertify?.message || 
+                          "Password reset instructions have been sent to your email address.";
+    
+    toastSuccess("Success", successMessage);
+    
+    // Redirect to signin after 3 seconds
+    setTimeout(() => {
+      router.push({ name: "iam/auth/signin" });
+    }, 3000);
+  } catch (error) {
+    console.error("Password reset request failed:", error);
+    
+    // Map backend field-specific errors
+    if (error?.response?.data?.errorPayload?.errors) {
+      errors.value = error.response.data.errorPayload.errors;
+    } else {
+      // Show general error as toast
+      const backendMessage = error?.response?.data?.errorPayload?.message || 
+                            error?.response?.data?.message;
+      const fallbackMessage = error?.message || "Failed to send password reset request. Please try again.";
+      toastError("Password Reset Failed", backendMessage || fallbackMessage);
+    }
+  } finally {
+    isLoading.value = false;
   }
-
-  // Go to dashboard
-  router.push({ name: "dashboard" });
 }
 </script>
 
@@ -132,22 +162,26 @@ async function onSubmit() {
                       name="reminder-credential"
                       placeholder="Username or Email"
                       :class="{
-                        'is-invalid': v$.reminder.$errors.length,
+                        'is-invalid': errors.username,
                       }"
                       v-model="state.reminder"
-                      @blur="v$.reminder.$touch"
+                      :disabled="isLoading"
                     />
                     <div
-                      v-if="v$.reminder.$errors.length"
+                      v-if="errors.username"
                       class="invalid-feedback animated fadeIn"
                     >
-                      Please enter a valid credential
+                      {{ errors.username }}
                     </div>
                   </div>
                   <div class="text-center">
-                    <button type="submit" class="btn btn-lg btn-alt-primary">
-                      <i class="fa fa-fw fa-envelope me-1 opacity-50"></i> Send
-                      Mail
+                    <button 
+                      type="submit" 
+                      class="btn btn-lg btn-alt-primary"
+                      :disabled="isLoading"
+                    >
+                      <i class="fa fa-fw fa-envelope me-1 opacity-50"></i>
+                      {{ isLoading ? 'Sending...' : 'Send Mail' }}
                     </button>
                   </div>
                 </form>

@@ -1,9 +1,9 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useTemplateStore } from "~/omnicore/stores/template";
-import { useAuthStore } from "~/omnicore/stores/auth"; // Ensure this is the correct path
-import { useAlert } from "~/omnicore/composables/alerts";
+import { useTemplateStore } from "@/stores/template";
+import { useAuthStore } from "@/stores/auth"; // Ensure this is the correct path
+import { useAlert } from "@/composables/alerts";
 
 const { toastSuccess, toastError } = useAlert();
 // Main stores and Router

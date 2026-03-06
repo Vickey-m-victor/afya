@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import DataTable from "#/components/DataTable/DataTable.vue";
-import { useDataTable } from "#/composables/useDataTable";
+import DataTable from "@/components/DataTable/DataTable.vue";
+import { useDataTable } from "@/composables/useDataTable";
 import groupService from "../../../services/groupService";
 import GroupsForm from "../../../components/GroupsForm.vue";
 
@@ -206,7 +206,7 @@ onMounted(() => {
       @change-sort="handleSort"
     >
       <template #cell-group_name="{ row }">
-        <i class="fa fa-users text-info me-2"></i>
+        <!-- <i class="fa fa-users text-info me-2"></i> -->
         {{ row.group_name }}
       </template>
 

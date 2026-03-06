@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import DataTable from "#/components/DataTable/DataTable.vue";
-import { useDataTable } from "#/composables/useDataTable";
+import DataTable from "@/components/DataTable/DataTable.vue";
+import { useDataTable } from "@/composables/useDataTable";
 import permissionService from "../../../services/permissionService";
 import PermissionsForm from "../../../components/PermissionsForm.vue";
 
@@ -197,7 +197,7 @@ onMounted(() => {
       @change-sort="handleSort"
     >
       <template #cell-permission_name="{ row }">
-        <i class="fa fa-key text-warning me-2"></i>
+        <!-- <i class="fa fa-key text-warning me-2"></i> -->
         {{ row.permission_name }}
       </template>
 

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useAlert } from '~/omnicore/composables/alerts';
+import { useAlert } from '@/composables/alerts';
 
 export const useAlertStore = defineStore('alert', {
     state: () => ({

@@ -1,15 +1,15 @@
 <script setup>
 import { ref } from "vue";
-import { useTemplateStore } from "~/omnicore/stores/template";
+import { useTemplateStore } from "@/stores/template";
 
-import BaseLayout from "#/layouts/BaseLayout.vue";
-import BaseNavigation from "#/components/BaseNavigation.vue";
+import BaseLayout from "@/layouts/BaseLayout.vue";
+import BaseNavigation from "@/components/BaseNavigation.vue";
 
 // Grab example data
-// import notifications from "#/data/notifications";
+// import notifications from "@/data/notifications";
 
 // Grab menu navigation arrays
-// import menu from "#/data/menu";
+// import menu from "@/data/menu";
 
 const navigation = menu.boxed;
 

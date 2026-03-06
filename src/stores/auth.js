@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
-import { encrypt, decrypt, decodeJWT } from "~/omnicore/helpers/crypto";
-import axiosInstance from "~/omnicore/helpers/axiosInstance";
-import authService from "~/omnicore/services/authService";
-import router from "~/omnicore/router";
-import { useAlert } from "~/omnicore/composables/alerts";
+import { encrypt, decrypt, decodeJWT } from "@/helpers/crypto";
+import axiosInstance from "@/helpers/axiosInstance";
+import authService from "@/services/authService";
+import router from "@/router";
+import { useAlert } from "@/composables/alerts";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({

@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import { layouts } from "#/layouts/layouts.js";
+import { layouts } from "@/layouts/layouts.js";
 
 const route = useRoute();
 
@@ -18,13 +18,13 @@ const layoutComponent = computed(() => {
 
 <style lang="scss">
 // Main Stylesheet
-@import "#/assets/scss/main";
+@import "@/assets/scss/main";
 
 // All color themes are included and available by default
 // Feel free to comment out any of them if you won't use them in your project
-@import "#/assets/scss/oneui/themes/amethyst";
-@import "#/assets/scss/oneui/themes/city";
-@import "#/assets/scss/oneui/themes/flat";
-@import "#/assets/scss/oneui/themes/modern";
-@import "#/assets/scss/oneui/themes/smooth";
+@import "@/assets/scss/oneui/themes/amethyst";
+@import "@/assets/scss/oneui/themes/city";
+@import "@/assets/scss/oneui/themes/flat";
+@import "@/assets/scss/oneui/themes/modern";
+@import "@/assets/scss/oneui/themes/smooth";
 </style>

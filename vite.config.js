@@ -13,9 +13,8 @@ export default defineConfig({
   resolve: {
     extensions: ['.js', '.jsx', '.vue', '.ts', '.tsx'],
     alias: {
-      "@": fileURLToPath(new URL("./modules", import.meta.url)),
-      "~": fileURLToPath(new URL("./app", import.meta.url)),
-      "#": fileURLToPath(new URL("./src", import.meta.url)),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "~": fileURLToPath(new URL("./modules", import.meta.url)),
     },
   },
   server: {
@@ -25,11 +24,7 @@ export default defineConfig({
         target: process.env.API_BASE_URL || "http://localhost:8086/",
         changeOrigin: true,
       },
-      "/uploads": {
-        target: process.env.API_BASE_URL || "http://localhost:8086/", 
-        changeOrigin: true, 
-        rewrite: (path) => path.replace(/^\/uploads/, '/uploads'),
-      },
+
     },
     cors: false,
   },

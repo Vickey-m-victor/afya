@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import DataTablePagination from "#/components/DataTable/DataTablePagination.vue";
+import DataTablePagination from "@/components/DataTable/DataTablePagination.vue";
 
 const props = defineProps({
   paginated: {

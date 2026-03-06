@@ -41,7 +41,7 @@ export default {
           icon: "fa fa-user-group",
         },
         {
-          name: "Business Rules",
+          name: "Rules",
           to: "iam/rbac/rules",
           icon: "fa fa-gavel",
         },

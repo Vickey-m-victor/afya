@@ -1,9 +1,9 @@
 import { ref, computed, watch } from 'vue';
 import axios from 'axios';
 import qs from 'qs';
-import axiosInstance from '~/omnicore/helpers/axiosInstance';
-import { useAlertStore } from '~/omnicore/stores/alert';
-import appConfig from '~/omnicore/config/app';
+import axiosInstance from '@/helpers/axiosInstance';
+import { useAlertStore } from '@/stores/alert';
+import appConfig from '@/config/app';
 import {
     setCache,
     getCache,
@@ -14,7 +14,7 @@ import {
     useNetworkStatus,
     shouldRetry,
     handleRetry,
-} from '~/omnicore/utils/useApiUtils';
+} from '@/utils/useApiUtils';
 
 /**
  * Advanced API composable for Vue 3 with comprehensive features

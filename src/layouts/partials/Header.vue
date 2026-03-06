@@ -1,11 +1,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import { useTemplateStore } from "~/omnicore/stores/template";
-import { useAuthStore } from "~/omnicore/stores/auth";
+import { useTemplateStore } from "@/stores/template";
+import { useAuthStore } from "@/stores/auth";
+import ChangePasswordModal from "~/iam/components/ChangePasswordModal.vue";
 
 // Grab example data
-// import notifications from "#/data/notifications";
+// import notifications from "@/data/notifications";
 
 // Main store and Router
 const store = useTemplateStore();
@@ -14,6 +15,8 @@ const router = useRouter();
 
 // Reactive variables
 const baseSearchTerm = ref("");
+const showChangePasswordModal = ref(false);
+const changePasswordSuccess = ref(false);
 
 // On form search submit functionality
 function onSubmitSearch() {
@@ -22,6 +25,26 @@ function onSubmitSearch() {
 
 async function onLogout() {
   await authStore.logout();
+}
+
+function openChangePasswordModal() {
+  showChangePasswordModal.value = true;
+}
+
+function closeChangePasswordModal() {
+  showChangePasswordModal.value = false;
+}
+
+function onChangePasswordSuccess() {
+  changePasswordSuccess.value = true;
+  
+  // Show success notification
+  alert("Password changed successfully!");
+  
+  // Reset after 3 seconds
+  setTimeout(() => {
+    changePasswordSuccess.value = false;
+  }, 3000);
 }
 
 // When ESCAPE key is hit close the header search section
@@ -152,6 +175,13 @@ onUnmounted(() => {
                       <span class="badge rounded-pill bg-primary ms-2">1</span>
                     </RouterLink>
                     <a
+                      href="#"
+                      class="dropdown-item d-flex align-items-center justify-content-between"
+                      @click.prevent="openChangePasswordModal"
+                    >
+                      <span class="fs-sm fw-medium">Change Password</span>
+                    </a>
+                    <a
                       class="dropdown-item d-flex align-items-center justify-content-between"
                       href="javascript:void(0)"
                     >
@@ -236,4 +266,11 @@ onUnmounted(() => {
     </slot>
   </header>
   <!-- END Header -->
+
+  <!-- Change Password Modal -->
+  <ChangePasswordModal 
+    :show="showChangePasswordModal" 
+    @close="closeChangePasswordModal"
+    @success="onChangePasswordSuccess"
+  />
 </template>

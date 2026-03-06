@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import DataTable from "#/components/DataTable/DataTable.vue";
-import { useDataTable } from "#/composables/useDataTable";
+import DataTable from "@/components/DataTable/DataTable.vue";
+import { useDataTable } from "@/composables/useDataTable";
 import logService from "../../services/logService";
 
 const {

@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import DataTable from "#/components/DataTable/DataTable.vue";
-import { useDataTable } from "#/composables/useDataTable";
+import DataTable from "@/components/DataTable/DataTable.vue";
+import { useDataTable } from "@/composables/useDataTable";
 import roleService from "../../../services/roleService";
 import RolesForm from "../../../components/RolesForm.vue";
 
@@ -205,7 +205,7 @@ onMounted(() => {
       @change-sort="handleSort"
     >
       <template #cell-role_name="{ row }">
-        <i class="fa fa-user-shield text-primary me-2"></i>
+        <!-- <i class="fa fa-user-shield text-primary me-2"></i> -->
         {{ row.role_name }}
       </template>
 

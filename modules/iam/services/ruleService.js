@@ -1,4 +1,4 @@
-import axiosInstance from "~/omnicore/helpers/axiosInstance";
+import axiosInstance from "@/helpers/axiosInstance";
 
 const ruleService = {
   /**
