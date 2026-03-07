@@ -3,18 +3,22 @@ import api from "@/utils/api";
 const {{camelCase entityName}}Service = {
   getAll(searchQuery = "", page = 1, perPage = 25) {
     const queryParam = searchQuery ? `&q=${searchQuery}` : '';
-    const url = `{{endpoint}}?page=${page}&perPage=${perPage}${queryParam}`;
+    const url = `{{endpoint}}?page=${page}&per-page=${perPage}${queryParam}`;
     return api.get(url);
   },
+  
   getById(id) {
     return api.get(`{{endpoint}}/${id}`);
   },
+  
   create(data) {
     return api.post("{{endpoint}}", data);
   },
+  
   update(id, data) {
     return api.put(`{{endpoint}}/${id}`, data);
   },
+  
   delete(id) {
     return api.delete(`{{endpoint}}/${id}`);
   }

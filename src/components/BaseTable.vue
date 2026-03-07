@@ -44,10 +44,10 @@ const getNestedValue = (obj, path) => {
     <div class="d-flex justify-content-between mb-3">
       <div class="col-md-2">
         <select class="form-select" v-model="selectedSize" @change="changeSize">
-          <option :value="10">10 Entries</option>
-          <option :value="25">25 Entries</option>
-          <option :value="50">50 Entries</option>
-          <option :value="100">100 Entries</option>
+          <option :value="10">10 </option>
+          <option :value="25">25 </option>
+          <option :value="50">50 </option>
+          <option :value="100">100 </option>
         </select>
       </div>
       <div class="col-md-4">
