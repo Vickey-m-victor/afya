@@ -8,11 +8,6 @@ const formData = ref({});
 
 const formFields = reactive([
   { label: "Business Name", type: "text", name: "business_name" },
-  { label: "Physical Address", type: "text", name: "physical_address" },
-  { label: "Postal Address", type: "text", name: "postal_address" },
-  { label: "Email address", type: "text", name: "email_address" },
-  { label: "Website", type: "text", name: "website" },
-  { label: "Mobile Number", type: "text", name: "primary_mobile_number" },
 
 ]);
 
