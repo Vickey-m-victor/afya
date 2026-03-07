@@ -46,15 +46,20 @@ const openEditModal = (row) => {
   showModal.value = true;
 };
 
+
+// Add a variable to hold the current search string
+let currentQuery = "";
+
 const handleSearch = (query) => {
-  // Pass the query to your store to fetch new data
-  store.fetchAll(query,1);
+  currentQuery = query; // Save the query
+  store.fetchAll(query, 1); // Reset to page 1 on new search
 };
 
-// 💡 NEW: Handle Page Changes
 const handlePageChange = (newPage) => {
-  store.fetchAll("", newPage); 
+  // Use the saved query so you don't lose your search filters!
+  store.fetchAll(currentQuery, newPage); 
 };
+
 // 💡 NEW: Delete Handler
 const handleDelete = async (row) => {
   // Assuming the ID field is 'id' or 'uuid'. Adjust if your backend uses something like 'role_id'

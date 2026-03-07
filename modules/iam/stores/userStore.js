@@ -25,11 +25,11 @@ export const useUserStore = defineStore("user", {
       await this.fetchAll(); 
       return response;
     },
-    async update(id, payload) {
-      const response = await userService.update(id, payload);
-      await this.fetchAll(); 
-      return response;
-    },
+    // async update(id, payload) {
+    //   const response = await userService.update(id, payload);
+    //   await this.fetchAll(); 
+    //   return response;
+    // },
     async delete(id) {
       const response = await userService.delete(id);
       await this.fetchAll(); 

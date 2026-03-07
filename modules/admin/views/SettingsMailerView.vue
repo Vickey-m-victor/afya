@@ -15,7 +15,12 @@ const formFields = reactive([
   { label: "smtp_port", type: "text", name: "smtp_port" },
   { label: "smtp_username", type: "text", name: "smtp_username" },
   { label: "smtp_password", type: "text", name: "smtp_password" },
-  { label: "email_encryption", type: "text", name: "email_encryption" },
+  { 
+    label: "Encryption Protocol", 
+    type: "select", 
+    name: "email_encryption",
+    options: [{ label: "SSL", value: "ssl" }, { label: "TLS", value: "tls" }, { label: "None", value: "none" }] 
+  }
 
 ]);
 

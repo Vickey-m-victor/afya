@@ -12,7 +12,7 @@ const { toastSuccess, toastError, confirmAction } = useAlert();
 const store = useUserStore();
 
 const showModal = ref(false);
-const isEditing = ref(false);
+// const isEditing = ref(false);
 const formData = ref({});
 
 const tableColumns = [
@@ -24,24 +24,24 @@ const tableColumns = [
 ];
 
 const openCreateModal = () => {
-  isEditing.value = false;
+  // isEditing.value = false;
   formData.value = {}; 
   showModal.value = true;
 };
 
-const openEditModal = (row) => {
-  isEditing.value = true;
-  // Flatten the profile object so it easily maps to our form inputs
-  formData.value = { 
-    ...row, 
-    first_name: row.profile?.first_name,
-    middle_name: row.profile?.middle_name,
-    last_name: row.profile?.last_name,
-    mobile_number: row.profile?.phone_number,
-    email_address: row.profile?.email_address
-  }; 
-  showModal.value = true;
-};
+// const openEditModal = (row) => {
+//   isEditing.value = true;
+//   // Flatten the profile object so it easily maps to our form inputs
+//   formData.value = { 
+//     ...row, 
+//     first_name: row.profile?.first_name,
+//     middle_name: row.profile?.middle_name,
+//     last_name: row.profile?.last_name,
+//     mobile_number: row.profile?.phone_number,
+//     email_address: row.profile?.email_address
+//   }; 
+//   showModal.value = true;
+// };
 
 const handleDelete = async (row) => {
   // Your backend uses the username as the identifier for User actions
@@ -103,9 +103,9 @@ onMounted(() => {
       </template>
 
       <template #cell(actions)="{ row }">
-        <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)">
+        <!-- <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)">
           <i class="fa fa-pencil-alt"></i>
-        </button>
+        </button> -->
         <button class="btn btn-sm btn-alt-danger" @click="handleDelete(row)">
           <i class="fa fa-trash"></i>
         </button>

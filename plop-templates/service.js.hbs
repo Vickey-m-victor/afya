@@ -1,8 +1,9 @@
 import api from "@/utils/api";
 
 const {{camelCase entityName}}Service = {
-  getAll(searchQuery = "") {
-    const url = searchQuery ? `{{endpoint}}?q=${searchQuery}` : "{{endpoint}}";
+  getAll(searchQuery = "", page = 1, perPage = 25) {
+    const queryParam = searchQuery ? `&q=${searchQuery}` : '';
+    const url = `{{endpoint}}?page=${page}&perPage=${perPage}${queryParam}`;
     return api.get(url);
   },
   getById(id) {

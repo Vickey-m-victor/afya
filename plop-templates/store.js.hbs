@@ -5,13 +5,24 @@ export const use{{pascalCase entityName}}Store = defineStore("{{camelCase entity
   state: () => ({
     items: [],
     loading: false,
+    pagination: { currentPage: 1, totalPages: 1, perPage: 25, totalCount: 0 }
   }),
   actions: {
-    async fetchAll(searchQuery = "") {
+    async fetchAll(searchQuery = "", page = 1, perPage = 25) {
       this.loading = true;
+      this.items = [];
       try {
-        const response = await {{camelCase entityName}}Service.getAll(searchQuery);
-        this.items = response.data?.dataPayload?.data || response.data;
+        const response = await {{camelCase entityName}}Service.getAll(searchQuery, page, perPage);
+        const payload = response.data?.dataPayload;
+        this.items = Array.isArray(payload?.data) ? payload.data : [];
+        if (payload) {
+          this.pagination = {
+            currentPage: payload.currentPage || 1,
+            totalPages: payload.totalPages || 1,
+            perPage: payload.perPage || 25,
+            totalCount: payload.totalCount || 0
+          };
+        }
       } catch (error) {
         throw error;
       } finally {

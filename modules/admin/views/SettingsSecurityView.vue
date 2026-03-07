@@ -14,11 +14,11 @@ const store = useSettingsSecurityStore();
 const formData = ref({});
 
 const formFields = reactive([
-  { label: "Otp Expiry", type: "number", name: "otp_expiry" },
-  { label: "Trusted device duration", type: "number", name: "trusted_device_duration" },
-  { label: "Maximum login attempts", type: "number", name: "maximum_login_attempts" },
-  { label: "Profile lock duration", type: "number", name: "profile_lock_duration" },
-  { label: "Two factor authentication", type: "number", name: "two_factor_auth" },
+  { label: "OTP Expiry (Minutes)", type: "number", name: "otp_expiry" },
+  { label: "Trusted Device Duration (Days)", type: "number", name: "trusted_device_duration" },
+  { label: "Maximum Login Attempts", type: "number", name: "maximum_login_attempts" },
+  { label: "Profile Lock Duration (Minutes)", type: "number", name: "profile_lock_duration" },
+  { label: "Two Factor Authentication", type: "switch", name: "two_factor_auth" }, // 💡 Now a switch!
 ]);
 
 const handleSave = async () => {

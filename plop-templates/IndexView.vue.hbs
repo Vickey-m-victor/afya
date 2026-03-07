@@ -11,11 +11,11 @@ import { useAlert } from "@/composables/alerts";
 const { toastSuccess, toastError, confirmAction } = useAlert();
 const store = use{{pascalCase entityName}}Store();
 
-// --- UI State ---
 const showModal = ref(false);
 const isEditing = ref(false);
+const formData = ref({});
+let currentQuery = "";
 
-// --- Table Configuration ---
 const tableColumns = [
   {{#each columns}}
   { name: "{{this.label}}", field: "{{this.field}}" },
@@ -23,36 +23,23 @@ const tableColumns = [
   { name: "Actions", field: "actions" },
 ];
 
-// --- Form Configuration ---
-const formData = ref({});
-
 const formFields = reactive([
   {{#each formFields}}
   { label: "{{this.label}}", type: "{{this.type}}", name: "{{this.field}}", placeholder: "Enter {{this.label}}..." },
   {{/each}}
 ]);
-const handleSearch = (query) => {
-  store.fetchAll(query);
-};
-// --- Handlers ---
-const openCreateModal = () => {
-  isEditing.value = false;
-  formData.value = {}; // Clear form for new entry
-  showModal.value = true;
-};
 
-// 💡 NEW: Edit Handler
-const openEditModal = (row) => {
-  isEditing.value = true;
-  formData.value = { ...row }; // Copy row data into form
-  showModal.value = true;
-};
+// Table Event Handlers
+const handleSearch = (query) => { currentQuery = query; store.fetchAll(query, 1, store.pagination.perPage); };
+const handlePageChange = (page) => { store.fetchAll(currentQuery, page, store.pagination.perPage); };
+const handleSizeChange = (size) => { store.fetchAll(currentQuery, 1, size); };
 
-// 💡 NEW: Delete Handler
+// Modal Handlers
+const openCreateModal = () => { isEditing.value = false; formData.value = {}; showModal.value = true; };
+const openEditModal = (row) => { isEditing.value = true; formData.value = { ...row }; showModal.value = true; };
+
 const handleDelete = async (row) => {
-  // Assuming the ID field is 'id' or 'uuid'. Adjust if your backend uses something like 'role_id'
-  const recordId = row.id || row.uuid || row[`{{snakeCase entityName}}_id`]; 
-  
+  const recordId = row.id || row.uuid || row[`{{snakeCase entityName}}_id`];
   const confirmed = await confirmAction("Are you sure?", "You won't be able to revert this!");
   if (confirmed.isConfirmed) {
     try {
@@ -66,24 +53,18 @@ const handleDelete = async (row) => {
 
 const handleSave = async () => {
   try {
-    if (isEditing.value) {
-      // Assuming ID field. Adjust if your backend uses a custom ID name
-      const recordId = formData.value.id || formData.value.uuid || formData.value[`{{snakeCase entityName}}_id`];
-      await store.update(recordId, formData.value);
-      toastSuccess("Success", "{{pascalCase entityName}} updated successfully!");
-    } else {
-      await store.create(formData.value);
-      toastSuccess("Success", "{{pascalCase entityName}} created successfully!");
-    }
+    const recordId = formData.value.id || formData.value.uuid || formData.value[`{{snakeCase entityName}}_id`];
+    if (isEditing.value) await store.update(recordId, formData.value);
+    else await store.create(formData.value);
+    
+    toastSuccess("Success", `{{pascalCase entityName}} ${isEditing.value ? 'updated' : 'created'} successfully!`);
     showModal.value = false;
   } catch (error) {
     toastError("Error", error.response?.data?.message || "Failed to save data");
   }
 };
 
-onMounted(() => {
-  store.fetchAll().catch(() => toastError("Error", "Failed to load data"));
-});
+onMounted(() => { store.fetchAll().catch(() => toastError("Error", "Failed to load data")); });
 </script>
 
 <template>
@@ -95,39 +76,24 @@ onMounted(() => {
       :data="store.items"
       :columns="tableColumns"
       :loading="store.loading"
+      :pagination="store.pagination"
       @search="handleSearch"
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
     >
       <template #header-actions>
         <BaseButton label="Create {{pascalCase entityName}}" variant="primary" @click="openCreateModal" />
       </template>
 
-      <template #cell(status)="{ row }">
-        <span class="badge" :class="row.status === 'active' ? 'bg-success' : 'bg-warning'">
-          \{{ row.status || 'N/A' }}
-        </span>
-      </template>
-
       <template #cell(actions)="{ row }">
-        <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)">
-          <i class="fa fa-pencil-alt"></i>
-        </button>
-        <button class="btn btn-sm btn-alt-danger" @click="handleDelete(row)">
-          <i class="fa fa-trash"></i>
-        </button>
+        <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)"><i class="fa fa-pencil-alt"></i></button>
+        <button class="btn btn-sm btn-alt-info me-1" @click="toastSuccess('View', 'View Logic Here')"><i class="fa fa-eye"></i></button>
+        <button class="btn btn-sm btn-alt-danger" @click="handleDelete(row)"><i class="fa fa-trash"></i></button>
       </template>
     </BaseTable>
 
-    <BaseModal 
-      :showModal="showModal" 
-      :title="isEditing ? 'Edit {{pascalCase entityName}}' : 'Create {{pascalCase entityName}}'" 
-      @close="showModal = false"
-    >
-      <BaseForm 
-        v-model="formData" 
-        :fields="formFields" 
-        submitLabel="Save" 
-        @submit="handleSave" 
-      />
+    <BaseModal :showModal="showModal" :title="isEditing ? 'Edit {{pascalCase entityName}}' : 'Create {{pascalCase entityName}}'" @close="showModal = false">
+      <BaseForm v-model="formData" :fields="formFields" :submitLabel="isEditing ? 'Update' : 'Save'" @submit="handleSave" />
     </BaseModal>
   </div>
 </template>

@@ -27,6 +27,9 @@ const authService = {
   resetPassword(email) {
     return api.post("/iam/auth/reset-password", { email });
   },
+  activateAccount() {
+    return api.get("/iam/auth/activate");
+  },
 };
 
 export default authService;

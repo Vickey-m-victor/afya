@@ -32,10 +32,23 @@ const formFields = reactive([
 { label: "Description", type: "text", name: "description", placeholder: "Enter Description" },
 
 ]);
+// Add a variable to hold the current search string
+let currentQuery = "";
 
 const handleSearch = (query) => {
-  // Pass the query to your store to fetch new data
-  store.fetchAll(query);
+  currentQuery = query; 
+  // 💡 Maintain the current perPage size when searching
+  store.fetchAll(query, 1, store.pagination.perPage); 
+};
+
+const handlePageChange = (newPage) => {
+  // 💡 Maintain the current perPage size when clicking Next Page
+  store.fetchAll(currentQuery, newPage, store.pagination.perPage); 
+};
+
+const handleSizeChange = (newSize) => {
+  // 💡 Send the new size to the store, and reset to Page 1
+  store.fetchAll(currentQuery, 1, newSize);
 };
 // --- Handlers ---
 const openCreateModal = () => {
@@ -92,15 +105,17 @@ onMounted(() => {
 <template>
   <div class="content">
     <BasePageHeading title="Permission Management" />
-
     <BaseTable
       title="Permissions"
       :data="store.items"
       :columns="tableColumns"
       :loading="store.loading"
+      :pagination="store.pagination" 
       @search="handleSearch"
-
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
     >
+
       <template #header-actions>
         <BaseButton label="Create Permission" variant="primary" @click="openCreateModal" />
       </template>
