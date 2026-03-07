@@ -4,8 +4,9 @@ import { execSync } from "child_process";
 
 // Your live backend API documentation URLs
 const ENDPOINTS = {
-  iam: "http://localhost:8086/v2/docs/openapi-resource.json?mod=iam",
-  admin: "http://localhost:8086/v2/docs/openapi-resource.json?mod=admin",
+  iam: "http://localhost:9365/v2/docs/openapi-resource.json?mod=iam",
+  admin: "http://localhost:9365/v2/docs/openapi-resource.json?mod=admin",
+  hr: "http://localhost:9365/v2/docs/openapi-resource.json?mod=hr",
 };
 
 // Helper: Formats the name (e.g., /admin/logs/access -> accessLog)

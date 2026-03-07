@@ -333,6 +333,87 @@
           "formFields": []
         },
         {
+          "name": "facilitie",
+          "endpoint": "/admin/facilities",
+          "type": "table",
+          "columns": [
+            {
+              "field": "facility_id",
+              "label": "Facility Id",
+              "type": "number"
+            },
+            {
+              "field": "facility_name",
+              "label": "Facility Name",
+              "type": "text"
+            },
+            {
+              "field": "facility_code",
+              "label": "Facility Code",
+              "type": "text"
+            },
+            {
+              "field": "facility_address",
+              "label": "Facility Address",
+              "type": "text"
+            },
+            {
+              "field": "facility_phone",
+              "label": "Facility Phone",
+              "type": "text"
+            },
+            {
+              "field": "facility_email",
+              "label": "Facility Email",
+              "type": "text"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "number"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "search-dropdown",
+          "endpoint": "/admin/facility/search-dropdown",
+          "type": "table",
+          "columns": [
+            {
+              "field": "facility_id",
+              "label": "Facility Id",
+              "type": "number"
+            },
+            {
+              "field": "facility_name",
+              "label": "Facility Name",
+              "type": "text"
+            },
+            {
+              "field": "facility_code",
+              "label": "Facility Code",
+              "type": "text"
+            }
+          ],
+          "formFields": []
+        },
+        {
           "name": "settingsGeneral",
           "endpoint": "/admin/settings/general",
           "type": "form",
@@ -641,6 +722,691 @@
               "type": "text"
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "hr",
+      "submodules": [
+        {
+          "name": "department",
+          "endpoint": "/hr/departments",
+          "type": "table",
+          "columns": [
+            {
+              "field": "department_id",
+              "label": "Department Id",
+              "type": "number"
+            },
+            {
+              "field": "facility_id",
+              "label": "Facility Id",
+              "type": "number"
+            },
+            {
+              "field": "parent_id",
+              "label": "Parent Id",
+              "type": "number"
+            },
+            {
+              "field": "department_name",
+              "label": "Department Name",
+              "type": "text"
+            },
+            {
+              "field": "department_code",
+              "label": "Department Code",
+              "type": "text"
+            },
+            {
+              "field": "description",
+              "label": "Description",
+              "type": "text"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "number"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "search-dropdown",
+          "endpoint": "/hr/department/search-dropdown",
+          "type": "table",
+          "columns": [
+            {
+              "field": "id",
+              "label": "Id",
+              "type": "number"
+            },
+            {
+              "field": "department_name",
+              "label": "Department Name",
+              "type": "text"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "job-group",
+          "endpoint": "/hr/job-groups",
+          "type": "table",
+          "columns": [
+            {
+              "field": "job_group_id",
+              "label": "Job Group Id",
+              "type": "number"
+            },
+            {
+              "field": "facility_id",
+              "label": "Facility Id",
+              "type": "number"
+            },
+            {
+              "field": "group_name",
+              "label": "Group Name",
+              "type": "text"
+            },
+            {
+              "field": "group_code",
+              "label": "Group Code",
+              "type": "text"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "number"
+            },
+            {
+              "field": "group_description",
+              "label": "Group Description",
+              "type": "text"
+            },
+            {
+              "field": "level",
+              "label": "Level",
+              "type": "number"
+            },
+            {
+              "field": "min_salary",
+              "label": "Min Salary",
+              "type": "text"
+            },
+            {
+              "field": "max_salary",
+              "label": "Max Salary",
+              "type": "text"
+            },
+            {
+              "field": "default_salary",
+              "label": "Default Salary",
+              "type": "text"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "job-title",
+          "endpoint": "/hr/job-titles",
+          "type": "table",
+          "columns": [
+            {
+              "field": "job_title_id",
+              "label": "Job Title Id",
+              "type": "number"
+            },
+            {
+              "field": "facility_id",
+              "label": "Facility Id",
+              "type": "number"
+            },
+            {
+              "field": "department_id",
+              "label": "Department Id",
+              "type": "number"
+            },
+            {
+              "field": "reports_to_title_id",
+              "label": "Reports To Title Id",
+              "type": "number"
+            },
+            {
+              "field": "job_group_id",
+              "label": "Job Group Id",
+              "type": "number"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "number"
+            },
+            {
+              "field": "title_name",
+              "label": "Title Name",
+              "type": "text"
+            },
+            {
+              "field": "title_code",
+              "label": "Title Code",
+              "type": "text"
+            },
+            {
+              "field": "title_description",
+              "label": "Title Description",
+              "type": "text"
+            },
+            {
+              "field": "requires_license",
+              "label": "Requires License",
+              "type": "text"
+            },
+            {
+              "field": "license_type",
+              "label": "License Type",
+              "type": "text"
+            },
+            {
+              "field": "is_clinical",
+              "label": "Is Clinical",
+              "type": "text"
+            },
+            {
+              "field": "is_supervisory",
+              "label": "Is Supervisory",
+              "type": "text"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "leave-type",
+          "endpoint": "/hr/leave-types",
+          "type": "table",
+          "columns": [
+            {
+              "field": "leave_type_id",
+              "label": "Leave Type Id",
+              "type": "number"
+            },
+            {
+              "field": "name",
+              "label": "Name",
+              "type": "text"
+            },
+            {
+              "field": "default_days",
+              "label": "Default Days",
+              "type": "number"
+            },
+            {
+              "field": "gender_specific",
+              "label": "Gender Specific",
+              "type": "text"
+            },
+            {
+              "field": "paid",
+              "label": "Paid",
+              "type": "text"
+            },
+            {
+              "field": "requires_approval",
+              "label": "Requires Approval",
+              "type": "text"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "payroll-setting",
+          "endpoint": "/hr/payroll-settings",
+          "type": "table",
+          "columns": [
+            {
+              "field": "payroll_setting_id",
+              "label": "Payroll Setting Id",
+              "type": "number"
+            },
+            {
+              "field": "facility_id",
+              "label": "Facility Id",
+              "type": "number"
+            },
+            {
+              "field": "pay_cycle",
+              "label": "Pay Cycle",
+              "type": "text"
+            },
+            {
+              "field": "currency",
+              "label": "Currency",
+              "type": "text"
+            },
+            {
+              "field": "overtime_rate",
+              "label": "Overtime Rate",
+              "type": "text"
+            },
+            {
+              "field": "tax_calculation_method",
+              "label": "Tax Calculation Method",
+              "type": "text"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "number"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "public-holiday",
+          "endpoint": "/hr/public-holidays",
+          "type": "table",
+          "columns": [
+            {
+              "field": "holiday_id",
+              "label": "Holiday Id",
+              "type": "number"
+            },
+            {
+              "field": "facility_id",
+              "label": "Facility Id",
+              "type": "number"
+            },
+            {
+              "field": "holiday_name",
+              "label": "Holiday Name",
+              "type": "text"
+            },
+            {
+              "field": "holiday_date",
+              "label": "Holiday Date",
+              "type": "text"
+            },
+            {
+              "field": "is_recurring",
+              "label": "Is Recurring",
+              "type": "text"
+            },
+            {
+              "field": "is_paid",
+              "label": "Is Paid",
+              "type": "text"
+            },
+            {
+              "field": "double_pay_if_worked",
+              "label": "Double Pay If Worked",
+              "type": "text"
+            },
+            {
+              "field": "description",
+              "label": "Description",
+              "type": "text"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "number"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            },
+            {
+              "field": "created_by",
+              "label": "Created By",
+              "type": "number"
+            },
+            {
+              "field": "updated_by",
+              "label": "Updated By",
+              "type": "number"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "statutory-rate",
+          "endpoint": "/hr/statutory-rates",
+          "type": "table",
+          "columns": [
+            {
+              "field": "statutory_rate_id",
+              "label": "Statutory Rate Id",
+              "type": "number"
+            },
+            {
+              "field": "facility_id",
+              "label": "Facility Id",
+              "type": "number"
+            },
+            {
+              "field": "name",
+              "label": "Name",
+              "type": "text"
+            },
+            {
+              "field": "authority",
+              "label": "Authority",
+              "type": "text"
+            },
+            {
+              "field": "type",
+              "label": "Type",
+              "type": "text"
+            },
+            {
+              "field": "employee_rate",
+              "label": "Employee Rate",
+              "type": "text"
+            },
+            {
+              "field": "employer_rate",
+              "label": "Employer Rate",
+              "type": "text"
+            },
+            {
+              "field": "effective_from",
+              "label": "Effective From",
+              "type": "text"
+            },
+            {
+              "field": "effective_to",
+              "label": "Effective To",
+              "type": "text"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "number"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "work-shift",
+          "endpoint": "/hr/work-shifts",
+          "type": "table",
+          "columns": [
+            {
+              "field": "work_shift_id",
+              "label": "Work Shift Id",
+              "type": "number"
+            },
+            {
+              "field": "facility_id",
+              "label": "Facility Id",
+              "type": "number"
+            },
+            {
+              "field": "shift_name",
+              "label": "Shift Name",
+              "type": "text"
+            },
+            {
+              "field": "shift_code",
+              "label": "Shift Code",
+              "type": "text"
+            },
+            {
+              "field": "start_time",
+              "label": "Start Time",
+              "type": "text"
+            },
+            {
+              "field": "end_time",
+              "label": "End Time",
+              "type": "text"
+            },
+            {
+              "field": "duration_hours",
+              "label": "Duration Hours",
+              "type": "text"
+            },
+            {
+              "field": "grace_period_minutes",
+              "label": "Grace Period Minutes",
+              "type": "number"
+            },
+            {
+              "field": "is_overnight",
+              "label": "Is Overnight",
+              "type": "text"
+            },
+            {
+              "field": "is_weekend_shift",
+              "label": "Is Weekend Shift",
+              "type": "text"
+            },
+            {
+              "field": "shift_allowance",
+              "label": "Shift Allowance",
+              "type": "text"
+            },
+            {
+              "field": "color_code",
+              "label": "Color Code",
+              "type": "text"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "number"
+            },
+            {
+              "field": "shift_type",
+              "label": "Shift Type",
+              "type": "text"
+            },
+            {
+              "field": "is_flexible",
+              "label": "Is Flexible",
+              "type": "text"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            }
+          ],
+          "formFields": []
+        },
+        {
+          "name": "worker-union",
+          "endpoint": "/hr/worker-unions",
+          "type": "table",
+          "columns": [
+            {
+              "field": "union_id",
+              "label": "Union Id",
+              "type": "number"
+            },
+            {
+              "field": "union_name",
+              "label": "Union Name",
+              "type": "text"
+            },
+            {
+              "field": "union_code",
+              "label": "Union Code",
+              "type": "text"
+            },
+            {
+              "field": "registration_number",
+              "label": "Registration Number",
+              "type": "text"
+            },
+            {
+              "field": "contact_person",
+              "label": "Contact Person",
+              "type": "text"
+            },
+            {
+              "field": "phone",
+              "label": "Phone",
+              "type": "text"
+            },
+            {
+              "field": "email",
+              "label": "Email",
+              "type": "text"
+            },
+            {
+              "field": "address",
+              "label": "Address",
+              "type": "text"
+            },
+            {
+              "field": "monthly_dues",
+              "label": "Monthly Dues",
+              "type": "text"
+            },
+            {
+              "field": "status",
+              "label": "Status",
+              "type": "number"
+            },
+            {
+              "field": "is_deleted",
+              "label": "Is Deleted",
+              "type": "text"
+            },
+            {
+              "field": "created_at",
+              "label": "Created At",
+              "type": "number"
+            },
+            {
+              "field": "updated_at",
+              "label": "Updated At",
+              "type": "number"
+            },
+            {
+              "field": "created_by",
+              "label": "Created By",
+              "type": "number"
+            },
+            {
+              "field": "updated_by",
+              "label": "Updated By",
+              "type": "number"
+            }
+          ],
+          "formFields": []
         }
       ]
     }

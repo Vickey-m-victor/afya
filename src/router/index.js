@@ -6,21 +6,10 @@ import LayoutBackend from "@/layouts/variations/Backend.vue";
 
 // Backend: Dashboard
 const BackendDashboard = () => import("@/views/backend/DashboardView.vue");
-import { authRoutes } from "~/iam/router.js";
-import {groupRoutes } from "~/iam/routers/groupRouter.js";
-import { permissionRoutes } from "~/iam/routers/permissionRouter.js";
-import { roleRoutes } from "~/iam/routers/roleRouter.js";
-import { ruleRoutes } from "~/iam/routers/ruleRouter";
-import { userRoutes } from "~/iam/routers/userRouter.js";
-import { accessLogRoutes } from "~/admin/routers/accessLogRouter";
-import { auditTrailRoutes } from "~/admin/routers/auditTrailRouter";
-import { errorLogRoutes } from "~/admin/routers/errorLogRouter";
-import { settingsGeneralRoutes } from "~/admin/routers/settingsGeneralRouter";
-import { settingsMailerRoutes } from "~/admin/routers/settingsMailerRouter";
-import { settingsSecurityRoutes } from "~/admin/routers/settingsSecurityRouter";
-import { settingsThemeRoutes } from "~/admin/routers/settingsThemeRouter";
-import { taskManagerRoutes } from "~/admin/routers/taskManagerRouter";
-
+import { authRoutes } from "~/iam/authRouter.js";
+import { iamRoutes } from "~/iam/router.js";
+import { adminRoutes } from "~/admin/router.js";
+import { hrRoutes } from "~/hr/router.js";
 
 import TestComponents from "@/views/Tests/TestView.vue";
 // Specials
@@ -64,20 +53,9 @@ const routes = [
         component: TestComponents,
       },
 
-      ...groupRoutes,
-      ...permissionRoutes,
-      ...roleRoutes,
-      ...ruleRoutes,
-      ...userRoutes,
-      ...accessLogRoutes,
-      ...auditTrailRoutes,
-      ...errorLogRoutes,
-      ...settingsGeneralRoutes,
-      ...settingsMailerRoutes,
-      ...settingsSecurityRoutes,
-      ...settingsThemeRoutes,
-      ...taskManagerRoutes,
-      // other pages can be added here
+      ...iamRoutes,
+      ...adminRoutes,
+      ...hrRoutes,
     ],
   },
 

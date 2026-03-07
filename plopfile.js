@@ -1,67 +1,78 @@
 import fs from "fs";
 
+// Helper functions to safely format names (e.g., "job-group" -> "jobGroup")
+const toCamelCase = (str) => str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+const toPascalCase = (str) => {
+  const camel = toCamelCase(str);
+  return camel.charAt(0).toUpperCase() + camel.slice(1);
+};
+
 export default function (plop) {
-  // 1. Read our Shopping List (the manifest)
   const manifest = JSON.parse(fs.readFileSync("./modules-manifest.json", "utf8"));
 
   plop.setGenerator("generate-all", {
     description: "Read manifest and generate all modules automatically",
-    prompts: [], // No questions asked in the terminal!
+    prompts: [], 
     actions: () => {
       const actions = [];
 
-      // 2. Loop through each module (iam, admin)
       manifest.modules.forEach((module) => {
+        const basePath = `modules/${module.name}`;
         
-        // 3. Loop through each submodule (roles, permissions, etc.)
+        // Generate the Module-Level Router Aggregator (e.g., hr/router.js)
+        actions.push({
+          type: "add",
+          path: `${basePath}/router.js`,
+          templateFile: "plop-templates/moduleRouter.js.hbs",
+          data: {
+            moduleName: module.name,
+            submodules: module.submodules
+          },
+          force: true, 
+        });
+
         module.submodules.forEach((sub) => {
-          const basePath = `modules/${module.name}`;
-          
-          // These are the variables we pass to our templates
           const data = {
-            moduleName: module.name, // e.g., "iam"
-            entityName: sub.name,    // e.g., "role"
-            endpoint: sub.endpoint,  // e.g., "/iam/rbac/roles"
+            moduleName: module.name, 
+            entityName: sub.name,    
+            endpoint: sub.endpoint,  
           };
 
-          // Action A: Create Service
+          // Safely convert names for the file paths
+          const camelName = toCamelCase(sub.name);
+          const pascalName = toPascalCase(sub.name);
+
           actions.push({
             type: "add",
-            path: `${basePath}/services/${sub.name}Service.js`,
+            path: `${basePath}/services/${camelName}Service.js`,
             templateFile: "plop-templates/service.js.hbs",
-            data: Object.assign({}, data, sub), // Pass columns and formFields to the service template
+            data: Object.assign({}, data, sub), 
             skipIfExists: true,
-            // force: true,
           });
 
-          // Action B: Create Store
           actions.push({
             type: "add",
-            path: `${basePath}/stores/${sub.name}Store.js`,
+            path: `${basePath}/stores/${camelName}Store.js`,
             templateFile: "plop-templates/store.js.hbs",
             data: Object.assign({}, data, sub),
             skipIfExists: true,
-            // force: true,
           });
 
-          // Action C: Create View (It checks if it should use the Table or Form template)
           const templateName = sub.type === "table" ? "IndexView.vue.hbs" : "FormView.vue.hbs";
           actions.push({
             type: "add",
-            path: `${basePath}/views/${plop.getHelper("pascalCase")(sub.name)}View.vue`,
+            path: `${basePath}/views/${pascalName}View.vue`,
             templateFile: `plop-templates/${templateName}`,
             data: Object.assign({}, data, sub),
             skipIfExists: true,
-            // force: true,
           });
-          // Action D: Create Router
+          
           actions.push({
             type: "add",
-            path: `${basePath}/routers/${sub.name}Router.js`,
+            path: `${basePath}/routers/${camelName}Router.js`,
             templateFile: "plop-templates/router.js.hbs",
             data: Object.assign({}, data, sub),
             skipIfExists: true,
-            // force: true,
           });
         });
       });

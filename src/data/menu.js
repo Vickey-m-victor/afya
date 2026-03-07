@@ -21,10 +21,65 @@ export default {
       to: "components",
       icon: "si si-settings",
     },
+
+    {
+      name: "HR Management",
+      icon:  "si si-people",
+      subActivePaths: "/hr/",
+      sub: [
+    {
+      name: "Departments",
+      to: "hr-departments",
+      icon: "si si-building",
+    },
+    {
+      name: "Job Titles",
+      to: "hr-job-titles",
+      icon: "si si-briefcase",
+    },
+    {
+      name: "Job Groups",
+      to: "hr-job-groups",
+      icon: "si si-briefcase",
+    },
+    {
+      name: "Leave Types",
+      to: "hr-leave-types",
+      icon: "si si-calendar",
+    },
+    {
+      name: "Payroll",
+      to: "hr-payroll-settings",
+      icon: "si si-wallet",
+    },
+    {
+      name: "Public Holidays",
+      to: "hr-public-holidays",
+      icon: "si si-globe",
+    },
+    {
+      name: "Statutory Rates",
+      to: "hr-statutory-rates",
+      icon: "si si-calculator",
+    },
+    {name: "Work Shifts",
+     to: "hr-work-shifts",
+     icon: "si si-clock",
+    },
+    {
+      name: "Worker Union",
+      to: "hr-worker-unions",
+      icon: "si si-users",
+
+    },
+  ],
+},
+
     {
       name: "IAM & Admin",
       heading: true,
     },
+
     {
       name: "Access Control",
       icon:  "si si-lock",

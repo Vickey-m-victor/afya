@@ -1,0 +1,10 @@
+
+{{#each submodules}}
+import { {{camelCase name}}Routes } from "./routers/{{camelCase name}}Router.js";
+{{/each}}
+
+export const {{camelCase moduleName}}Routes = [
+  {{#each submodules}}
+  ...{{camelCase name}}Routes,
+  {{/each}}
+];
