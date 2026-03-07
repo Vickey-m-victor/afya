@@ -15,16 +15,17 @@ export default {
       name: "IAM",
       heading: true,
     },
-    {
-      name: "Users",
-      to: "iam/users",
-      icon: "fa fa-users",
-    },
+
     {
       name: "RBAC",
       icon: "fa fa-shield-halved",
-      subActivePaths: "/iam/rbac",
+      subActivePaths: "/iam",
       sub: [
+        {
+      name: "Users",
+      to: "iam/users",
+      icon: "fa fa-users",
+        },
         {
           name: "Roles",
           to: "iam/rbac/roles",

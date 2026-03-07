@@ -1,6 +1,5 @@
 <script setup>
 import { useTemplateStore } from "@/stores/template";
-import { onMounted } from 'vue';
 
 import BaseLayout from "@/layouts/BaseLayout.vue";
 
@@ -14,13 +13,9 @@ store.setLayout({
   footer: true,
 });
 
-onMounted(() => {
-  // 1. Keep the main sidebar open so it takes up the 60px mini-width
-  store.sidebar({ mode: 'open' }); 
-  
-  // 2. Set it to 'mini' mode so it starts closed (icons only)
-  store.sidebarMini({ mode: 'on' }); 
-});
+// Ensure sidebar is fully open (not mini) on load
+store.sidebar({ mode: 'open' });
+store.sidebarMini({ mode: 'off' });
 
 // Set various template options for this layout variation
 store.headerStyle({ mode: "light" });
