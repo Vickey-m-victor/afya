@@ -40,10 +40,11 @@
     "@vueform/slider": "^2.1.10",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
+    "apexcharts": "^5.8.1",
     "axios": "^1.13.5",
     "bootstrap": "5.3.8",
-    "chart.js": "^4.5.1",
     "chalk": "^5.6.2",
+    "chart.js": "^4.5.1",
     "ckeditor5": "^47.2.0",
     "commander": "^14.0.1",
     "crypto-js": "^4.2.0",
@@ -66,7 +67,8 @@
     "vue-flatpickr-component": "^12.0.0",
     "vue-router": "^4.6.3",
     "vue-select": "^4.0.0-beta.3",
-    "vue-star-rating": "^2.1.0"
+    "vue-star-rating": "^2.1.0",
+    "vue3-apexcharts": "^1.10.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",

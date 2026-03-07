@@ -25,5 +25,11 @@ export default [
     name: 'hr/department',
     component: () => import('../views/Department/index.vue'),
     meta: { title: 'Afya365 - Department', layout: layout }
+  },
+  {
+    path: '/hr',
+    name: 'hr',
+    component: () => import('../views/DashboardView.vue'),
+    meta: { title: 'Afya365 - HR Dashboard', layout: layout }
   }
 ];

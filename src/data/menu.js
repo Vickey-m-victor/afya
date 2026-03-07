@@ -57,6 +57,11 @@ export default {
       subActivePaths: "/hr",
       sub: [
         {
+          name: "Dashboard",
+          to: "hr",
+          icon: "fa fa-tachometer-alt",
+        },
+        {
           name: "Departments",
           to: "hr/department",
           icon: "fa fa-building",

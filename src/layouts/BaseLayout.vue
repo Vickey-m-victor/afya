@@ -42,7 +42,7 @@ if (savedTheme) {
 const classContainer = computed(() => {
   return {
     "sidebar-r": store.layout.sidebar && !store.settings.sidebarLeft,
-    "sidebar-mini": store.layout.sidebar && store.settings.sidebarMini && !store.settings.sidebarHoverExpand,
+    "sidebar-mini": store.layout.sidebar && store.settings.sidebarMini,
     "sidebar-o": store.layout.sidebar && store.settings.sidebarVisibleDesktop,
     "sidebar-o-xs": store.layout.sidebar && store.settings.sidebarVisibleMobile,
     "sidebar-dark": store.layout.sidebar && store.settings.sidebarDark,

@@ -47,8 +47,6 @@ onMounted(() => {
     id="sidebar"
     :class="{ 'with-mini-nav': withMiniNav }"
     aria-label="Main Navigation"
-    @mouseenter="store.settings.sidebarMini && store.setSidebarHoverExpand({ expanded: true })"
-    @mouseleave="store.setSidebarHoverExpand({ expanded: false })"
   >
     <slot>
       <!-- Side Header -->

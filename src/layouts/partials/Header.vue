@@ -115,7 +115,7 @@ onUnmounted(() => {
               <button
                 type="button"
                 class="btn btn-sm border-0 bg-transparent shadow-none me-2 d-none d-lg-inline-flex align-items-center"
-                @click="store.sidebarMini({ mode: 'toggle' })"
+                @click="store.sidebarMiniToggle()"
                 :title="store.settings.sidebarMini ? 'Expand Sidebar' : 'Collapse Sidebar'"
               >
                 <i class="fa fa-fw" :class="store.settings.sidebarMini ? 'fa-indent' : 'fa-outdent'"></i>
