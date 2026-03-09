@@ -30,7 +30,7 @@ export default {
     {
       name: "Departments",
       to: "hr-departments",
-      icon: "si si-building",
+      icon: "si si-layers",
     },
     {
       name: "Job Titles",
