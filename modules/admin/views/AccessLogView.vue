@@ -3,22 +3,19 @@ import { ref, reactive, onMounted } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
 import BaseModal from "@/components/BaseModal.vue";
 import BaseForm from "@/components/BaseForm.vue";
-import BaseButton from "@/components/BaseButton.vue";
 import BasePageHeading from "@/components/BasePageHeading.vue";
 import { useAccessLogStore } from "~/admin/stores/accessLogStore";
 import { useAlert } from "@/composables/alerts";
 
-const { toastSuccess, toastError, confirmAction } = useAlert();
+const { toastError } = useAlert();
 const store = useAccessLogStore();
 
 // --- UI State ---
 const showModal = ref(false);
-const isEditing = ref(false);
 
 // --- Table Configuration ---
 const tableColumns = [
-  { name: "Access Id", field: "access_id" },
-  { name: "User ", field: "user" },
+  { name: "User", field: "user" },
   { name: "Description", field: "description" },
   { name: "Ip Address", field: "ip_address" },
   { name: "User Agent", field: "user_agent" },
@@ -26,60 +23,37 @@ const tableColumns = [
   { name: "Actions", field: "actions" },
 ];
 
-// --- Form Configuration ---
+// --- Form Configuration (For Viewing Details) ---
 const formData = ref({});
 
 const formFields = reactive([
+  { label: "User", type: "text", name: "user" },
+  { label: "Description", type: "text", name: "description" },
+  { label: "IP Address", type: "text", name: "ip_address" },
+  { label: "User Agent", type: "text", name: "user_agent" },
+  { label: "Access Time", type: "text", name: "access_time" }
 ]);
 
-// --- Handlers ---
-const openCreateModal = () => {
-  isEditing.value = false;
-  formData.value = {}; // Clear form for new entry
-  showModal.value = true;
-};
+// --- Backend Pagination & Search Handlers ---
+let currentQuery = "";
 
-// 💡 NEW: Edit Handler
-const openEditModal = (row) => {
-  isEditing.value = true;
-  formData.value = { ...row }; // Copy row data into form
-  showModal.value = true;
-};
-
-// 💡 NEW: Delete Handler
-const handleDelete = async (row) => {
-  // Assuming the ID field is 'id' or 'uuid'. Adjust if your backend uses something like 'role_id'
-  const recordId = row.id || row.uuid || row[`access_log_id`]; 
-  
-  const confirmed = await confirmAction("Are you sure?", "You won't be able to revert this!");
-  if (confirmed.isConfirmed) {
-    try {
-      await store.delete(recordId);
-      toastSuccess("Deleted!", "Record has been deleted.");
-    } catch (error) {
-      toastError("Error", "Failed to delete record.");
-    }
-  }
-};
 const handleSearch = (query) => {
-  // Pass the query to your store to fetch new data
-  store.fetchAll(query);
+  currentQuery = query; 
+  store.fetchAll(query, 1, store.pagination?.perPage || 25); 
 };
-const handleSave = async () => {
-  try {
-    if (isEditing.value) {
-      // Assuming ID field. Adjust if your backend uses a custom ID name
-      const recordId = formData.value.id || formData.value.uuid || formData.value[`access_log_id`];
-      await store.update(recordId, formData.value);
-      toastSuccess("Success", "AccessLog updated successfully!");
-    } else {
-      await store.create(formData.value);
-      toastSuccess("Success", "AccessLog created successfully!");
-    }
-    showModal.value = false;
-  } catch (error) {
-    toastError("Error", error.response?.data?.message);
-  }
+
+const handlePageChange = (newPage) => {
+  store.fetchAll(currentQuery, newPage, store.pagination?.perPage || 25); 
+};
+
+const handleSizeChange = (newSize) => {
+  store.fetchAll(currentQuery, 1, newSize);
+};
+
+// --- Action Handlers ---
+const openViewModal = (row) => {
+  formData.value = { ...row }; 
+  showModal.value = true;
 };
 
 onMounted(() => {
@@ -90,44 +64,33 @@ onMounted(() => {
 <template>
   <div class="content">
     <BasePageHeading title="AccessLog Management" />
-
+    
     <BaseTable
       title="AccessLogs"
       :data="store.items"
       :columns="tableColumns"
       :loading="store.loading"
+      :pagination="store.pagination" 
       @search="handleSearch"
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
     >
-      <!-- <template #header-actions>
-        <BaseButton label="Create AccessLog" variant="primary" @click="openCreateModal" />
-      </template> -->
-
-      <template #cell(status)="{ row }">
-        <span class="badge" :class="row.status === 'active' ? 'bg-success' : 'bg-warning'">
-          {{ row.status || 'N/A' }}
-        </span>
-      </template>
-
       <template #cell(actions)="{ row }">
-        <!-- <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)">
-          <i class="fa fa-pencil-alt"></i>
-        </button> -->
-        <button class="btn btn-sm btn-alt-danger" @click="handleDelete(row)">
-          <i class="fa fa-trash"></i>
+        <button class="btn btn-sm btn-alt-info me-1" @click="openViewModal(row)" title="View Details">
+          <i class="fa fa-eye"></i>
         </button>
       </template>
     </BaseTable>
 
     <BaseModal 
       :showModal="showModal" 
-      :title="isEditing ? 'Edit AccessLog' : 'Create AccessLog'" 
+      title="View AccessLog Details" 
       @close="showModal = false"
     >
       <BaseForm 
         v-model="formData" 
         :fields="formFields" 
-        submitLabel="Save" 
-        @submit="handleSave" 
+        :showSubmit="false" 
       />
     </BaseModal>
   </div>

@@ -1,11 +1,11 @@
 import api from "@/utils/api";
 
 const auditTrailService = {
- getAll(searchQuery = "") {
-      // If there is a search query, attach it. Otherwise, just fetch all.
-      const url = searchQuery ? `/admin/audit/trail?q=${searchQuery}` : "/admin/audit/trail";
-      return api.get(url);
-    },
+  getAll(searchQuery = "", page = 1, perPage = 25) {
+    const queryParam = searchQuery ? `&q=${searchQuery}` : '';
+    const url = `/admin/audit/trail?page=${page}&per-page=${perPage}${queryParam}`;
+    return api.get(url);
+  },
   getById(id) {
     return api.get(`/admin/audit/trail/${id}`);
   },
@@ -17,6 +17,10 @@ const auditTrailService = {
   },
   delete(id) {
     return api.delete(`/admin/audit/trail/${id}`);
+  },
+  // 💡 Exactly matches your cURL command!
+  restore(id) {
+    return api.patch(`/admin/audit/trail/${id}`); 
   }
 };
 

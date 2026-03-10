@@ -1,9 +1,8 @@
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, watch } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
 import BaseModal from "@/components/BaseModal.vue";
 import BaseForm from "@/components/BaseForm.vue";
-import BaseButton from "@/components/BaseButton.vue";
 import BasePageHeading from "@/components/BasePageHeading.vue";
 import { useAuditTrailStore } from "~/admin/stores/auditTrailStore";
 import { useAlert } from "@/composables/alerts";
@@ -13,87 +12,107 @@ const store = useAuditTrailStore();
 
 // --- UI State ---
 const showModal = ref(false);
-const isEditing = ref(false);
+const showDeleted = ref(false);
 
 // --- Table Configuration ---
 const tableColumns = [
-  // { name: "Audit ID", field: "audit_id" },
   { name: "System User", field: "user" },
-  // { name: "IP Address", field: "ip_info.ip_address" },
-  // { name: "Country", field: "ip_info.country" },
-  // { name: "Country Code", field: "ip_info.country_code" },
-  // { name: "Region Code", field: "ip_info.region_code" },
-  // { name: "Region Name", field: "ip_info.region_name" },
-  // { name: "City", field: "ip_info.city" },
-  // { name: "ZIP Code", field: "ip_info.zip_code" },
-  // { name: "Latitude", field: "ip_info.latitude" },
-  // { name: "Longitude", field: "ip_info.longitude" },
-  // { name: "Time Zone", field: "ip_info.time_zone" },
-  // { name: "ISP", field: "ip_info.isp" },
-  // { name: "Organization", field: "ip_info.organization" },
-  // { name: "Autonomous System", field: "ip_info.autonomous_system" },
-  // { name: "Field Name", field: "field_name" },
   { name: "Old Value", field: "old_value" },
   { name: "New Value", field: "new_value" },
   { name: "Audit Time", field: "audit_time" },
-  // { name: "Operation", field: "operation" },
-  // { name: "Request Method", field: "request_method" },
   { name: "Actions", field: "actions" },
 ];
 
-// --- Form Configuration ---
 const formData = ref({});
-
 const formFields = reactive([
+  { label: "Audit ID", type: "text", name: "audit_id" },
+  { label: "System User", type: "text", name: "user" },
+  { label: "Operation", type: "text", name: "operation" },
+  { label: "Field Name", type: "text", name: "field_name" },
+  { label: "Old Value", type: "text", name: "old_value" },
+  { label: "New Value", type: "text", name: "new_value" },
+  { label: "IP Address", type: "text", name: "ip_info.ip_address" },
+  { label: "Audit Time", type: "text", name: "audit_time" }
 ]);
 
-// --- Handlers ---
-const openCreateModal = () => {
-  isEditing.value = false;
-  formData.value = {}; // Clear form for new entry
+// --- Backend Pagination & Search Handlers ---
+let currentQuery = "";
+
+const handleSearch = (query) => {
+  currentQuery = query;
+  store.fetchAll(currentQuery, 1, store.pagination?.perPage || 25, showDeleted.value);
+};
+
+const handlePageChange = (newPage) => {
+  store.fetchAll(currentQuery, newPage, store.pagination?.perPage || 25, showDeleted.value);
+};
+
+const handleSizeChange = (newSize) => {
+  store.fetchAll(currentQuery, 1, newSize, showDeleted.value);
+};
+
+watch(showDeleted, () => {
+  store.fetchAll(currentQuery, 1, store.pagination?.perPage || 25, showDeleted.value);
+});
+
+// --- Smart Helpers ---
+const resolveId = (row) => {
+  const id = row.audit_trail_id ?? row.audit_id ?? row.uuid ?? row.id ?? null;
+  if (!id) console.warn('Could not resolve ID for row:', row);
+  return id;
+};
+
+// 💡 NEW: Smart function to guess how your backend marks deleted records
+const isDeleted = (row) => {
+  return (
+    (row.deleted_at !== null && row.deleted_at !== undefined) || 
+    row.is_deleted === 1 || 
+    row.is_deleted === true || 
+    row.status === 0 || 
+    row.status === 'deleted' ||
+    row.status === 'inactive'
+  );
+};
+
+// --- Action Handlers ---
+const openViewModal = (row) => {
+  formData.value = { ...row };
   showModal.value = true;
 };
 
-// 💡 NEW: Edit Handler
-const openEditModal = (row) => {
-  isEditing.value = true;
-  formData.value = { ...row }; // Copy row data into form
-  showModal.value = true;
-};
+const handleRestore = async (row) => {
+  const recordId = resolveId(row);
+  if (!recordId) {
+    toastError("Error", "Cannot resolve record ID for restore.");
+    return;
+  }
 
-// 💡 NEW: Delete Handler
-const handleDelete = async (row) => {
-  // Assuming the ID field is 'id' or 'uuid'. Adjust if your backend uses something like 'role_id'
-  const recordId = row.id || row.uuid || row[`audit_trail_id`]; 
-  
-  const confirmed = await confirmAction("Are you sure?", "You won't be able to revert this!");
-  if (confirmed.isConfirmed) {
-    try {
-      await store.delete(recordId);
-      toastSuccess("Deleted!", "Record has been deleted.");
-    } catch (error) {
-      toastError("Error", "Failed to delete record.");
-    }
+  const confirmed = await confirmAction("Restore Record?", "Are you sure you want to restore this audit record?");
+  if (!confirmed.isConfirmed) return;
+
+  try {
+    await store.restore(recordId, currentQuery, store.pagination.currentPage, store.pagination.perPage, showDeleted.value);
+    toastSuccess("Restored!", "Record has been successfully restored to active status.");
+  } catch {
+    toastError("Error", "Failed to restore record.");
   }
 };
-const handleSearch = (query) => {
-  // Pass the query to your store to fetch new data
-  store.fetchAll(query);
-};
-const handleSave = async () => {
+
+const handleDelete = async (row) => {
+  const recordId = resolveId(row);
+  if (!recordId) {
+    toastError("Error", "Cannot resolve record ID for delete.");
+    return;
+  }
+
+  const confirmed = await confirmAction("Delete Record?", "Are you sure? You can restore this record later if needed!");
+  if (!confirmed.isConfirmed) return;
+
   try {
-    if (isEditing.value) {
-      // Assuming ID field. Adjust if your backend uses a custom ID name
-      const recordId = formData.value.id || formData.value.uuid || formData.value[`audit_trail_id`];
-      await store.update(recordId, formData.value);
-      toastSuccess("Success", "AuditTrail updated successfully!");
-    } else {
-      await store.create(formData.value);
-      toastSuccess("Success", "AuditTrail created successfully!");
-    }
-    showModal.value = false;
-  } catch (error) {
-    toastError("Error", error.response?.data?.message || "Failed to save data");
+    await store.delete(recordId, currentQuery, store.pagination.currentPage, store.pagination.perPage, showDeleted.value);
+    toastSuccess("Moved to Trash!", "Record deleted. You can click the green restore icon to undo this.");
+  } catch {
+    toastError("Error", "Failed to delete record.");
   }
 };
 
@@ -104,45 +123,58 @@ onMounted(() => {
 
 <template>
   <div class="content">
-    <BasePageHeading title="AuditTrail Management" />
-
+    <BasePageHeading title="Audit Trail Management" />
     <BaseTable
-      title="AuditTrails"
+      title="Audit Trails"
       :data="store.items"
       :columns="tableColumns"
       :loading="store.loading"
+      :pagination="store.pagination" 
       @search="handleSearch"
+      @page-change="handlePageChange"
+      @size-change="handleSizeChange"
     >
-      <!-- <template #header-actions>
-        <BaseButton label="Create AuditTrail" variant="primary" @click="openCreateModal" />
-      </template> -->
+  
 
       <template #cell(status)="{ row }">
         <span class="badge" :class="row.status === 'active' ? 'bg-success' : 'bg-warning'">
           {{ row.status || 'N/A' }}
         </span>
       </template>
-
       <template #cell(actions)="{ row }">
-        <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)">
-          <i class="fa fa-pencil-alt"></i>
-        </button>
-        <button class="btn btn-sm btn-alt-danger" @click="handleDelete(row)">
-          <i class="fa fa-trash"></i>
-        </button>
-      </template>
+  <button class="btn btn-sm btn-alt-info me-1" @click="openViewModal(row)" title="View Details">
+    <i class="fa fa-eye"></i>
+  </button>
+
+  <button
+    v-if="isDeleted(row)"
+    class="btn btn-sm btn-alt-success"
+    @click="handleRestore(row)"
+    title="Restore Record"
+  >
+    <i class="fa fa-undo"></i>
+  </button>
+
+  <button
+    v-else
+    class="btn btn-sm btn-alt-danger"
+    @click="handleDelete(row)"
+    title="Delete Record"
+  >
+    <i class="fa fa-trash"></i>
+  </button>
+</template>
     </BaseTable>
 
     <BaseModal 
       :showModal="showModal" 
-      :title="isEditing ? 'Edit AuditTrail' : 'Create AuditTrail'" 
+      title="View Audit Trail Details" 
       @close="showModal = false"
     >
       <BaseForm 
         v-model="formData" 
         :fields="formFields" 
-        submitLabel="Save" 
-        @submit="handleSave" 
+        :showSubmit="false" 
       />
     </BaseModal>
   </div>
