@@ -33,7 +33,18 @@ const tableColumns = [
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
+  { label: "", type: "text", name: "payroll_setting_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "facility_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "pay_cycle", placeholder: "Enter " },
+  { label: "", type: "text", name: "currency", placeholder: "Enter " },
+  { label: "", type: "text", name: "overtime_rate", placeholder: "Enter " },
+  { label: "", type: "text", name: "tax_calculation_method", placeholder: "Enter " },
+  { label: "", type: "text", name: "status", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
 ]);
+
 
 // --- Handlers ---
 const handleSearch = (query) => {

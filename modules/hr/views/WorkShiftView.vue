@@ -32,16 +32,35 @@ const tableColumns = [
   { name: "Status", field: "status" },
   { name: "Shift Type", field: "shift_type" },
   { name: "Is Flexible", field: "is_flexible" },
-  { name: "Is Deleted", field: "is_deleted" },
-  { name: "Created At", field: "created_at" },
-  { name: "Updated At", field: "updated_at" },
+  // { name: "Is Deleted", field: "is_deleted" },
+  // { name: "Created At", field: "created_at" },
+  // { name: "Updated At", field: "updated_at" },
   { name: "Actions", field: "actions" },
 ];
 
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
+  { label: "", type: "text", name: "work_shift_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "facility_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "shift_name", placeholder: "Enter " },
+  { label: "", type: "text", name: "shift_code", placeholder: "Enter " },
+  { label: "", type: "text", name: "start_time", placeholder: "Enter " },
+  { label: "", type: "text", name: "end_time", placeholder: "Enter " },
+  { label: "", type: "text", name: "duration_hours", placeholder: "Enter " },
+  { label: "", type: "text", name: "grace_period_minutes", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_overnight", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_weekend_shift", placeholder: "Enter " },
+  { label: "", type: "text", name: "shift_allowance", placeholder: "Enter " },
+  { label: "", type: "text", name: "color_code", placeholder: "Enter " },
+  { label: "", type: "text", name: "status", placeholder: "Enter " },
+  { label: "", type: "text", name: "shift_type", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_flexible", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
 ]);
+
 
 // --- Handlers ---
 const handleSearch = (query) => {

@@ -33,7 +33,18 @@ const tableColumns = [
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
+  { label: "", type: "text", name: "department_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "facility_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "parent_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "department_name", placeholder: "Enter " },
+  { label: "", type: "text", name: "department_code", placeholder: "Enter " },
+  { label: "", type: "text", name: "description", placeholder: "Enter " },
+  { label: "", type: "text", name: "status", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
 ]);
+
 
 // --- Handlers ---
 const handleSearch = (query) => {

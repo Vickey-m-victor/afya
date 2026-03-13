@@ -20,7 +20,7 @@ const tableColumns = [
   { name: "Job Title Id", field: "job_title_id" },
   { name: "Facility Id", field: "facility_id" },
   { name: "Department Id", field: "department_id" },
-  // { name: "Reports To Title Id", field: "reports_to_title_id" },
+  { name: "Reports To Title Id", field: "reports_to_title_id" },
   { name: "Job Group Id", field: "job_group_id" },
   { name: "Status", field: "status" },
   { name: "Title Name", field: "title_name" },
@@ -39,7 +39,24 @@ const tableColumns = [
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
+  { label: "", type: "text", name: "job_title_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "facility_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "department_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "reports_to_title_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "job_group_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "status", placeholder: "Enter " },
+  { label: "", type: "text", name: "title_name", placeholder: "Enter " },
+  { label: "", type: "text", name: "title_code", placeholder: "Enter " },
+  { label: "", type: "text", name: "title_description", placeholder: "Enter " },
+  { label: "", type: "text", name: "requires_license", placeholder: "Enter " },
+  { label: "", type: "text", name: "license_type", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_clinical", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_supervisory", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
 ]);
+
 
 // --- Handlers ---
 const handleSearch = (query) => {

@@ -36,7 +36,21 @@ const tableColumns = [
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
+  { label: "", type: "text", name: "statutory_rate_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "facility_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "name", placeholder: "Enter " },
+  { label: "", type: "text", name: "authority", placeholder: "Enter " },
+  { label: "", type: "text", name: "type", placeholder: "Enter " },
+  { label: "", type: "text", name: "employee_rate", placeholder: "Enter " },
+  { label: "", type: "text", name: "employer_rate", placeholder: "Enter " },
+  { label: "", type: "text", name: "effective_from", placeholder: "Enter " },
+  { label: "", type: "text", name: "effective_to", placeholder: "Enter " },
+  { label: "", type: "text", name: "status", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
 ]);
+
 
 // --- Handlers ---
 const handleSearch = (query) => {

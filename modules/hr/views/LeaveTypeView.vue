@@ -32,7 +32,17 @@ const tableColumns = [
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
+  { label: "", type: "text", name: "leave_type_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "name", placeholder: "Enter " },
+  { label: "", type: "text", name: "default_days", placeholder: "Enter " },
+  { label: "", type: "text", name: "gender_specific", placeholder: "Enter " },
+  { label: "", type: "text", name: "paid", placeholder: "Enter " },
+  { label: "", type: "text", name: "requires_approval", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
 ]);
+
 
 // --- Handlers ---
 const handleSearch = (query) => {

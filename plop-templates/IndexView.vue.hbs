@@ -26,10 +26,11 @@ const tableColumns = [
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
-  {{#each formFields}}
-  { label: "{{this.label}}", type: "{{this.type}}", name: "{{this.field}}" },
+  {{#each columns}}
+  { label: "{{this.name}}", type: "text", name: "{{this.field}}", placeholder: "Enter {{this.name}}" },
   {{/each}}
 ]);
+
 
 // --- Handlers ---
 const handleSearch = (query) => {

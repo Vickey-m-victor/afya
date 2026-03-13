@@ -38,7 +38,23 @@ const tableColumns = [
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
+  { label: "", type: "text", name: "union_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "union_name", placeholder: "Enter " },
+  { label: "", type: "text", name: "union_code", placeholder: "Enter " },
+  { label: "", type: "text", name: "registration_number", placeholder: "Enter " },
+  { label: "", type: "text", name: "contact_person", placeholder: "Enter " },
+  { label: "", type: "text", name: "phone", placeholder: "Enter " },
+  { label: "", type: "text", name: "email", placeholder: "Enter " },
+  { label: "", type: "text", name: "address", placeholder: "Enter " },
+  { label: "", type: "text", name: "monthly_dues", placeholder: "Enter " },
+  { label: "", type: "text", name: "status", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_by", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_by", placeholder: "Enter " },
 ]);
+
 
 // --- Handlers ---
 const handleSearch = (query) => {

@@ -37,7 +37,22 @@ const tableColumns = [
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
+  { label: "", type: "text", name: "holiday_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "facility_id", placeholder: "Enter " },
+  { label: "", type: "text", name: "holiday_name", placeholder: "Enter " },
+  { label: "", type: "text", name: "holiday_date", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_recurring", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_paid", placeholder: "Enter " },
+  { label: "", type: "text", name: "double_pay_if_worked", placeholder: "Enter " },
+  { label: "", type: "text", name: "description", placeholder: "Enter " },
+  { label: "", type: "text", name: "status", placeholder: "Enter " },
+  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
+  { label: "", type: "text", name: "created_by", placeholder: "Enter " },
+  { label: "", type: "text", name: "updated_by", placeholder: "Enter " },
 ]);
+
 
 // --- Handlers ---
 const handleSearch = (query) => {
