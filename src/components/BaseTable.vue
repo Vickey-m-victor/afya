@@ -79,7 +79,10 @@ const getNestedValue = (obj, path) => {
 
         <tbody v-else class="fs-sm">
           <tr v-for="(row, rowIndex) in data" :key="rowIndex">
-            <th scope="row">{{ (pagination.currentPage - 1) * pagination.perPage + rowIndex + 1 }}</th>
+            <th v-if="showIndex" scope="row">
+              {{ (pagination.currentPage - 1) * pagination.perPage + rowIndex + 1 }}
+            </th>
+            
             <td v-for="col in columns" :key="col.field">
               <slot :name="`cell(${col.field})`" :row="row" :index="rowIndex">
                 {{ getNestedValue(row, col.field) }}

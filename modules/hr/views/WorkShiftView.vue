@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
 import BaseModal from "@/components/BaseModal.vue";
-import BaseForm from "@/components/BaseForm.vue";
+import BaseGridForm from "@/components/BaseGridForm.vue";
 import BasePageHeading from "@/components/BasePageHeading.vue";
 import { useWorkShiftStore } from "~/hr/stores/workShiftStore";
 import { useAlert } from "@/composables/alerts";
@@ -32,35 +32,28 @@ const tableColumns = [
   { name: "Status", field: "status" },
   { name: "Shift Type", field: "shift_type" },
   { name: "Is Flexible", field: "is_flexible" },
-  // { name: "Is Deleted", field: "is_deleted" },
-  // { name: "Created At", field: "created_at" },
-  // { name: "Updated At", field: "updated_at" },
   { name: "Actions", field: "actions" },
 ];
 
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
-  { label: "", type: "text", name: "work_shift_id", placeholder: "Enter " },
-  { label: "", type: "text", name: "facility_id", placeholder: "Enter " },
-  { label: "", type: "text", name: "shift_name", placeholder: "Enter " },
-  { label: "", type: "text", name: "shift_code", placeholder: "Enter " },
-  { label: "", type: "text", name: "start_time", placeholder: "Enter " },
-  { label: "", type: "text", name: "end_time", placeholder: "Enter " },
-  { label: "", type: "text", name: "duration_hours", placeholder: "Enter " },
-  { label: "", type: "text", name: "grace_period_minutes", placeholder: "Enter " },
-  { label: "", type: "text", name: "is_overnight", placeholder: "Enter " },
-  { label: "", type: "text", name: "is_weekend_shift", placeholder: "Enter " },
-  { label: "", type: "text", name: "shift_allowance", placeholder: "Enter " },
-  { label: "", type: "text", name: "color_code", placeholder: "Enter " },
-  { label: "", type: "text", name: "status", placeholder: "Enter " },
-  { label: "", type: "text", name: "shift_type", placeholder: "Enter " },
-  { label: "", type: "text", name: "is_flexible", placeholder: "Enter " },
-  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
-  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
-  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
+  { label: "Shift ID", type: "text", name: "work_shift_id", placeholder: "Enter ID", col: "col-4" },
+  { label: "Facility ID", type: "text", name: "facility_id", placeholder: "Enter Facility ID", col: "col-4" },
+  { label: "Shift Code", type: "text", name: "shift_code", placeholder: "Enter Code", col: "col-4" },
+  { label: "Shift Name", type: "text", name: "shift_name", placeholder: "Enter Name", col: "col-8" },
+  { label: "Shift Type", type: "text", name: "shift_type", placeholder: "Enter Type", col: "col-4" },
+  { label: "Start Time", type: "text", name: "start_time", placeholder: "HH:MM", col: "col-4" },
+  { label: "End Time", type: "text", name: "end_time", placeholder: "HH:MM", col: "col-4" },
+  { label: "Duration (Hrs)", type: "text", name: "duration_hours", placeholder: "Enter Hours", col: "col-4" },
+  { label: "Grace Period (Mins)", type: "text", name: "grace_period_minutes", placeholder: "Enter Minutes", col: "col-4" },
+  { label: "Shift Allowance", type: "text", name: "shift_allowance", placeholder: "Enter Amount", col: "col-4" },
+  { label: "Color Code", type: "text", name: "color_code", placeholder: "e.g. #FF0000", col: "col-4" },
+  { label: "Is Overnight", type: "text", name: "is_overnight", placeholder: "Yes/No", col: "col-3" },
+  { label: "Is Weekend", type: "text", name: "is_weekend_shift", placeholder: "Yes/No", col: "col-3" },
+  { label: "Is Flexible", type: "text", name: "is_flexible", placeholder: "Yes/No", col: "col-3" },
+  { label: "Status", type: "badge", name: "status", col: "col-3" },
 ]);
-
 
 // --- Handlers ---
 const handleSearch = (query) => {
@@ -133,10 +126,18 @@ onMounted(() => {
       :columns="tableColumns"
       :loading="store.loading"
       :pagination="store.pagination"
+      :show-index="false"
       @search="handleSearch"
       @page-change="handlePageChange"
       @size-change="handleSizeChange"
     >
+      <template #cell(status)="{ row }">
+        <span v-if="row.status" class="badge" :class="`bg-${row.status.theme || 'primary'}`">
+          {{ row.status.label || 'N/A' }}
+        </span>
+        <span v-else class="text-muted">N/A</span>
+      </template>
+
       <template #header-actions>
         <button class="btn btn-sm btn-primary" @click="openCreateModal">
           <i class="fa fa-plus me-1"></i> Create WorkShift
@@ -155,10 +156,11 @@ onMounted(() => {
 
     <BaseModal 
       :showModal="showModal" 
+      size="modal-xl"
       :title="isEditing ? 'Edit WorkShift' : 'Create WorkShift'" 
       @close="showModal = false"
     >
-      <BaseForm 
+      <BaseGridForm 
         v-model="formData" 
         :fields="formFields" 
         :showSubmit="false" 

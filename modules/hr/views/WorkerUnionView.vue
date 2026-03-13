@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
 import BaseModal from "@/components/BaseModal.vue";
-import BaseForm from "@/components/BaseForm.vue";
+import BaseGridForm from "@/components/BaseGridForm.vue";
 import BasePageHeading from "@/components/BasePageHeading.vue";
 import { useWorkerUnionStore } from "~/hr/stores/workerUnionStore";
 import { useAlert } from "@/composables/alerts";
@@ -10,12 +10,10 @@ import { useAlert } from "@/composables/alerts";
 const { toastSuccess, toastError, confirmAction } = useAlert();
 const store = useWorkerUnionStore();
 
-// --- UI State ---
 const showModal = ref(false);
 const isEditing = ref(false);
 let currentQuery = "";
 
-// --- Table Configuration ---
 const tableColumns = [
   { name: "Union Id", field: "union_id" },
   { name: "Union Name", field: "union_name" },
@@ -27,61 +25,29 @@ const tableColumns = [
   { name: "Address", field: "address" },
   { name: "Monthly Dues", field: "monthly_dues" },
   { name: "Status", field: "status" },
-  // { name: "Is Deleted", field: "is_deleted" },
-  // { name: "Created At", field: "created_at" },
-  // { name: "Updated At", field: "updated_at" },
-  // { name: "Created By", field: "created_by" },
-  // { name: "Updated By", field: "updated_by" },
   { name: "Actions", field: "actions" },
 ];
 
-// --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
-  { label: "", type: "text", name: "union_id", placeholder: "Enter " },
-  { label: "", type: "text", name: "union_name", placeholder: "Enter " },
-  { label: "", type: "text", name: "union_code", placeholder: "Enter " },
-  { label: "", type: "text", name: "registration_number", placeholder: "Enter " },
-  { label: "", type: "text", name: "contact_person", placeholder: "Enter " },
-  { label: "", type: "text", name: "phone", placeholder: "Enter " },
-  { label: "", type: "text", name: "email", placeholder: "Enter " },
-  { label: "", type: "text", name: "address", placeholder: "Enter " },
-  { label: "", type: "text", name: "monthly_dues", placeholder: "Enter " },
-  { label: "", type: "text", name: "status", placeholder: "Enter " },
-  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
-  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
-  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
-  { label: "", type: "text", name: "created_by", placeholder: "Enter " },
-  { label: "", type: "text", name: "updated_by", placeholder: "Enter " },
+  { label: "Union ID", type: "text", name: "union_id", placeholder: "Enter ID", col: "col-4" },
+  { label: "Union Name", type: "text", name: "union_name", placeholder: "Enter Name", col: "col-8" },
+  { label: "Union Code", type: "text", name: "union_code", placeholder: "Enter Code", col: "col-4" },
+  { label: "Registration No.", type: "text", name: "registration_number", placeholder: "Enter Reg Number", col: "col-8" },
+  { label: "Contact Person", type: "text", name: "contact_person", placeholder: "Enter Contact Name", col: "col-6" },
+  { label: "Phone Number", type: "text", name: "phone", placeholder: "Enter Phone", col: "col-6" },
+  { label: "Email Address", type: "email", name: "email", placeholder: "Enter Email", col: "col-6" },
+  { label: "Monthly Dues", type: "text", name: "monthly_dues", placeholder: "Enter Dues Amount", col: "col-6" },
+  { label: "Status", type: "badge", name: "status", col: "col-4" },
+  { label: "Physical Address", type: "textarea", name: "address", placeholder: "Enter Address", col: "col-12" },
 ]);
 
+const handleSearch = (query) => { currentQuery = query; store.fetchAll(query, 1, store.pagination?.perPage || 25); };
+const handlePageChange = (newPage) => { store.fetchAll(currentQuery, newPage, store.pagination?.perPage || 25); };
+const handleSizeChange = (newSize) => { store.fetchAll(currentQuery, 1, newSize); };
 
-// --- Handlers ---
-const handleSearch = (query) => {
-  currentQuery = query;
-  store.fetchAll(query, 1, store.pagination?.perPage || 25);
-};
-
-const handlePageChange = (newPage) => {
-  store.fetchAll(currentQuery, newPage, store.pagination?.perPage || 25);
-};
-
-const handleSizeChange = (newSize) => {
-  store.fetchAll(currentQuery, 1, newSize);
-};
-
-// --- Action Handlers ---
-const openCreateModal = () => {
-  isEditing.value = false;
-  formData.value = {}; 
-  showModal.value = true;
-};
-
-const openEditModal = (row) => {
-  isEditing.value = true;
-  formData.value = { ...row }; 
-  showModal.value = true;
-};
+const openCreateModal = () => { isEditing.value = false; formData.value = {}; showModal.value = true; };
+const openEditModal = (row) => { isEditing.value = true; formData.value = { ...row }; showModal.value = true; };
 
 const handleSave = async () => {
   try {
@@ -112,28 +78,33 @@ const handleDelete = async (row) => {
   }
 };
 
-onMounted(() => {
-  store.fetchAll().catch(() => toastError("Error", "Failed to load data"));
-});
+onMounted(() => { store.fetchAll().catch(() => toastError("Error", "Failed to load data")); });
 </script>
 
 <template>
   <div class="content">
     <BasePageHeading title="WorkerUnion Management" />
-
     <BaseTable
       title="WorkerUnions"
       :data="store.items"
       :columns="tableColumns"
       :loading="store.loading"
       :pagination="store.pagination"
+      :show-index="false"
       @search="handleSearch"
       @page-change="handlePageChange"
       @size-change="handleSizeChange"
     >
+      <template #cell(status)="{ row }">
+        <span v-if="row.status" class="badge" :class="`bg-${row.status.theme || 'primary'}`">
+          {{ row.status.label || 'N/A' }}
+        </span>
+        <span v-else class="text-muted">N/A</span>
+      </template>
+
       <template #header-actions>
         <button class="btn btn-sm btn-primary" @click="openCreateModal">
-          <i class="fa fa-plus me-1"></i> Create WorkerUnion
+          <i class="fa fa-plus me-1"></i> Create Union
         </button>
       </template>
 
@@ -149,22 +120,14 @@ onMounted(() => {
 
     <BaseModal 
       :showModal="showModal" 
+      size="modal-lg"
       :title="isEditing ? 'Edit WorkerUnion' : 'Create WorkerUnion'" 
       @close="showModal = false"
     >
-      <BaseForm 
-        v-model="formData" 
-        :fields="formFields" 
-        :showSubmit="false" 
-      />
-      
+      <BaseGridForm v-model="formData" :fields="formFields" :showSubmit="false" />
       <template #footer>
-        <button type="button" class="btn btn-sm btn-alt-secondary me-2" @click="showModal = false">
-          Cancel
-        </button>
-        <button type="button" class="btn btn-sm btn-primary" @click="handleSave">
-          {{ isEditing ? 'Update' : 'Save' }}
-        </button>
+        <button type="button" class="btn btn-sm btn-alt-secondary me-2" @click="showModal = false">Cancel</button>
+        <button type="button" class="btn btn-sm btn-primary" @click="handleSave">{{ isEditing ? 'Update' : 'Save' }}</button>
       </template>
     </BaseModal>
   </div>

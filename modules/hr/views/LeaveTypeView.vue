@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
 import BaseModal from "@/components/BaseModal.vue";
-import BaseForm from "@/components/BaseForm.vue";
+import BaseGridForm from "@/components/BaseGridForm.vue";
 import BasePageHeading from "@/components/BasePageHeading.vue";
 import { useLeaveTypeStore } from "~/hr/stores/leaveTypeStore";
 import { useAlert } from "@/composables/alerts";
@@ -10,12 +10,10 @@ import { useAlert } from "@/composables/alerts";
 const { toastSuccess, toastError, confirmAction } = useAlert();
 const store = useLeaveTypeStore();
 
-// --- UI State ---
 const showModal = ref(false);
 const isEditing = ref(false);
 let currentQuery = "";
 
-// --- Table Configuration ---
 const tableColumns = [
   { name: "Leave Type Id", field: "leave_type_id" },
   { name: "Name", field: "name" },
@@ -23,53 +21,25 @@ const tableColumns = [
   { name: "Gender Specific", field: "gender_specific" },
   { name: "Paid", field: "paid" },
   { name: "Requires Approval", field: "requires_approval" },
-  // { name: "Is Deleted", field: "is_deleted" },
-  // { name: "Created At", field: "created_at" },
-  // { name: "Updated At", field: "updated_at" },
   { name: "Actions", field: "actions" },
 ];
 
-// --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
-  { label: "", type: "text", name: "leave_type_id", placeholder: "Enter " },
-  { label: "", type: "text", name: "name", placeholder: "Enter " },
-  { label: "", type: "text", name: "default_days", placeholder: "Enter " },
-  { label: "", type: "text", name: "gender_specific", placeholder: "Enter " },
-  { label: "", type: "text", name: "paid", placeholder: "Enter " },
-  { label: "", type: "text", name: "requires_approval", placeholder: "Enter " },
-  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
-  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
-  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
+  { label: "Leave Type ID", type: "text", name: "leave_type_id", placeholder: "Enter ID", col: "col-4" },
+  { label: "Name", type: "text", name: "name", placeholder: "Enter Leave Name", col: "col-8" },
+  { label: "Default Days", type: "text", name: "default_days", placeholder: "Enter Days", col: "col-4" },
+  { label: "Gender Specific", type: "text", name: "gender_specific", placeholder: "All/Male/Female", col: "col-8" },
+  { label: "Paid Leave", type: "text", name: "paid", placeholder: "Yes/No", col: "col-6" },
+  { label: "Requires Approval", type: "text", name: "requires_approval", placeholder: "Yes/No", col: "col-6" },
 ]);
 
+const handleSearch = (query) => { currentQuery = query; store.fetchAll(query, 1, store.pagination?.perPage || 25); };
+const handlePageChange = (newPage) => { store.fetchAll(currentQuery, newPage, store.pagination?.perPage || 25); };
+const handleSizeChange = (newSize) => { store.fetchAll(currentQuery, 1, newSize); };
 
-// --- Handlers ---
-const handleSearch = (query) => {
-  currentQuery = query;
-  store.fetchAll(query, 1, store.pagination?.perPage || 25);
-};
-
-const handlePageChange = (newPage) => {
-  store.fetchAll(currentQuery, newPage, store.pagination?.perPage || 25);
-};
-
-const handleSizeChange = (newSize) => {
-  store.fetchAll(currentQuery, 1, newSize);
-};
-
-// --- Action Handlers ---
-const openCreateModal = () => {
-  isEditing.value = false;
-  formData.value = {}; 
-  showModal.value = true;
-};
-
-const openEditModal = (row) => {
-  isEditing.value = true;
-  formData.value = { ...row }; 
-  showModal.value = true;
-};
+const openCreateModal = () => { isEditing.value = false; formData.value = {}; showModal.value = true; };
+const openEditModal = (row) => { isEditing.value = true; formData.value = { ...row }; showModal.value = true; };
 
 const handleSave = async () => {
   try {
@@ -100,21 +70,19 @@ const handleDelete = async (row) => {
   }
 };
 
-onMounted(() => {
-  store.fetchAll().catch(() => toastError("Error", "Failed to load data"));
-});
+onMounted(() => { store.fetchAll().catch(() => toastError("Error", "Failed to load data")); });
 </script>
 
 <template>
   <div class="content">
     <BasePageHeading title="LeaveType Management" />
-
     <BaseTable
       title="LeaveTypes"
       :data="store.items"
       :columns="tableColumns"
       :loading="store.loading"
       :pagination="store.pagination"
+      :show-index="false"
       @search="handleSearch"
       @page-change="handlePageChange"
       @size-change="handleSizeChange"
@@ -137,22 +105,14 @@ onMounted(() => {
 
     <BaseModal 
       :showModal="showModal" 
+      size="modal-lg"
       :title="isEditing ? 'Edit LeaveType' : 'Create LeaveType'" 
       @close="showModal = false"
     >
-      <BaseForm 
-        v-model="formData" 
-        :fields="formFields" 
-        :showSubmit="false" 
-      />
-      
+      <BaseGridForm v-model="formData" :fields="formFields" :showSubmit="false" />
       <template #footer>
-        <button type="button" class="btn btn-sm btn-alt-secondary me-2" @click="showModal = false">
-          Cancel
-        </button>
-        <button type="button" class="btn btn-sm btn-primary" @click="handleSave">
-          {{ isEditing ? 'Update' : 'Save' }}
-        </button>
+        <button type="button" class="btn btn-sm btn-alt-secondary me-2" @click="showModal = false">Cancel</button>
+        <button type="button" class="btn btn-sm btn-primary" @click="handleSave">{{ isEditing ? 'Update' : 'Save' }}</button>
       </template>
     </BaseModal>
   </div>
