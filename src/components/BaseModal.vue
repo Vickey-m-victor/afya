@@ -1,66 +1,35 @@
 <script setup>
-import BaseButton from "./BaseButton.vue";
-
 const props = defineProps({
-  title: {
-    type: String,
-    default: "Modal",
-  },
-  size: {
-    type: String,
-    default: "modal-lg", //modal-xl, modal-sm
-  },
-  showModal: {
-    type: Boolean,
-    default: false,
-  },
-  position: {
-    type: String,
-    default: "modal-dialog-centered",
-  },
+  showModal: { type: Boolean, default: false },
+  title: { type: String, default: "Modal Title" },
+  size: { type: String, default: "modal-md" },
+  position: { type: String, default: "modal-dialog-centered" }
 });
-const emit = defineEmits([ "close"]);
-
-const close = () => emit("close");
+defineEmits(["close"]);
 </script>
-
 <template>
-  <div
-    v-if="showModal"
-    class="modal fade show d-block"
-    id="modal-block-vcenter"
-    tabindex="-1"
-    role="dialog"
-    aria-labelledby="modal-block-vcenter"
-    aria-hidden="true"
-    @click.self="close"
-    style="background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);"
-  >
-    <div class="modal-dialog" :class="[size, position]" role="document">
+  <div v-if="showModal" class="modal d-block" style="background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(3px);" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" :class="size">
       <div class="modal-content">
-        <BaseBlock :title="title" transparent class="mb-0">
+        <BaseBlock :title="title" class="mb-0" transparent>
           <template #options>
-            <button
-              type="button"
-              class="btn-block-option"
-              aria-label="Close"
-              @click="close"
-            >
+            <button type="button" class="btn-block-option" @click="$emit('close')">
               <i class="fa fa-fw fa-times"></i>
             </button>
           </template>
-
-          <template #content>
-            <div class="block-content fs-sm">
-              <slot></slot>
-            </div>
-          </template>
+          
+          <div class="block-content fs-sm mb-3">
+            <slot></slot>
+          </div>
+          
+          <div class="block-content block-content-full text-end bg-body">
+            <slot name="footer">
+              <button type="button" class="btn btn-sm btn-alt-secondary" @click="$emit('close')">
+                Close
+              </button>
+            </slot>
+          </div>
         </BaseBlock>
-        <div class="block-content block-content-full text-end bg-body">
-          <slot name="footer">
-            <BaseButton label="Close" variant="secondary" @click="close"> </BaseButton>
-          </slot>
-        </div>
       </div>
     </div>
   </div>

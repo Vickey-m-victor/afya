@@ -3,7 +3,7 @@ import api from "@/utils/api";
 const searchDropdownService = {
   getAll(searchQuery = "", page = 1, perPage = 25) {
     const queryParam = searchQuery ? `&q=${searchQuery}` : '';
-    const url = `/hr/department/search-dropdown?page=${page}&per-page=${perPage}${queryParam}`;
+    const url = `/hr/department/search-dropdown?page=${page}&per_page=${perPage}${queryParam}`;
     return api.get(url);
   },
   
@@ -12,7 +12,7 @@ const searchDropdownService = {
   },
   
   create(data) {
-    return api.post("/hr/department/search-dropdown", data);
+    return api.post(`/hr/department/search-dropdown`, data);
   },
   
   update(id, data) {

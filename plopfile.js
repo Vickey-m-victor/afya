@@ -1,12 +1,5 @@
 import fs from "fs";
 
-// Helper functions to safely format names (e.g., "job-group" -> "jobGroup")
-const toCamelCase = (str) => str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-const toPascalCase = (str) => {
-  const camel = toCamelCase(str);
-  return camel.charAt(0).toUpperCase() + camel.slice(1);
-};
-
 export default function (plop) {
   const manifest = JSON.parse(fs.readFileSync("./modules-manifest.json", "utf8"));
 
@@ -19,7 +12,6 @@ export default function (plop) {
       manifest.modules.forEach((module) => {
         const basePath = `modules/${module.name}`;
         
-        // Generate the Module-Level Router Aggregator (e.g., hr/router.js)
         actions.push({
           type: "add",
           path: `${basePath}/router.js`,
@@ -32,15 +24,16 @@ export default function (plop) {
         });
 
         module.submodules.forEach((sub) => {
+          const camelName = plop.getHelper("camelCase")(sub.name);
+          const pascalName = plop.getHelper("pascalCase")(sub.name);
+          const singularEndpoint = sub.endpoint.endsWith("s") ? sub.endpoint.slice(0, -1) : sub.endpoint;
+
           const data = {
             moduleName: module.name, 
             entityName: sub.name,    
             endpoint: sub.endpoint,  
+            singularEndpoint: singularEndpoint
           };
-
-          // Safely convert names for the file paths
-          const camelName = toCamelCase(sub.name);
-          const pascalName = toPascalCase(sub.name);
 
           actions.push({
             type: "add",

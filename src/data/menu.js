@@ -11,16 +11,16 @@ export default {
       to: "dashboard",
       icon: "si si-speedometer",
     },
-    {
-      name: "Tests",
-      to: "tests",
-      icon: "si si-settings",
-    },
-    {
-      name: "Components",
-      to: "components",
-      icon: "si si-settings",
-    },
+    // {
+    //   name: "Tests",
+    //   to: "tests",
+    //   icon: "si si-settings",
+    // },
+    // {
+    //   name: "Components",
+    //   to: "components",
+    //   icon: "si si-settings",
+    // },
 
     {
       name: "HR Management",
