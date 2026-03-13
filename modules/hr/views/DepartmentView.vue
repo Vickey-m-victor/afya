@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
 import BaseModal from "@/components/BaseModal.vue";
-import BaseForm from "@/components/BaseForm.vue";
+import BaseGridForm from "@/components/BaseGridForm.vue";
 import BasePageHeading from "@/components/BasePageHeading.vue";
 import { useDepartmentStore } from "~/hr/stores/departmentStore";
 import { useAlert } from "@/composables/alerts";
@@ -33,16 +33,16 @@ const tableColumns = [
 // --- Form Configuration ---
 const formData = ref({});
 const formFields = reactive([
-  { label: "", type: "text", name: "department_id", placeholder: "Enter " },
-  { label: "", type: "text", name: "facility_id", placeholder: "Enter " },
-  { label: "", type: "text", name: "parent_id", placeholder: "Enter " },
-  { label: "", type: "text", name: "department_name", placeholder: "Enter " },
-  { label: "", type: "text", name: "department_code", placeholder: "Enter " },
-  { label: "", type: "text", name: "description", placeholder: "Enter " },
-  { label: "", type: "text", name: "status", placeholder: "Enter " },
-  { label: "", type: "text", name: "is_deleted", placeholder: "Enter " },
-  { label: "", type: "text", name: "created_at", placeholder: "Enter " },
-  { label: "", type: "text", name: "updated_at", placeholder: "Enter " },
+  { label: "Department ID", type: "text", name: "department_id", placeholder: "Department ID", col: "col-4" },
+  { label: "Facility ID", type: "text", name: "facility_id", placeholder: "Enter Facility ID", col: "col-8" },
+  { label: "Parent ID", type: "text", name: "parent_id", placeholder: "Enter Parent ID", col: "col-6" },
+  { label: "Department Name", type: "text", name: "department_name", placeholder: "Enter Name", col: "col-4" },
+  { label: "Department Code", type: "text", name: "department_code", placeholder: "Enter Code", col: "col-4" },
+  { label: "Description", type: "text", name: "description", placeholder: "Enter Description", col: "col-8" },
+  { label: "Status", type: "badge", name: "status", col: "col-4" }, 
+  //   // { label: "Is Deleted", type: "text", name: "is_deleted", placeholder: "Enter Deleted Status", col: "col-4" },
+  // { label: "Created At", type: "text", name: "created_at", placeholder: "Enter Created Date", col: "col-4" },
+  // { label: "Updated At", type: "text", name: "updated_at", placeholder: "Enter Updated Date", col: "col-4" },
 ]);
 
 
@@ -117,10 +117,17 @@ onMounted(() => {
       :columns="tableColumns"
       :loading="store.loading"
       :pagination="store.pagination"
+      :show-index="false"
       @search="handleSearch"
       @page-change="handlePageChange"
       @size-change="handleSizeChange"
     >
+    <template #cell(status)="{ row }">
+        <span v-if="row.status" class="badge" :class="`bg-${row.status.theme || 'primary'}`">
+          {{ row.status.label || 'N/A' }}
+        </span>
+        <span v-else class="text-muted">N/A</span>
+      </template>
       <template #header-actions>
         <button class="btn btn-sm btn-primary" @click="openCreateModal">
           <i class="fa fa-plus me-1"></i> Create Department
@@ -141,8 +148,9 @@ onMounted(() => {
       :showModal="showModal" 
       :title="isEditing ? 'Edit Department' : 'Create Department'" 
       @close="showModal = false"
+
     >
-      <BaseForm 
+      <BaseGridForm 
         v-model="formData" 
         :fields="formFields" 
         :showSubmit="false" 

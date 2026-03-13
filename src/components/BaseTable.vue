@@ -11,7 +11,8 @@ const props = defineProps({
   pagination: {
     type: Object,
     default: () => ({ currentPage: 1, totalPages: 1, perPage: 25, totalCount: 0 })
-  }
+  },
+  showIndex: { type: Boolean, default: true }
 });
 
 const emit = defineEmits(["search", "page-change", "size-change"]);
@@ -59,7 +60,7 @@ const getNestedValue = (obj, path) => {
       <table class="table table-striped mb-0">
         <thead>
           <tr>
-            <th style="width: 50px">ID</th>
+            <th v-if="showIndex" style="width: 50px">#</th>
             <th v-for="(col, index) in columns" :key="col.field">{{ col.name }}</th>
           </tr>
         </thead>
