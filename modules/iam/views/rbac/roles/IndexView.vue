@@ -3,9 +3,16 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import DataTable from "@/components/DataTable/DataTable.vue";
 import { useDataTable } from "@/composables/useDataTable";
-import roleService from "../../../services/roleService";
+import { useApi } from "@/helpers/useApi";
+import { useModalStore } from "@/stores/modal";
 import RolesForm from "../../../components/RolesForm.vue";
+import AssignmentManager from "../../../components/AssignmentManager.vue";
+import { useAlertStore } from "@/stores/alert";
+import { useAlert } from "@/composables/alerts";
 
+const modalStore = useModalStore();
+const alertStore = useAlertStore();
+const { confirmAction } = useAlert();
 const router = useRouter();
 
 const {
@@ -14,63 +21,54 @@ const {
   perPage,
   sortBy,
   sortDir,
+  totalCount,
+  totalPages,
   perPageOptions,
   setSearchDebounced,
   setPage,
   setPerPage,
   setSort,
+  syncFromResponse,
+  buildQueryParams,
 } = useDataTable({
-  initialPage: 1,
-  initialPerPage: 20,
-  perPageOptions: [10, 20, 50, 100],
   initialSortBy: "role_name",
   initialSortDir: "asc",
-  searchDebounceMs: 300,
 });
 
 const tableColumns = [
   { field: "role_name", header: "Name", cellClass: "fw-semibold" },
   { field: "role_id", header: "Role ID" },
   { field: "ruleName", header: "Rule Name" },
-  { field: "manage", header: "Manage", width: "90px", headerClass: "text-center", cellClass: "text-center", sortable: false },
 ];
 
 const roles = ref([]);
 const loading = ref(false);
-const totalCount = ref(0);
-const totalPages = ref(1);
 
-const showModal = ref(false);
-const modalTitle = ref("");
 const modalMode = ref("view");
-const formData = ref({});
-const fieldErrors = ref({});
-const formLoading = ref(false);
+const selectedRole = ref(null);
 
 const fetchRoles = async () => {
   loading.value = true;
   try {
-    const params = {
-      page: currentPage.value,
-      "per-page": perPage.value,
-      sort_by: sortBy.value,
-      sort_dir: sortDir.value,
-    };
+    const { data: responseData, request, error } = useApi("/iam/rbac/roles", {
+      method: "GET",
+      autoFetch: false,
+    });
 
-    if (searchQuery.value) {
-      params._search = searchQuery.value;
+    await request(null, buildQueryParams());
+
+    if (error.value) {
+      throw error.value;
     }
 
-    const response = await roleService.getRoles(params);
-    const payload = response.data?.dataPayload || response.data;
+    const payload = responseData.value?.dataPayload || responseData.value;
+    syncFromResponse(payload);
 
     const dataArray = Array.isArray(payload?.data) 
       ? payload.data 
       : Object.values(payload?.data || {});
     
     roles.value = dataArray;
-    totalCount.value = payload?.totalCount || 0;
-    totalPages.value = payload?.totalPages || 1;
   } catch (error) {
     console.error("Failed to fetch roles:", error);
   } finally {
@@ -99,74 +97,263 @@ function handleSort(field) {
 
 function handleView(role) {
   modalMode.value = "view";
-  modalTitle.value = "View Role";
-  formData.value = { ...role };
-  fieldErrors.value = {};
-  showModal.value = true;
+  modalStore.toggleModalUsage(true); // set to false to navigate to page
+
+  if (!modalStore.useModal) {
+    router.push({ name: 'iam/rbac/roles/view', params: { id: role.role_id } });
+    return;
+  }
+
+  modalStore.openModal({
+    component: RolesForm,
+    props: {
+      formData: { ...role },
+      fieldErrors: {},
+      isLoading: false,
+      readonly: true,
+      hideSubmit: true,
+      compact: true,
+      onSubmit: handleSubmit
+    },
+    title: "View Role",
+    size: "md",
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+  });
 }
 
 function handleCreate() {
   modalMode.value = "create";
-  modalTitle.value = "Create Role";
-  formData.value = {};
-  fieldErrors.value = {};
-  showModal.value = true;
+  modalStore.toggleModalUsage(true); // set to false to navigate to page
+
+  if (!modalStore.useModal) {
+    router.push({ name: 'iam/rbac/roles/create' });
+    return;
+  }
+
+  modalStore.openModal({
+    component: RolesForm,
+    props: {
+      formData: {},
+      fieldErrors: {},
+      isLoading: false,
+      readonly: false,
+      hideSubmit: false,
+      compact: true,
+      onSubmit: handleSubmit
+    },
+    title: "Create Role",
+    size: "md",
+    showFooter: false,
+  });
 }
 
 function handleEdit(role) {
   modalMode.value = "edit";
-  modalTitle.value = "Edit Role";
-  formData.value = { ...role };
-  fieldErrors.value = {};
-  showModal.value = true;
-}
+  modalStore.toggleModalUsage(true); // set to false to navigate to page
 
-async function handleDelete(role) {
-  if (!confirm(`Are you sure you want to delete role "${role.role_name}"?`)) {
+  if (!modalStore.useModal) {
+    router.push({ name: 'iam/rbac/roles/update', params: { id: role.role_id } });
     return;
   }
 
+  modalStore.openModal({
+    component: RolesForm,
+    props: {
+      formData: { ...role },
+      fieldErrors: {},
+      isLoading: false,
+      readonly: false,
+      hideSubmit: false,
+      compact: true,
+      onSubmit: handleSubmit
+    },
+    title: "Edit Role",
+    size: "md",
+    showFooter: false,
+  });
+}
+
+async function handleDelete(role) {
+  const result = await confirmAction(
+    `Delete Role "${role.role_name}"?`,
+    "This will permanently remove the role and its permission assignments."
+  );
+  if (!result.isConfirmed) return;
+
   try {
-    await roleService.deleteRole(role.role_id);
+    const { request, error } = useApi(`/iam/rbac/role/${role.role_id}`, {
+      method: "DELETE",
+      autoFetch: false,
+    });
+
+    await request();
+    if (error.value) {
+      throw error.value;
+    }
+
     await fetchRoles();
   } catch (error) {
     console.error("Failed to delete role:", error);
-    alert("Failed to delete role");
+    alertStore.show({ theme: "error", type: "toast", message: "Failed to delete role." });
   }
 }
 
-function handleManagePermissions(role) {
-  router.push(`/iam/rbac/roles/${role.role_id}/permissions`);
+function normalizeAssignmentItems(items) {
+  return Object.entries(items || {}).map(([id, item]) => ({
+    id,
+    label: item?.display_name || id,
+    type: item?.type || "",
+  }));
+}
+
+function normalizeAlertify(payload, fallbackType, fallbackMessage) {
+  if (!payload) {
+    return {
+      type: fallbackType,
+      message: fallbackMessage,
+    };
+  }
+
+  const type = payload.theme || payload.type || fallbackType;
+  return {
+    type,
+    title: payload.title,
+    message: payload.message || fallbackMessage,
+    options: payload.options,
+  };
+}
+
+function handleResponseAlert(response, fallbackMessage) {
+  const payload = response?.alertifyPayload || response?.dataPayload?.alertify || response?.data?.alertifyPayload || response?.data?.dataPayload?.alertify;
+  const normalized = normalizeAlertify(payload, "success", fallbackMessage);
+  alertStore.show(normalized);
+}
+
+function handleErrorAlert(error, fallbackMessage) {
+  const payload = error?.alertifyPayload;
+  const normalized = normalizeAlertify(payload, "error", fallbackMessage);
+  alertStore.show(normalized);
+}
+
+async function loadRoleAssignments(roleId) {
+  const { data: responseData, request, error } = useApi(`/iam/rbac/role/${roleId}`, {
+    method: "GET",
+    autoFetch: false,
+  });
+  await request();
+  if (error.value) throw error.value;
+  const roleData = responseData.value?.dataPayload?.data || {};
+  const items = roleData.items || {};
+  return {
+    available: normalizeAssignmentItems(items.available),
+    assigned: normalizeAssignmentItems(items.assigned),
+  };
+}
+
+async function handleManagePermissions(role) {
+  selectedRole.value = role;
+
+  modalStore.openModal({
+    component: AssignmentManager,
+    title: `Manage Permissions: ${role.role_name || role.role_id}`,
+    size: "xl",
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+    props: {
+      availableItems: [],
+      assignedItems: [],
+      isLoading: true,
+      isSubmitting: false,
+      availableLabel: "Available Permissions",
+      assignedLabel: "Assigned Permissions",
+      onAssign: async (selectedIds) => {
+        modalStore.props.isSubmitting = true;
+        const { data: responseData, request, error } = useApi(
+          `/iam/rbac/role/assign/${role.role_id}`,
+          { method: "POST", autoFetch: false }
+        );
+        await request({ permissions: selectedIds });
+        if (error.value) {
+          handleErrorAlert(error.value, "Failed to assign permissions.");
+        } else {
+          handleResponseAlert(responseData.value, "Permissions assigned successfully.");
+          await fetchRoles();
+        }
+        await reloadRoleAssignmentsIntoModal(role.role_id);
+      },
+      onRemove: async (selectedIds) => {
+        modalStore.props.isSubmitting = true;
+        const { data: responseData, request, error } = useApi(
+          `/iam/rbac/role/remove/${role.role_id}`,
+          { method: "POST", autoFetch: false }
+        );
+        await request({ permissions: selectedIds });
+        if (error.value) {
+          handleErrorAlert(error.value, "Failed to remove permissions.");
+        } else {
+          handleResponseAlert(responseData.value, "Permissions removed successfully.");
+          await fetchRoles();
+        }
+        await reloadRoleAssignmentsIntoModal(role.role_id);
+      },
+    },
+  });
+
+  await reloadRoleAssignmentsIntoModal(role.role_id);
+}
+
+async function reloadRoleAssignmentsIntoModal(roleId) {
+  modalStore.props.isLoading = true;
+  modalStore.props.isSubmitting = false;
+  try {
+    const data = await loadRoleAssignments(roleId);
+    modalStore.props.availableItems = data.available;
+    modalStore.props.assignedItems = data.assigned;
+  } catch (err) {
+    console.error("Failed to reload role assignments:", err);
+    modalStore.props.availableItems = [];
+    modalStore.props.assignedItems = [];
+  } finally {
+    modalStore.props.isLoading = false;
+  }
 }
 
 async function handleSubmit(data) {
-  formLoading.value = true;
-  fieldErrors.value = {};
+  modalStore.props.isLoading = true;
+  modalStore.props.fieldErrors = {};
 
-  try {
-    if (modalMode.value === "create") {
-      await roleService.createRole(data);
-    } else if (modalMode.value === "edit") {
-      await roleService.updateRole(data.role_id, data);
-    }
+  let apiError = null;
 
-    showModal.value = false;
-    await fetchRoles();
-  } catch (error) {
-    console.error("Form submission error:", error);
-
-    if (error.response?.data?.errorPayload?.errors) {
-      fieldErrors.value = error.response.data.errorPayload.errors;
-    }
-
-    throw error;
-  } finally {
-    formLoading.value = false;
+  if (modalMode.value === "create") {
+    const { request, error } = useApi("/iam/rbac/role", {
+      method: "POST",
+      autoFetch: false,
+    });
+    await request(data);
+    apiError = error.value;
+  } else if (modalMode.value === "edit") {
+    const { request, error } = useApi(`/iam/rbac/role/${data.role_id}`, {
+      method: "PUT",
+      autoFetch: false,
+    });
+    await request(data);
+    apiError = error.value;
   }
-}
 
-function closeModal() {
-  showModal.value = false;
+  modalStore.props.isLoading = false;
+
+  if (apiError) {
+    const errors =
+      typeof apiError === "object" && !Array.isArray(apiError) ? apiError : {};
+    modalStore.props.fieldErrors = errors;
+    return;
+  }
+
+  modalStore.closeModal();
+  await fetchRoles();
 }
 
 onMounted(() => {
@@ -182,7 +369,8 @@ onMounted(() => {
       :columns="tableColumns"
       :loading="loading"
       row-key="role_id"
-      :actions="['view', 'edit', 'delete']"
+      :actions="['view', 'edit', 'manage', 'delete']"
+      :action-icons="{ manage: 'fa fa-key' }"
       :total-count="totalCount"
       :search-query="searchQuery"
       search-placeholder="Search roles..."
@@ -198,6 +386,7 @@ onMounted(() => {
       @create="handleCreate"
       @view="handleView"
       @edit="handleEdit"
+      @manage="handleManagePermissions"
       @delete="handleDelete"
       @search="handleSearch"
       @change-page="handlePageChange"
@@ -216,58 +405,7 @@ onMounted(() => {
       <template #cell-ruleName="{ row }">
         {{ row.ruleName || '-' }}
       </template>
-
-      <template #cell-manage="{ row }">
-        <button
-          type="button"
-          class="btn btn-sm btn-alt-info"
-          @click="handleManagePermissions(row)"
-        >
-          <i class="fa fa-key"></i>
-        </button>
-      </template>
     </DataTable>
 
-    <div
-      class="modal"
-      :class="{ show: showModal }"
-      :style="{ display: showModal ? 'block' : 'none' }"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ modalTitle }}</h5>
-            <button type="button" class="btn-close" @click="closeModal"></button>
-          </div>
-          <div class="modal-body">
-            <RolesForm
-              :formData="formData"
-              :fieldErrors="fieldErrors"
-              :isLoading="formLoading"
-              :readonly="modalMode === 'view'"
-              :hideSubmit="modalMode === 'view'"
-              :compact="true"
-              :onSubmit="handleSubmit"
-            />
-          </div>
-          <div class="modal-footer" v-if="modalMode === 'view'">
-            <button type="button" class="btn btn-secondary btn-sm" @click="closeModal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-backdrop" :class="{ show: showModal }" v-if="showModal"></div>
   </div>
 </template>
-
-<style scoped>
-.modal.show {
-  display: block;
-}
-
-.modal-backdrop.show {
-  opacity: 0.5;
-}
-</style>

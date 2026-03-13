@@ -2,7 +2,11 @@
 import { ref, onMounted } from "vue";
 import DataTable from "@/components/DataTable/DataTable.vue";
 import { useDataTable } from "@/composables/useDataTable";
-import logService from "../../services/logService";
+import { useApi } from "@/helpers/useApi";
+import { useModalStore } from "@/stores/modal";
+import AccessLogDetailModal from "../../components/log/AccessLogDetailModal.vue";
+
+const modalStore = useModalStore();
 
 const {
   searchQuery,
@@ -38,29 +42,36 @@ const loading = ref(false);
 const totalCount = ref(0);
 const totalPages = ref(1);
 
-const showModal = ref(false);
-const selectedLog = ref(null);
-
 const fetchAccessLogs = async () => {
   loading.value = true;
+  const { data: responseData, request } = useApi("/admin/logs/access", {
+    method: "GET",
+    autoFetch: false,
+  });
+
   try {
     const params = {
       page: currentPage.value,
       "per-page": perPage.value,
-      sort_by: sortBy.value,
-      sort_dir: sortDir.value,
     };
 
-    if (searchQuery.value) {
-      params._search = searchQuery.value;
+    if (sortBy.value) {
+      params.sort = sortDir.value === "desc" ? `-${sortBy.value}` : sortBy.value;
     }
 
-    const response = await logService.getAccessLogs(params);
-    const payload = logService.normalizePayload(response);
+    if (searchQuery.value) {
+      params.q = searchQuery.value;
+    }
 
-    logs.value = payload.data;
-    totalCount.value = payload.totalCount;
-    totalPages.value = payload.totalPages;
+    await request(null, params);
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    const rawData = payload?.data;
+
+    const data = Array.isArray(rawData) ? rawData : Object.values(rawData || {});
+
+    logs.value = data;
+    totalCount.value = payload?.totalCount || 0;
+    totalPages.value = payload?.totalPages || 1;
   } catch (error) {
     console.error("Failed to fetch access logs:", error);
   } finally {
@@ -102,21 +113,20 @@ function accessAgent(row) {
 }
 
 async function handleView(log) {
-  try {
-    const response = await logService.getAccessLog(log.access_id);
-    const payload = response.data?.dataPayload || response.data || {};
-    selectedLog.value = payload?.data || payload;
-  } catch (error) {
-    console.error("Failed to fetch access log details:", error);
-    selectedLog.value = log;
-  }
-
-  showModal.value = true;
-}
-
-function closeModal() {
-  showModal.value = false;
-  selectedLog.value = null;
+  modalStore.openModal({
+    component: AccessLogDetailModal,
+    props: {
+      accessId: log.access_id,
+      summary: log,
+    },
+    title: `Access Log #${log.access_id}`,
+    size: "lg",
+    centered: true,
+    scrollable: false,
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+  });
 }
 
 onMounted(() => {
@@ -159,60 +169,5 @@ onMounted(() => {
         {{ accessAgent(row) }}
       </template>
     </DataTable>
-
-    <div
-      class="modal"
-      :class="{ show: showModal }"
-      :style="{ display: showModal ? 'block' : 'none' }"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Access Log Details</h5>
-            <button type="button" class="btn-close" @click="closeModal"></button>
-          </div>
-          <div class="modal-body" v-if="selectedLog">
-            <dl class="row mb-0">
-              <dt class="col-sm-3">ID</dt>
-              <dd class="col-sm-9">{{ selectedLog.access_id }}</dd>
-
-              <dt class="col-sm-3">User</dt>
-              <dd class="col-sm-9">{{ selectedLog.user || '-' }}</dd>
-
-              <dt class="col-sm-3">Description</dt>
-              <dd class="col-sm-9">{{ selectedLog.description || '-' }}</dd>
-
-              <dt class="col-sm-3">IP Address</dt>
-              <dd class="col-sm-9"><code>{{ selectedLog?.ip_info?.ip_address || '-' }}</code></dd>
-
-              <dt class="col-sm-3">IP Info</dt>
-              <dd class="col-sm-9">{{ selectedLog?.ip_info?.message || '-' }}</dd>
-
-              <dt class="col-sm-3">User Agent</dt>
-              <dd class="col-sm-9">{{ accessAgent(selectedLog) }}</dd>
-
-              <dt class="col-sm-3">Access Time</dt>
-              <dd class="col-sm-9">{{ selectedLog.access_time || '-' }}</dd>
-            </dl>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary btn-sm" @click="closeModal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-backdrop" :class="{ show: showModal }" v-if="showModal"></div>
   </div>
 </template>
-
-<style scoped>
-.modal.show {
-  display: block;
-}
-
-.modal-backdrop.show {
-  opacity: 0.5;
-}
-</style>

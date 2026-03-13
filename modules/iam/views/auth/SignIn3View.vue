@@ -34,15 +34,15 @@ async function onSubmit() {
     toastSuccess("Success", successMessage);
     router.push({ name: "dashboard" });
   } catch (error) {
-    // Correctly map backend errors
-    if (error?.response?.data?.errorPayload?.errors) {
-      errors.value = error.response.data.errorPayload.errors;
+    // Handle useApi error structure (errorPayload directly, not nested in response.data)
+    if (error?.errorPayload?.errors) {
+      errors.value = error.errorPayload.errors;
     } else {
       const backendMessage =
-        error?.response?.data?.errorPayload?.message ||
-        error?.response?.data?.message;
+        error?.errorPayload?.message ||
+        error?.message;
       const fallbackMessage =
-        error?.message || "Login failed. Please try again.";
+        "Login failed. Please try again.";
       toastError("Login failed", backendMessage || fallbackMessage);
     }
   } finally {

@@ -3,9 +3,16 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import DataTable from "@/components/DataTable/DataTable.vue";
 import { useDataTable } from "@/composables/useDataTable";
-import groupService from "../../../services/groupService";
+import { useApi } from "@/helpers/useApi";
+import { useModalStore } from "@/stores/modal";
 import GroupsForm from "../../../components/GroupsForm.vue";
+import AssignmentManager from "../../../components/AssignmentManager.vue";
+import { useAlertStore } from "@/stores/alert";
+import { useAlert } from "@/composables/alerts";
 
+const modalStore = useModalStore();
+const alertStore = useAlertStore();
+const { confirmAction } = useAlert();
 const router = useRouter();
 
 const {
@@ -14,18 +21,18 @@ const {
   perPage,
   sortBy,
   sortDir,
+  totalCount,
+  totalPages,
   perPageOptions,
   setSearchDebounced,
   setPage,
   setPerPage,
   setSort,
+  syncFromResponse,
+  buildQueryParams,
 } = useDataTable({
-  initialPage: 1,
-  initialPerPage: 20,
-  perPageOptions: [10, 20, 50, 100],
   initialSortBy: "group_name",
   initialSortDir: "asc",
-  searchDebounceMs: 300,
 });
 
 const tableColumns = [
@@ -33,45 +40,35 @@ const tableColumns = [
   { field: "group_id", header: "Group ID" },
   { field: "description", header: "Description" },
   { field: "ruleName", header: "Rule Name" },
-  { field: "manage", header: "Manage", width: "90px", headerClass: "text-center", cellClass: "text-center", sortable: false },
 ];
 
 const groups = ref([]);
 const loading = ref(false);
-const totalCount = ref(0);
-const totalPages = ref(1);
 
-const showModal = ref(false);
-const modalTitle = ref("");
 const modalMode = ref("view");
-const formData = ref({});
-const fieldErrors = ref({});
-const formLoading = ref(false);
+const selectedGroup = ref(null);
 
 const fetchGroups = async () => {
   loading.value = true;
   try {
-    const params = {
-      page: currentPage.value,
-      "per-page": perPage.value,
-      sort_by: sortBy.value,
-      sort_dir: sortDir.value,
-    };
+    const { data: responseData, request, error } = useApi("/iam/rbac/groups", {
+      method: "GET",
+      autoFetch: false,
+    });
 
-    if (searchQuery.value) {
-      params._search = searchQuery.value;
+    await request(null, buildQueryParams());
+    if (error.value) {
+      throw error.value;
     }
 
-    const response = await groupService.getGroups(params);
-    const payload = response.data?.dataPayload || response.data;
+    const payload = responseData.value?.dataPayload || responseData.value;
+    syncFromResponse(payload);
 
     const dataArray = Array.isArray(payload?.data) 
       ? payload.data 
       : Object.values(payload?.data || {});
     
     groups.value = dataArray;
-    totalCount.value = payload?.totalCount || 0;
-    totalPages.value = payload?.totalPages || 1;
   } catch (error) {
     console.error("Failed to fetch groups:", error);
   } finally {
@@ -100,74 +97,263 @@ function handleSort(field) {
 
 function handleView(group) {
   modalMode.value = "view";
-  modalTitle.value = "View Group";
-  formData.value = { ...group };
-  fieldErrors.value = {};
-  showModal.value = true;
+  modalStore.toggleModalUsage(true); // set to false to navigate to page
+
+  if (!modalStore.useModal) {
+    router.push({ name: 'iam/rbac/groups/view', params: { id: group.group_id } });
+    return;
+  }
+
+  modalStore.openModal({
+    component: GroupsForm,
+    props: {
+      formData: { ...group },
+      fieldErrors: {},
+      isLoading: false,
+      readonly: true,
+      hideSubmit: true,
+      compact: true,
+      onSubmit: handleSubmit
+    },
+    title: "View Group",
+    size: "md",
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+  });
 }
 
 function handleCreate() {
   modalMode.value = "create";
-  modalTitle.value = "Create Group";
-  formData.value = {};
-  fieldErrors.value = {};
-  showModal.value = true;
+  modalStore.toggleModalUsage(true); // set to false to navigate to page
+
+  if (!modalStore.useModal) {
+    router.push({ name: 'iam/rbac/groups/create' });
+    return;
+  }
+
+  modalStore.openModal({
+    component: GroupsForm,
+    props: {
+      formData: {},
+      fieldErrors: {},
+      isLoading: false,
+      readonly: false,
+      hideSubmit: false,
+      compact: true,
+      onSubmit: handleSubmit
+    },
+    title: "Create Group",
+    size: "md",
+    showFooter: false,
+  });
 }
 
 function handleEdit(group) {
   modalMode.value = "edit";
-  modalTitle.value = "Edit Group";
-  formData.value = { ...group };
-  fieldErrors.value = {};
-  showModal.value = true;
-}
+  modalStore.toggleModalUsage(true); // set to false to navigate to page
 
-async function handleDelete(group) {
-  if (!confirm(`Are you sure you want to delete group "${group.group_name}"?`)) {
+  if (!modalStore.useModal) {
+    router.push({ name: 'iam/rbac/groups/update', params: { id: group.group_id } });
     return;
   }
 
+  modalStore.openModal({
+    component: GroupsForm,
+    props: {
+      formData: { ...group },
+      fieldErrors: {},
+      isLoading: false,
+      readonly: false,
+      hideSubmit: false,
+      compact: true,
+      onSubmit: handleSubmit
+    },
+    title: "Edit Group",
+    size: "md",
+    showFooter: false,
+  });
+}
+
+async function handleDelete(group) {
+  const result = await confirmAction(
+    `Delete Group "${group.group_name}"?`,
+    "This will permanently remove the group and its role assignments."
+  );
+  if (!result.isConfirmed) return;
+
   try {
-    await groupService.deleteGroup(group.group_id);
+    const { request, error } = useApi(`/iam/rbac/group/${group.group_id}`, {
+      method: "DELETE",
+      autoFetch: false,
+    });
+
+    await request();
+    if (error.value) {
+      throw error.value;
+    }
+
     await fetchGroups();
   } catch (error) {
     console.error("Failed to delete group:", error);
-    alert("Failed to delete group");
+    alertStore.show({ theme: "error", type: "toast", message: "Failed to delete group." });
   }
 }
 
-function handleManageUsers(group) {
-  router.push(`/iam/rbac/groups/${group.group_id}/users`);
+function normalizeAssignmentItems(items) {
+  return Object.entries(items || {}).map(([id, item]) => ({
+    id,
+    label: item?.display_name || id,
+    type: item?.type || "",
+  }));
+}
+
+function normalizeAlertify(payload, fallbackType, fallbackMessage) {
+  if (!payload) {
+    return {
+      type: fallbackType,
+      message: fallbackMessage,
+    };
+  }
+
+  const type = payload.theme || payload.type || fallbackType;
+  return {
+    type,
+    title: payload.title,
+    message: payload.message || fallbackMessage,
+    options: payload.options,
+  };
+}
+
+function handleResponseAlert(response, fallbackMessage) {
+  const payload = response?.alertifyPayload || response?.dataPayload?.alertify || response?.data?.alertifyPayload || response?.data?.dataPayload?.alertify;
+  const normalized = normalizeAlertify(payload, "success", fallbackMessage);
+  alertStore.show(normalized);
+}
+
+function handleErrorAlert(error, fallbackMessage) {
+  const payload = error?.alertifyPayload;
+  const normalized = normalizeAlertify(payload, "error", fallbackMessage);
+  alertStore.show(normalized);
+}
+
+async function loadGroupAssignments(groupId) {
+  const { data: responseData, request, error } = useApi(`/iam/rbac/group/${groupId}`, {
+    method: "GET",
+    autoFetch: false,
+  });
+  await request();
+  if (error.value) throw error.value;
+  const groupData = responseData.value?.dataPayload?.data || {};
+  const items = groupData.items || {};
+  return {
+    available: normalizeAssignmentItems(items.available),
+    assigned: normalizeAssignmentItems(items.assigned),
+  };
+}
+
+async function handleManageUsers(group) {
+  selectedGroup.value = group;
+
+  modalStore.openModal({
+    component: AssignmentManager,
+    title: `Manage Roles: ${group.group_name || group.group_id}`,
+    size: "xl",
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+    props: {
+      availableItems: [],
+      assignedItems: [],
+      isLoading: true,
+      isSubmitting: false,
+      availableLabel: "Available Roles",
+      assignedLabel: "Assigned Roles",
+      onAssign: async (selectedIds) => {
+        modalStore.props.isSubmitting = true;
+        const { data: responseData, request, error } = useApi(
+          `/iam/rbac/group/assign/${group.group_id}`,
+          { method: "POST", autoFetch: false }
+        );
+        await request({ roles: selectedIds });
+        if (error.value) {
+          handleErrorAlert(error.value, "Failed to assign roles.");
+        } else {
+          handleResponseAlert(responseData.value, "Roles assigned successfully.");
+          await fetchGroups();
+        }
+        await reloadGroupAssignmentsIntoModal(group.group_id);
+      },
+      onRemove: async (selectedIds) => {
+        modalStore.props.isSubmitting = true;
+        const { data: responseData, request, error } = useApi(
+          `/iam/rbac/group/remove/${group.group_id}`,
+          { method: "POST", autoFetch: false }
+        );
+        await request({ roles: selectedIds });
+        if (error.value) {
+          handleErrorAlert(error.value, "Failed to remove roles.");
+        } else {
+          handleResponseAlert(responseData.value, "Roles removed successfully.");
+          await fetchGroups();
+        }
+        await reloadGroupAssignmentsIntoModal(group.group_id);
+      },
+    },
+  });
+
+  await reloadGroupAssignmentsIntoModal(group.group_id);
+}
+
+async function reloadGroupAssignmentsIntoModal(groupId) {
+  modalStore.props.isLoading = true;
+  modalStore.props.isSubmitting = false;
+  try {
+    const data = await loadGroupAssignments(groupId);
+    modalStore.props.availableItems = data.available;
+    modalStore.props.assignedItems = data.assigned;
+  } catch (err) {
+    console.error("Failed to reload group assignments:", err);
+    modalStore.props.availableItems = [];
+    modalStore.props.assignedItems = [];
+  } finally {
+    modalStore.props.isLoading = false;
+  }
 }
 
 async function handleSubmit(data) {
-  formLoading.value = true;
-  fieldErrors.value = {};
+  modalStore.props.isLoading = true;
+  modalStore.props.fieldErrors = {};
 
-  try {
-    if (modalMode.value === "create") {
-      await groupService.createGroup(data);
-    } else if (modalMode.value === "edit") {
-      await groupService.updateGroup(data.group_id, data);
-    }
+  let apiError = null;
 
-    showModal.value = false;
-    await fetchGroups();
-  } catch (error) {
-    console.error("Form submission error:", error);
-
-    if (error.response?.data?.errorPayload?.errors) {
-      fieldErrors.value = error.response.data.errorPayload.errors;
-    }
-
-    throw error;
-  } finally {
-    formLoading.value = false;
+  if (modalMode.value === "create") {
+    const { request, error } = useApi("/iam/rbac/group", {
+      method: "POST",
+      autoFetch: false,
+    });
+    await request(data);
+    apiError = error.value;
+  } else if (modalMode.value === "edit") {
+    const { request, error } = useApi(`/iam/rbac/group/${data.group_id}`, {
+      method: "PUT",
+      autoFetch: false,
+    });
+    await request(data);
+    apiError = error.value;
   }
-}
 
-function closeModal() {
-  showModal.value = false;
+  modalStore.props.isLoading = false;
+
+  if (apiError) {
+    const errors =
+      typeof apiError === "object" && !Array.isArray(apiError) ? apiError : {};
+    modalStore.props.fieldErrors = errors;
+    return;
+  }
+
+  modalStore.closeModal();
+  await fetchGroups();
 }
 
 onMounted(() => {
@@ -183,7 +369,8 @@ onMounted(() => {
       :columns="tableColumns"
       :loading="loading"
       row-key="group_id"
-      :actions="['view', 'edit', 'delete']"
+      :actions="['view', 'edit', 'manage', 'delete']"
+      :action-icons="{ manage: 'fa fa-user' }"
       :total-count="totalCount"
       :search-query="searchQuery"
       search-placeholder="Search groups..."
@@ -199,6 +386,7 @@ onMounted(() => {
       @create="handleCreate"
       @view="handleView"
       @edit="handleEdit"
+      @manage="handleManageUsers"
       @delete="handleDelete"
       @search="handleSearch"
       @change-page="handlePageChange"
@@ -221,58 +409,7 @@ onMounted(() => {
       <template #cell-ruleName="{ row }">
         {{ row.ruleName || '-' }}
       </template>
-
-      <template #cell-manage="{ row }">
-        <button
-          type="button"
-          class="btn btn-sm btn-alt-info"
-          @click="handleManageUsers(row)"
-        >
-          <i class="fa fa-user"></i>
-        </button>
-      </template>
     </DataTable>
 
-    <div
-      class="modal"
-      :class="{ show: showModal }"
-      :style="{ display: showModal ? 'block' : 'none' }"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ modalTitle }}</h5>
-            <button type="button" class="btn-close" @click="closeModal"></button>
-          </div>
-          <div class="modal-body">
-            <GroupsForm
-              :formData="formData"
-              :fieldErrors="fieldErrors"
-              :isLoading="formLoading"
-              :readonly="modalMode === 'view'"
-              :hideSubmit="modalMode === 'view'"
-              :compact="true"
-              :onSubmit="handleSubmit"
-            />
-          </div>
-          <div class="modal-footer" v-if="modalMode === 'view'">
-            <button type="button" class="btn btn-secondary btn-sm" @click="closeModal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-backdrop" :class="{ show: showModal }" v-if="showModal"></div>
   </div>
 </template>
-
-<style scoped>
-.modal.show {
-  display: block;
-}
-
-.modal-backdrop.show {
-  opacity: 0.5;
-}
-</style>

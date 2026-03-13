@@ -29,6 +29,7 @@ export const useTemplateStore = defineStore("template", {
       sidebarDark: true,
       sidebarVisibleDesktop: true,
       sidebarVisibleMobile: false,
+      sidebarHoverExpand: false,
       sideOverlayVisible: false,
       sideOverlayHoverable: false,
       pageOverlay: true,
@@ -87,10 +88,32 @@ export const useTemplateStore = defineStore("template", {
           this.settings.sidebarMini = true;
         } else if (payload.mode === "off") {
           this.settings.sidebarMini = false;
+          this.settings.sidebarHoverExpand = false;
         } else if (payload.mode === "toggle") {
           this.settings.sidebarMini = !this.settings.sidebarMini;
+          if (!this.settings.sidebarMini) {
+            this.settings.sidebarHoverExpand = false;
+          }
         }
       }
+    },
+    // Convenience toggle used by header button
+    sidebarMiniToggle() {
+      this.sidebarMini({ mode: "toggle" });
+    },
+    // Legacy API used by some sidebar templates
+    sidebarMiniHover(payload) {
+      if (payload.mode === "on") {
+        this.settings.sidebarHoverExpand = true;
+      } else if (payload.mode === "off") {
+        this.settings.sidebarHoverExpand = false;
+      } else if (payload.mode === "toggle") {
+        this.settings.sidebarHoverExpand = !this.settings.sidebarHoverExpand;
+      }
+    },
+    // Sets sidebar hover expand (for mini mode hover preview)
+    setSidebarHoverExpand(payload) {
+      this.settings.sidebarHoverExpand = payload.expanded;
     },
     // Sets sidebar position (left, right, toggle)
     sidebarPosition(payload) {

@@ -2,8 +2,11 @@
 import { ref, onMounted } from "vue";
 import DataTable from "@/components/DataTable/DataTable.vue";
 import { useDataTable } from "@/composables/useDataTable";
-import ruleService from "../../../services/ruleService";
+import { useApi } from "@/helpers/useApi";
+import { useModalStore } from "@/stores/modal";
 import RulesForm from "../../../components/RulesForm.vue";
+
+const modalStore = useModalStore();
 
 const {
   searchQuery,
@@ -11,18 +14,18 @@ const {
   perPage,
   sortBy,
   sortDir,
+  totalCount,
+  totalPages,
   perPageOptions,
   setSearchDebounced,
   setPage,
   setPerPage,
   setSort,
+  syncFromResponse,
+  buildQueryParams,
 } = useDataTable({
-  initialPage: 1,
-  initialPerPage: 20,
-  perPageOptions: [10, 20, 50, 100],
   initialSortBy: "rule_name",
   initialSortDir: "asc",
-  searchDebounceMs: 300,
 });
 
 const tableColumns = [
@@ -32,32 +35,18 @@ const tableColumns = [
 
 const rules = ref([]);
 const loading = ref(false);
-const totalCount = ref(0);
-const totalPages = ref(1);
-
-const showModal = ref(false);
-const modalTitle = ref("");
-const modalMode = ref("view");
-const formData = ref({});
-const fieldErrors = ref({});
-const formLoading = ref(false);
 
 const fetchRules = async () => {
   loading.value = true;
+  const { data: responseData, request, error } = useApi("/iam/rbac/rules", {
+    method: "GET",
+    autoFetch: false,
+  });
+  
   try {
-    const params = {
-      page: currentPage.value,
-      "per-page": perPage.value,
-      sort_by: sortBy.value,
-      sort_dir: sortDir.value,
-    };
-
-    if (searchQuery.value) {
-      params._search = searchQuery.value;
-    }
-
-    const response = await ruleService.getRules(params);
-    const payload = response.data?.dataPayload || response.data;
+    await request(null, buildQueryParams());
+    const payload = responseData.value?.dataPayload || responseData.value;
+    syncFromResponse(payload);
 
     // Transform object {rule_key: "description"} to array [{rule_name: "rule_key", description: "description"}]
     const rulesData = payload?.data || {};
@@ -70,10 +59,12 @@ const fetchRules = async () => {
         }));
     
     rules.value = dataArray;
-    totalCount.value = payload?.totalCount || dataArray.length;
-    totalPages.value = payload?.totalPages || 1;
-  } catch (error) {
-    console.error("Failed to fetch rules:", error);
+    // Fallback for totalCount if backend doesn't paginate rules
+    if (!payload?.totalCount) {
+      totalCount.value = dataArray.length;
+    }
+  } catch (err) {
+    console.error("Failed to fetch rules:", err);
   } finally {
     loading.value = false;
   }
@@ -99,44 +90,65 @@ function handleSort(field) {
 }
 
 function handleView(rule) {
-  modalMode.value = "view";
-  modalTitle.value = "View Business Rule";
-  formData.value = { ...rule };
-  fieldErrors.value = {};
-  showModal.value = true;
+  modalStore.openModal({
+    component: RulesForm,
+    props: {
+      formData: { ...rule },
+      fieldErrors: {},
+      isLoading: false,
+      readonly: true,
+      hideSubmit: true,
+      compact: true,
+    },
+    title: "View Business Rule",
+    size: "md",
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+  });
 }
 
 function handleEdit(rule) {
-  modalMode.value = "edit";
-  modalTitle.value = "Edit Business Rule";
-  formData.value = { ...rule };
-  fieldErrors.value = {};
-  showModal.value = true;
+  modalStore.openModal({
+    component: RulesForm,
+    props: {
+      formData: { ...rule },
+      fieldErrors: {},
+      isLoading: false,
+      readonly: false,
+      hideSubmit: false,
+      compact: true,
+      onSubmit: handleSubmit,
+    },
+    title: "Edit Business Rule",
+    size: "md",
+    showFooter: false,
+  });
 }
 
 async function handleSubmit(data) {
-  formLoading.value = true;
-  fieldErrors.value = {};
+  modalStore.props.isLoading = true;
+  modalStore.props.fieldErrors = {};
 
-  try {
-    await ruleService.updateRule(data.name, data);
-    showModal.value = false;
-    await fetchRules();
-  } catch (error) {
-    console.error("Form submission error:", error);
+  const { request, error } = useApi(`/iam/rbac/rule/${data.name}`, {
+    method: "PUT",
+    autoFetch: false,
+  });
 
-    if (error.response?.data?.errorPayload?.errors) {
-      fieldErrors.value = error.response.data.errorPayload.errors;
-    }
+  await request(data);
+  modalStore.props.isLoading = false;
 
-    throw error;
-  } finally {
-    formLoading.value = false;
+  if (error.value) {
+    const errors =
+      typeof error.value === "object" && !Array.isArray(error.value)
+        ? error.value
+        : {};
+    modalStore.props.fieldErrors = errors;
+    return;
   }
-}
 
-function closeModal() {
-  showModal.value = false;
+  modalStore.closeModal();
+  await fetchRules();
 }
 
 onMounted(() => {
@@ -173,7 +185,6 @@ onMounted(() => {
       @change-sort="handleSort"
     >
       <template #cell-rule_name="{ row }">
-        <!-- <i class="fa fa-gavel text-secondary me-2"></i> -->
         {{ row.rule_name }}
       </template>
 
@@ -181,47 +192,5 @@ onMounted(() => {
         {{ row.description || '-' }}
       </template>
     </DataTable>
-
-    <div
-      class="modal"
-      :class="{ show: showModal }"
-      :style="{ display: showModal ? 'block' : 'none' }"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ modalTitle }}</h5>
-            <button type="button" class="btn-close" @click="closeModal"></button>
-          </div>
-          <div class="modal-body">
-            <RulesForm
-              :formData="formData"
-              :fieldErrors="fieldErrors"
-              :isLoading="formLoading"
-              :readonly="modalMode === 'view'"
-              :hideSubmit="modalMode === 'view'"
-              :compact="true"
-              :onSubmit="handleSubmit"
-            />
-          </div>
-          <div class="modal-footer" v-if="modalMode === 'view'">
-            <button type="button" class="btn btn-secondary btn-sm" @click="closeModal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-backdrop" :class="{ show: showModal }" v-if="showModal"></div>
   </div>
 </template>
-
-<style scoped>
-.modal.show {
-  display: block;
-}
-
-.modal-backdrop.show {
-  opacity: 0.5;
-}
-</style>

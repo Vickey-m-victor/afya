@@ -159,9 +159,9 @@ export function useApi(baseUrl, {
             const queryString = Object.keys(queryParams).length || pagination
                 ? `?${qs.stringify({
                     ...queryParams,
-                    ...(pagination ? { 
-                        page: overridePage ?? currentPage.value, 
-                        per_page: perPage.value 
+                    ...(pagination ? {
+                        page: overridePage ?? currentPage.value,
+                        per_page: perPage.value
                     } : {})
                 })}`
                 : '';
@@ -249,9 +249,12 @@ export function useApi(baseUrl, {
             }
 
             // Auto-alert feature
-            if (autoAlert && response.data?.alertifyPayload) {
-                const alertStore = useAlertStore();
-                alertStore.show(response.data.alertifyPayload);
+            if (autoAlert) {
+                const alertPayload = response.data?.alertifyPayload || response.data?.dataPayload?.alertify;
+                if (alertPayload) {
+                    const alertStore = useAlertStore();
+                    alertStore.show(alertPayload);
+                }
             }
 
             // Transform response data
@@ -297,26 +300,29 @@ export function useApi(baseUrl, {
             const statusCode = err.response?.status || 500;
 
             // Auto-alert for errors
-            if (autoAlert && responseData?.alertifyPayload) {
-                const alertStore = useAlertStore();
-                alertStore.show(responseData.alertifyPayload);
+            if (autoAlert) {
+                const alertPayload = responseData?.alertifyPayload || responseData?.dataPayload?.alertify;
+                if (alertPayload) {
+                    const alertStore = useAlertStore();
+                    alertStore.show(alertPayload);
+                }
             }
 
-            error.value = err.response?.data?.errorPayload?.errors || 
-                         err.response?.data?.errors ||
-                         err.response?.data || 
-                         [err.message];
+            error.value = err.response?.data?.errorPayload?.errors ||
+                err.response?.data?.errors ||
+                err.response?.data ||
+                [err.message];
             status.value = 'error';
             data.value = null;
 
         } finally {
             progress.value = 0;
-            
+
             if (typeof onComplete === 'function') {
-                onComplete({ 
-                    status: status.value, 
-                    data: data.value, 
-                    error: error.value 
+                onComplete({
+                    status: status.value,
+                    data: data.value,
+                    error: error.value
                 });
             }
         }
@@ -350,8 +356,8 @@ export function useApi(baseUrl, {
             const localTransform = req.transform ?? batchTransform;
 
             // Build request config
-            const queryString = req.queryParams && Object.keys(req.queryParams).length 
-                ? `?${qs.stringify(req.queryParams)}` 
+            const queryString = req.queryParams && Object.keys(req.queryParams).length
+                ? `?${qs.stringify(req.queryParams)}`
                 : '';
             const fullUrl = `${req.url}${queryString}`;
 
@@ -394,9 +400,12 @@ export function useApi(baseUrl, {
                 }
 
                 // Auto-alert
-                if (batchAutoAlert && res.data?.alertifyPayload) {
-                    const alertStore = useAlertStore();
-                    alertStore.show(res.data.alertifyPayload);
+                if (batchAutoAlert) {
+                    const alertPayload = res.data?.alertifyPayload || res.data?.dataPayload?.alertify;
+                    if (alertPayload) {
+                        const alertStore = useAlertStore();
+                        alertStore.show(alertPayload);
+                    }
                 }
 
                 results.push({
@@ -407,8 +416,8 @@ export function useApi(baseUrl, {
 
             } catch (err) {
                 const errorPayload = err.response?.data?.errorPayload?.errors ||
-                                   err.response?.data ||
-                                   [err.message];
+                    err.response?.data ||
+                    [err.message];
 
                 results.push({
                     success: false,
@@ -515,14 +524,14 @@ export function useApi(baseUrl, {
         status,
         lastFetched,
         isOnline,
-        
+
         // Methods
         request,
         batchRequest,
         refresh,
         clear,
         abort,
-        
+
         // Cache methods
         clearAllCache,
         clearCacheForKey: (key) => {
@@ -531,13 +540,13 @@ export function useApi(baseUrl, {
         },
         listCacheKeys,
         clearCacheMatching,
-        
+
         // Computed properties
         isLoading: computed(() => status.value === 'loading'),
         isError: computed(() => status.value === 'error'),
         isSuccess: computed(() => status.value === 'success'),
         progress: computed(() => progress.value),
-        
+
         // Pagination (if enabled)
         ...(pagination ? {
             currentPage,

@@ -2,7 +2,11 @@
 import { ref, onMounted } from "vue";
 import DataTable from "@/components/DataTable/DataTable.vue";
 import { useDataTable } from "@/composables/useDataTable";
-import logService from "../../services/logService";
+import { useApi } from "@/helpers/useApi";
+import { useModalStore } from "@/stores/modal";
+import ErrorLogDetailModal from "../../components/log/ErrorLogDetailModal.vue";
+
+const modalStore = useModalStore();
 
 const {
   searchQuery,
@@ -10,56 +14,44 @@ const {
   perPage,
   sortBy,
   sortDir,
+  totalCount,
+  totalPages,
   perPageOptions,
   setSearchDebounced,
   setPage,
   setPerPage,
   setSort,
+  syncFromResponse,
+  buildQueryParams,
 } = useDataTable({
-  initialPage: 1,
-  initialPerPage: 20,
-  perPageOptions: [10, 20, 50, 100],
   initialSortBy: "log_time",
   initialSortDir: "desc",
-  searchDebounceMs: 300,
 });
 
 const tableColumns = [
-  { field: "id", header: "ID", width: "90px", headerClass: "text-center", cellClass: "text-center" },
-  { field: "level", header: "Level", width: "120px", headerClass: "text-center", cellClass: "text-center" },
+  { field: "id", header: "ID", width: "80px", headerClass: "text-center", cellClass: "text-center" },
+  { field: "level", header: "Level", width: "110px", headerClass: "text-center", cellClass: "text-center" },
   { field: "category", header: "Category", cellClass: "fw-semibold" },
   { field: "log_time", header: "Log Time", width: "180px" },
-  { field: "is_resolved", header: "Resolved", width: "120px", headerClass: "text-center", cellClass: "text-center" },
+  { field: "is_resolved", header: "Status", width: "120px", headerClass: "text-center", cellClass: "text-center" },
 ];
 
 const logs = ref([]);
 const loading = ref(false);
-const totalCount = ref(0);
-const totalPages = ref(1);
-
-const showModal = ref(false);
-const selectedLog = ref(null);
 
 const fetchErrorLogs = async () => {
   loading.value = true;
+  const { data: responseData, request } = useApi("/admin/logs/error", {
+    method: "GET",
+    autoFetch: false,
+  });
+
   try {
-    const params = {
-      page: currentPage.value,
-      "per-page": perPage.value,
-      sort_by: sortBy.value,
-      sort_dir: sortDir.value,
-    };
-
-    if (searchQuery.value) {
-      params._search = searchQuery.value;
-    }
-
-    const response = await logService.getErrorLogs(params);
-    const payload = logService.normalizePayload(response);
-
-    logs.value = payload.data;
-    totalCount.value = payload.totalCount;
-    totalPages.value = payload.totalPages;
+    await request(null, buildQueryParams());
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    syncFromResponse(payload);
+    const rawData = payload?.data;
+    logs.value = Array.isArray(rawData) ? rawData : Object.values(rawData || {});
   } catch (error) {
     console.error("Failed to fetch error logs:", error);
   } finally {
@@ -88,8 +80,8 @@ function handleSort(field) {
 
 function levelBadgeClass(level) {
   if (level === "danger" || level === "error") return "bg-danger";
-  if (level === "warning") return "bg-warning";
-  if (level === "info") return "bg-info";
+  if (level === "warning") return "bg-warning text-dark";
+  if (level === "info") return "bg-info text-dark";
   return "bg-secondary";
 }
 
@@ -98,25 +90,29 @@ function resolvedBadgeClass(isResolved) {
 }
 
 function resolvedLabel(isResolved) {
-  return Number(isResolved) === 1 ? "Yes" : "No";
+  return Number(isResolved) === 1 ? "Resolved" : "Unresolved";
 }
 
 async function handleView(log) {
-  try {
-    const response = await logService.getErrorLog(log.id);
-    const payload = response.data?.dataPayload || response.data || {};
-    selectedLog.value = payload?.data || payload;
-  } catch (error) {
-    console.error("Failed to fetch error log details:", error);
-    selectedLog.value = log;
-  }
-
-  showModal.value = true;
-}
-
-function closeModal() {
-  showModal.value = false;
-  selectedLog.value = null;
+  modalStore.openModal({
+    component: ErrorLogDetailModal,
+    props: {
+      log,
+      onResolved: (id) => {
+        const idx = logs.value.findIndex((l) => l.id === id);
+        if (idx !== -1) {
+          logs.value[idx] = { ...logs.value[idx], is_resolved: 1 };
+        }
+      },
+    },
+    title: `Log Entry #${log.id}${log.log_time ? ` - ${log.log_time}` : ""}`,
+    size: "xl",
+    centered: true,
+    scrollable: true,
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+  });
 }
 
 onMounted(() => {
@@ -163,54 +159,8 @@ onMounted(() => {
         </span>
       </template>
     </DataTable>
-
-    <div
-      class="modal"
-      :class="{ show: showModal }"
-      :style="{ display: showModal ? 'block' : 'none' }"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Error Log Details</h5>
-            <button type="button" class="btn-close" @click="closeModal"></button>
-          </div>
-          <div class="modal-body" v-if="selectedLog">
-            <dl class="row mb-0">
-              <dt class="col-sm-3">ID</dt>
-              <dd class="col-sm-9">{{ selectedLog.id }}</dd>
-
-              <dt class="col-sm-3">Level</dt>
-              <dd class="col-sm-9">{{ selectedLog.level || '-' }}</dd>
-
-              <dt class="col-sm-3">Category</dt>
-              <dd class="col-sm-9">{{ selectedLog.category || '-' }}</dd>
-
-              <dt class="col-sm-3">Resolved</dt>
-              <dd class="col-sm-9">{{ resolvedLabel(selectedLog.is_resolved) }}</dd>
-
-              <dt class="col-sm-3">Log Time</dt>
-              <dd class="col-sm-9">{{ selectedLog.log_time || '-' }}</dd>
-            </dl>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary btn-sm" @click="closeModal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-backdrop" :class="{ show: showModal }" v-if="showModal"></div>
   </div>
 </template>
 
 <style scoped>
-.modal.show {
-  display: block;
-}
-
-.modal-backdrop.show {
-  opacity: 0.5;
-}
 </style>

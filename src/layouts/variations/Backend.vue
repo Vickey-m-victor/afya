@@ -13,6 +13,10 @@ store.setLayout({
   footer: true,
 });
 
+// Ensure sidebar is fully open (not mini) on load
+store.sidebar({ mode: 'open' });
+store.sidebarMini({ mode: 'off' });
+
 // Set various template options for this layout variation
 store.headerStyle({ mode: "light" });
 store.mainContent({ mode: "narrow" });

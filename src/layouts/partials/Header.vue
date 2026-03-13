@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
 import { useAuthStore } from "@/stores/auth";
+import { useModalStore } from "@/stores/modal";
 import ChangePasswordModal from "~/iam/components/ChangePasswordModal.vue";
 
 // Grab example data
@@ -11,12 +12,12 @@ import ChangePasswordModal from "~/iam/components/ChangePasswordModal.vue";
 // Main store and Router
 const store = useTemplateStore();
 const authStore = useAuthStore();
+const modalStore = useModalStore();
 const router = useRouter();
 
 // Reactive variables
 const baseSearchTerm = ref("");
-const showChangePasswordModal = ref(false);
-const changePasswordSuccess = ref(false);
+const changePasswordSubmit = ref(null);
 
 // On form search submit functionality
 function onSubmitSearch() {
@@ -27,24 +28,48 @@ async function onLogout() {
   await authStore.logout();
 }
 
+function onLockAccount() {
+  if (authStore.user?.username) {
+    sessionStorage.setItem("lock.username", authStore.user.username);
+  }
+  router.push({ name: "iam/auth/lock" });
+}
+
 function openChangePasswordModal() {
-  showChangePasswordModal.value = true;
-}
+  changePasswordSubmit.value = null;
+  modalStore.openModal({
+    component: ChangePasswordModal,
+    title: "Change Password",
+    size: "md",
+    showFooter: true,
+    closeOnBackdrop: false,
+    closeOnEsc: true,
+    confirmText: "Change Password",
+    cancelText: "Cancel",
+    initialFocus: "#current-password",
+    props: {
+      registerSubmit: (submitFn) => {
+        changePasswordSubmit.value = submitFn;
+      },
+    },
+    onConfirm: async () => {
+      if (!changePasswordSubmit.value) {
+        return false;
+      }
 
-function closeChangePasswordModal() {
-  showChangePasswordModal.value = false;
-}
+      const result = await changePasswordSubmit.value();
+      if (result?.forceLogout) {
+        modalStore.closeModal(true);
+        authStore.logOut({
+          callApi: false,
+          redirect: { name: "iam/auth/signin" },
+        });
+        return false;
+      }
 
-function onChangePasswordSuccess() {
-  changePasswordSuccess.value = true;
-  
-  // Show success notification
-  alert("Password changed successfully!");
-  
-  // Reset after 3 seconds
-  setTimeout(() => {
-    changePasswordSuccess.value = false;
-  }, 3000);
+      return result;
+    },
+  });
 }
 
 // When ESCAPE key is hit close the header search section
@@ -85,6 +110,17 @@ onUnmounted(() => {
                 <i class="fa fa-fw fa-bars"></i>
               </button>
               <!-- END Toggle Sidebar -->
+
+              <!-- Toggle Sidebar Mini (desktop) -->
+              <button
+                type="button"
+                class="btn btn-sm border-0 bg-transparent shadow-none me-2 d-none d-lg-inline-flex align-items-center"
+                @click="store.sidebarMiniToggle()"
+                :title="store.settings.sidebarMini ? 'Expand Sidebar' : 'Collapse Sidebar'"
+              >
+                <i class="fa fa-fw" :class="store.settings.sidebarMini ? 'fa-indent' : 'fa-outdent'"></i>
+              </button>
+              <!-- END Toggle Sidebar Mini (desktop) -->
 
               <!-- Open Search Section (visible on smaller screens) -->
               <button
@@ -134,12 +170,20 @@ onUnmounted(() => {
                   aria-expanded="false"
                 >
                   <img
+                    v-if="authStore.user.profile?.avatar_url"
+                    class="rounded-circle"
+                    :src="authStore.user.profile.avatar_url"
+                    alt="Header Avatar"
+                    style="width: 21px"
+                  />
+                  <img
+                    v-else
                     class="rounded-circle"
                     src="/assets/media/avatars/avatar10.jpg"
                     alt="Header Avatar"
                     style="width: 21px"
                   />
-                  <span class="d-none d-sm-inline-block ms-2">John</span>
+                  <span class="d-none d-sm-inline-block ms-2">{{ authStore.user.profile?.first_name || authStore.user.username || 'User' }}</span>
                   <i
                     class="fa fa-fw fa-angle-down d-none d-sm-inline-block opacity-50 ms-1 mt-1"
                   ></i>
@@ -152,12 +196,19 @@ onUnmounted(() => {
                     class="p-3 text-center bg-body-light border-bottom rounded-top"
                   >
                     <img
+                      v-if="authStore.user.profile?.avatar_url"
+                      class="img-avatar img-avatar48 img-avatar-thumb"
+                      :src="authStore.user.profile.avatar_url"
+                      alt="Header Avatar"
+                    />
+                    <img
+                      v-else
                       class="img-avatar img-avatar48 img-avatar-thumb"
                       src="/assets/media/avatars/avatar10.jpg"
                       alt="Header Avatar"
                     />
-                    <p class="mt-2 mb-0 fw-medium">John Smith</p>
-                    <p class="mb-0 text-muted fs-sm fw-medium">Web Developer</p>
+                    <p class="mt-2 mb-0 fw-medium">{{ authStore.user.profile ? [authStore.user.profile.first_name, authStore.user.profile.last_name].filter(Boolean).join(' ') : (authStore.user.username || 'User') }}</p>
+                    <p class="mb-0 text-muted fs-sm fw-medium">@{{ authStore.user.username || 'user' }}</p>
                   </div>
                   <div class="p-2">
                     <a
@@ -168,7 +219,7 @@ onUnmounted(() => {
                       <span class="badge rounded-pill bg-primary ms-2">3</span>
                     </a>
                     <RouterLink
-                      :to="{ name: 'dashboard' }"
+                      :to="{ name: 'admin/profile' }"
                       class="dropdown-item d-flex align-items-center justify-content-between"
                     >
                       <span class="fs-sm fw-medium">Profile</span>
@@ -181,21 +232,17 @@ onUnmounted(() => {
                     >
                       <span class="fs-sm fw-medium">Change Password</span>
                     </a>
-                    <a
-                      class="dropdown-item d-flex align-items-center justify-content-between"
-                      href="javascript:void(0)"
-                    >
-                      <span class="fs-sm fw-medium">Settings</span>
-                    </a>
+
                   </div>
                   <div role="separator" class="dropdown-divider m-0"></div>
                   <div class="p-2">
-                    <RouterLink
-                      :to="{ name: 'iam/auth/lock' }"
+                    <a
+                      href="#"
                       class="dropdown-item d-flex align-items-center justify-content-between"
+                      @click.prevent="onLockAccount"
                     >
                       <span class="fs-sm fw-medium">Lock Account</span>
-                    </RouterLink>
+                    </a>
                     <a
                       href="#"
                       class="dropdown-item d-flex align-items-center justify-content-between"
@@ -267,10 +314,4 @@ onUnmounted(() => {
   </header>
   <!-- END Header -->
 
-  <!-- Change Password Modal -->
-  <ChangePasswordModal 
-    :show="showChangePasswordModal" 
-    @close="closeChangePasswordModal"
-    @success="onChangePasswordSuccess"
-  />
 </template>

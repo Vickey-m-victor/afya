@@ -1,9 +1,19 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import DataTable from "@/components/DataTable/DataTable.vue";
 import { useDataTable } from "@/composables/useDataTable";
-import permissionService from "../../../services/permissionService";
+import { useApi } from "@/helpers/useApi";
+import { useModalStore } from "@/stores/modal";
 import PermissionsForm from "../../../components/PermissionsForm.vue";
+import AssignmentManager from "../../../components/AssignmentManager.vue";
+import { useAlertStore } from "@/stores/alert";
+import { useAlert } from "@/composables/alerts";
+
+const modalStore = useModalStore();
+const alertStore = useAlertStore();
+const { confirmAction } = useAlert();
+const router = useRouter();
 
 const {
   searchQuery,
@@ -11,18 +21,18 @@ const {
   perPage,
   sortBy,
   sortDir,
+  totalCount,
+  totalPages,
   perPageOptions,
   setSearchDebounced,
   setPage,
   setPerPage,
   setSort,
+  syncFromResponse,
+  buildQueryParams,
 } = useDataTable({
-  initialPage: 1,
-  initialPerPage: 20,
-  perPageOptions: [10, 20, 50, 100],
   initialSortBy: "permission_name",
   initialSortDir: "asc",
-  searchDebounceMs: 300,
 });
 
 const tableColumns = [
@@ -33,40 +43,31 @@ const tableColumns = [
 
 const permissions = ref([]);
 const loading = ref(false);
-const totalCount = ref(0);
-const totalPages = ref(1);
 
-const showModal = ref(false);
-const modalTitle = ref("");
 const modalMode = ref("view");
-const formData = ref({});
-const fieldErrors = ref({});
-const formLoading = ref(false);
+const selectedPermission = ref(null);
 
 const fetchPermissions = async () => {
   loading.value = true;
   try {
-    const params = {
-      page: currentPage.value,
-      "per-page": perPage.value,
-      sort_by: sortBy.value,
-      sort_dir: sortDir.value,
-    };
+    const { data: responseData, request, error } = useApi("/iam/rbac/permissions", {
+      method: "GET",
+      autoFetch: false,
+    });
 
-    if (searchQuery.value) {
-      params._search = searchQuery.value;
+    await request(null, buildQueryParams());
+    if (error.value) {
+      throw error.value;
     }
 
-    const response = await permissionService.getPermissions(params);
-    const payload = response.data?.dataPayload || response.data;
+    const payload = responseData.value?.dataPayload || responseData.value;
+    syncFromResponse(payload);
 
     const dataArray = Array.isArray(payload?.data) 
       ? payload.data 
       : Object.values(payload?.data || {});
     
     permissions.value = dataArray;
-    totalCount.value = payload?.totalCount || 0;
-    totalPages.value = payload?.totalPages || 1;
   } catch (error) {
     console.error("Failed to fetch permissions:", error);
   } finally {
@@ -95,70 +96,295 @@ function handleSort(field) {
 
 function handleView(permission) {
   modalMode.value = "view";
-  modalTitle.value = "View Permission";
-  formData.value = { ...permission };
-  fieldErrors.value = {};
-  showModal.value = true;
+  modalStore.toggleModalUsage(true); // set to false to navigate to page
+
+  if (!modalStore.useModal) {
+    router.push({ name: 'iam/rbac/permissions/view', params: { id: permission.permission_id } });
+    return;
+  }
+
+  modalStore.openModal({
+    component: PermissionsForm,
+    props: {
+      formData: { ...permission },
+      fieldErrors: {},
+      isLoading: false,
+      readonly: true,
+      hideSubmit: true,
+      compact: true,
+      onSubmit: handleSubmit
+    },
+    title: "View Permission",
+    size: "md",
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+  });
 }
 
 function handleCreate() {
   modalMode.value = "create";
-  modalTitle.value = "Create Permission";
-  formData.value = {};
-  fieldErrors.value = {};
-  showModal.value = true;
+  modalStore.toggleModalUsage(true); // set to false to navigate to page
+
+  if (!modalStore.useModal) {
+    router.push({ name: 'iam/rbac/permissions/create' });
+    return;
+  }
+
+  modalStore.openModal({
+    component: PermissionsForm,
+    props: {
+      formData: {},
+      fieldErrors: {},
+      isLoading: false,
+      readonly: false,
+      hideSubmit: false,
+      compact: true,
+      onSubmit: handleSubmit
+    },
+    title: "Create Permission",
+    size: "md",
+    showFooter: false,
+  });
 }
 
 function handleEdit(permission) {
   modalMode.value = "edit";
-  modalTitle.value = "Edit Permission";
-  formData.value = { ...permission };
-  fieldErrors.value = {};
-  showModal.value = true;
-}
+  modalStore.toggleModalUsage(true); // set to false to navigate to page
 
-async function handleDelete(permission) {
-  if (!confirm(`Are you sure you want to delete permission "${permission.permission_name}"?`)) {
+  if (!modalStore.useModal) {
+    router.push({ name: 'iam/rbac/permissions/update', params: { id: permission.permission_id } });
     return;
   }
 
+  modalStore.openModal({
+    component: PermissionsForm,
+    props: {
+      formData: { ...permission },
+      fieldErrors: {},
+      isLoading: false,
+      readonly: false,
+      hideSubmit: false,
+      compact: true,
+      onSubmit: handleSubmit
+    },
+    title: "Edit Permission",
+    size: "md",
+    showFooter: false,
+  });
+}
+
+async function handleDelete(permission) {
+  const result = await confirmAction(
+    `Delete Permission "${permission.permission_name}"?`,
+    "This will permanently remove the permission."
+  );
+  if (!result.isConfirmed) return;
+
   try {
-    await permissionService.deletePermission(permission.permission_id);
+    const { request, error } = useApi(`/iam/rbac/permission/${permission.permission_id}`, {
+      method: "DELETE",
+      autoFetch: false,
+    });
+    await request();
+    if (error.value) {
+      throw error.value;
+    }
+
     await fetchPermissions();
   } catch (error) {
     console.error("Failed to delete permission:", error);
-    alert("Failed to delete permission");
+    alertStore.show({ theme: "error", type: "toast", message: "Failed to delete permission." });
+  }
+}
+
+function normalizeRoles(payloadData) {
+  const rows = Array.isArray(payloadData) ? payloadData : Object.values(payloadData || {});
+  return rows.map((role) => ({
+    id: role.role_id || role.name,
+    label: role.role_name || role.description || role.role_id || role.name,
+  }));
+}
+
+function normalizeAlertify(payload, fallbackType, fallbackMessage) {
+  if (!payload) {
+    return {
+      type: fallbackType,
+      message: fallbackMessage,
+    };
+  }
+
+  const type = payload.theme || payload.type || fallbackType;
+  return {
+    type,
+    title: payload.title,
+    message: payload.message || fallbackMessage,
+    options: payload.options,
+  };
+}
+
+function handleResponseAlert(response, fallbackMessage) {
+  const payload = response?.alertifyPayload || response?.dataPayload?.alertify || response?.data?.alertifyPayload || response?.data?.dataPayload?.alertify;
+  const normalized = normalizeAlertify(payload, "success", fallbackMessage);
+  alertStore.show(normalized);
+}
+
+function handleErrorAlert(error, fallbackMessage) {
+  const payload = error?.alertifyPayload;
+  const normalized = normalizeAlertify(payload, "error", fallbackMessage);
+  alertStore.show(normalized);
+}
+
+async function loadPermissionAssignments(permissionId) {
+  const { data: rolesResponseData, request: fetchRolesReq, error: rolesError } = useApi("/iam/rbac/roles", {
+    method: "GET",
+    autoFetch: false,
+  });
+  await fetchRolesReq(null, { "per-page": 1000 });
+  if (rolesError.value) throw rolesError.value;
+
+  const rolesPayload = rolesResponseData.value?.dataPayload || rolesResponseData.value;
+  const roles = normalizeRoles(rolesPayload?.data);
+
+  const roleAssignmentChecks = await Promise.all(
+    roles.map(async (role) => {
+      try {
+        const { data: detailData, request: fetchRoleDetail, error: detailError } = useApi(`/iam/rbac/role/${role.id}`, {
+          method: "GET",
+          autoFetch: false,
+        });
+        await fetchRoleDetail();
+        if (detailError.value) return { ...role, isAssigned: false };
+        const roleData = detailData.value?.dataPayload?.data || {};
+        const assignedMap = roleData.items?.assigned || {};
+        return {
+          ...role,
+          isAssigned: Object.prototype.hasOwnProperty.call(assignedMap, permissionId),
+        };
+      } catch {
+        return { ...role, isAssigned: false };
+      }
+    })
+  );
+
+  return {
+    available: roleAssignmentChecks.filter((item) => !item.isAssigned),
+    assigned: roleAssignmentChecks.filter((item) => item.isAssigned),
+  };
+}
+
+async function handleManage(permission) {
+  selectedPermission.value = permission;
+
+  modalStore.openModal({
+    component: AssignmentManager,
+    title: `Manage Roles: ${permission.permission_name || permission.permission_id}`,
+    size: "xl",
+    showFooter: false,
+    showConfirm: false,
+    showCancel: false,
+    props: {
+      availableItems: [],
+      assignedItems: [],
+      isLoading: true,
+      isSubmitting: false,
+      availableLabel: "Available Roles",
+      assignedLabel: "Assigned Roles",
+      onAssign: async (selectedIds) => {
+        modalStore.props.isSubmitting = true;
+        try {
+          const responses = await Promise.all(
+            selectedIds.map(async (roleId) => {
+              const { data: responseData, request, error } = useApi(`/iam/rbac/role/assign/${roleId}`, {
+                method: "POST",
+                autoFetch: false,
+              });
+              await request({ permissions: [permission.permission_id] });
+              if (error.value) throw error.value;
+              return responseData.value;
+            })
+          );
+          responses.forEach((r) => handleResponseAlert(r, "Permission assigned successfully."));
+        } catch (err) {
+          handleErrorAlert(err, "Failed to assign permission.");
+        }
+        await reloadPermissionAssignmentsIntoModal(permission.permission_id);
+      },
+      onRemove: async (selectedIds) => {
+        modalStore.props.isSubmitting = true;
+        try {
+          const responses = await Promise.all(
+            selectedIds.map(async (roleId) => {
+              const { data: responseData, request, error } = useApi(`/iam/rbac/role/remove/${roleId}`, {
+                method: "POST",
+                autoFetch: false,
+              });
+              await request({ permissions: [permission.permission_id] });
+              if (error.value) throw error.value;
+              return responseData.value;
+            })
+          );
+          responses.forEach((r) => handleResponseAlert(r, "Permission removed successfully."));
+        } catch (err) {
+          handleErrorAlert(err, "Failed to remove permission.");
+        }
+        await reloadPermissionAssignmentsIntoModal(permission.permission_id);
+      },
+    },
+  });
+
+  await reloadPermissionAssignmentsIntoModal(permission.permission_id);
+}
+
+async function reloadPermissionAssignmentsIntoModal(permissionId) {
+  modalStore.props.isLoading = true;
+  modalStore.props.isSubmitting = false;
+  try {
+    const data = await loadPermissionAssignments(permissionId);
+    modalStore.props.availableItems = data.available;
+    modalStore.props.assignedItems = data.assigned;
+  } catch (err) {
+    console.error("Failed to reload permission assignments:", err);
+    modalStore.props.availableItems = [];
+    modalStore.props.assignedItems = [];
+  } finally {
+    modalStore.props.isLoading = false;
   }
 }
 
 async function handleSubmit(data) {
-  formLoading.value = true;
-  fieldErrors.value = {};
+  modalStore.props.isLoading = true;
+  modalStore.props.fieldErrors = {};
 
-  try {
-    if (modalMode.value === "create") {
-      await permissionService.createPermission(data);
-    } else if (modalMode.value === "edit") {
-      await permissionService.updatePermission(data.permission_id, data);
-    }
+  let apiError = null;
 
-    showModal.value = false;
-    await fetchPermissions();
-  } catch (error) {
-    console.error("Form submission error:", error);
-
-    if (error.response?.data?.errorPayload?.errors) {
-      fieldErrors.value = error.response.data.errorPayload.errors;
-    }
-
-    throw error;
-  } finally {
-    formLoading.value = false;
+  if (modalMode.value === "create") {
+    const { request, error } = useApi("/iam/rbac/permission", {
+      method: "POST",
+      autoFetch: false,
+    });
+    await request(data);
+    apiError = error.value;
+  } else if (modalMode.value === "edit") {
+    const { request, error } = useApi(`/iam/rbac/permission/${data.permission_id}`, {
+      method: "PUT",
+      autoFetch: false,
+    });
+    await request(data);
+    apiError = error.value;
   }
-}
 
-function closeModal() {
-  showModal.value = false;
+  modalStore.props.isLoading = false;
+
+  if (apiError) {
+    const errors =
+      typeof apiError === "object" && !Array.isArray(apiError) ? apiError : {};
+    modalStore.props.fieldErrors = errors;
+    return;
+  }
+
+  modalStore.closeModal();
+  await fetchPermissions();
 }
 
 onMounted(() => {
@@ -174,7 +400,8 @@ onMounted(() => {
       :columns="tableColumns"
       :loading="loading"
       row-key="permission_id"
-      :actions="['view', 'edit', 'delete']"
+      :actions="['view', 'edit', 'manage', 'delete']"
+      :action-icons="{ manage: 'fa fa-link' }"
       :total-count="totalCount"
       :search-query="searchQuery"
       search-placeholder="Search permissions..."
@@ -190,6 +417,7 @@ onMounted(() => {
       @create="handleCreate"
       @view="handleView"
       @edit="handleEdit"
+      @manage="handleManage"
       @delete="handleDelete"
       @search="handleSearch"
       @change-page="handlePageChange"
@@ -210,46 +438,5 @@ onMounted(() => {
       </template>
     </DataTable>
 
-    <div
-      class="modal"
-      :class="{ show: showModal }"
-      :style="{ display: showModal ? 'block' : 'none' }"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ modalTitle }}</h5>
-            <button type="button" class="btn-close" @click="closeModal"></button>
-          </div>
-          <div class="modal-body">
-            <PermissionsForm
-              :formData="formData"
-              :fieldErrors="fieldErrors"
-              :isLoading="formLoading"
-              :readonly="modalMode === 'view'"
-              :hideSubmit="modalMode === 'view'"
-              :compact="true"
-              :onSubmit="handleSubmit"
-            />
-          </div>
-          <div class="modal-footer" v-if="modalMode === 'view'">
-            <button type="button" class="btn btn-secondary btn-sm" @click="closeModal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-backdrop" :class="{ show: showModal }" v-if="showModal"></div>
   </div>
 </template>
-
-<style scoped>
-.modal.show {
-  display: block;
-}
-
-.modal-backdrop.show {
-  opacity: 0.5;
-}
-</style>

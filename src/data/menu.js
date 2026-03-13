@@ -15,16 +15,17 @@ export default {
       name: "IAM",
       heading: true,
     },
-    {
-      name: "Users",
-      to: "iam/users",
-      icon: "fa fa-users",
-    },
+
     {
       name: "RBAC",
       icon: "fa fa-shield-halved",
-      subActivePaths: "/iam/rbac",
+      subActivePaths: "/iam",
       sub: [
+        {
+      name: "Users",
+      to: "iam/users",
+      icon: "fa fa-users",
+        },
         {
           name: "Roles",
           to: "iam/rbac/roles",
@@ -44,6 +45,67 @@ export default {
           name: "Rules",
           to: "iam/rbac/rules",
           icon: "fa fa-gavel",
+        },
+      ],
+    },
+    {
+      name: "HR",
+      heading: true,
+    },
+    {
+      name: "Human Resources",
+      icon: "fa fa-people-group",
+      subActivePaths: "/hr",
+      sub: [
+        {
+          name: "Dashboard",
+          to: "hr",
+          icon: "fa fa-tachometer-alt",
+        },
+        {
+          name: "Departments",
+          to: "hr/department",
+          icon: "fa fa-building",
+        },
+        {
+          name: "Job Groups",
+          to: "hr/job-group",
+          icon: "fa fa-layer-group",
+        },
+        {
+          name: "Job Titles",
+          to: "hr/job-title",
+          icon: "fa fa-id-badge",
+        },
+        {
+          name: "Leave Types",
+          to: "hr/leave-type",
+          icon: "fa fa-calendar-xmark",
+        },
+        {
+          name: "Payroll Settings",
+          to: "hr/payroll-setting",
+          icon: "fa fa-money-check-dollar",
+        },
+        {
+          name: "Public Holidays",
+          to: "hr/public-holiday",
+          icon: "fa fa-calendar-day",
+        },
+        {
+          name: "Statutory Rates",
+          to: "hr/statutory-rate",
+          icon: "fa fa-percent",
+        },
+        {
+          name: "Work Shifts",
+          to: "hr/work-shift",
+          icon: "fa fa-clock",
+        },
+        {
+          name: "Worker Unions",
+          to: "hr/worker-union",
+          icon: "fa fa-handshake",
         },
       ],
     },
@@ -72,6 +134,16 @@ export default {
           icon: "fa fa-circle-exclamation",
         },
       ],
+    },
+    {
+      name: "Task Manager",
+      to: "admin/task-manager",
+      icon: "fa fa-clock",
+    },
+    {
+      name: "Settings",
+      to: "admin/settings/general",
+      icon: "fa fa-cog",
     },
     {
       name: "Tests",
