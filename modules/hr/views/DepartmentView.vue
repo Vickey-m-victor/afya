@@ -24,9 +24,9 @@ const tableColumns = [
   { name: "Department Code", field: "department_code" },
   { name: "Description", field: "description" },
   { name: "Status", field: "status" },
-  { name: "Is Deleted", field: "is_deleted" },
-  { name: "Created At", field: "created_at" },
-  { name: "Updated At", field: "updated_at" },
+  // { name: "Is Deleted", field: "is_deleted" },
+  // { name: "Created At", field: "created_at" },
+  // { name: "Updated At", field: "updated_at" },
   { name: "Actions", field: "actions" },
 ];
 

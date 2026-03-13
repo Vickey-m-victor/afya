@@ -27,11 +27,11 @@ const tableColumns = [
   { name: "Address", field: "address" },
   { name: "Monthly Dues", field: "monthly_dues" },
   { name: "Status", field: "status" },
-  { name: "Is Deleted", field: "is_deleted" },
-  { name: "Created At", field: "created_at" },
-  { name: "Updated At", field: "updated_at" },
-  { name: "Created By", field: "created_by" },
-  { name: "Updated By", field: "updated_by" },
+  // { name: "Is Deleted", field: "is_deleted" },
+  // { name: "Created At", field: "created_at" },
+  // { name: "Updated At", field: "updated_at" },
+  // { name: "Created By", field: "created_by" },
+  // { name: "Updated By", field: "updated_by" },
   { name: "Actions", field: "actions" },
 ];
 

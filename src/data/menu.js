@@ -21,9 +21,13 @@ export default {
     //   to: "components",
     //   icon: "si si-settings",
     // },
+    {
+      name: "Hr",
+      heading: true,
+    },
 
     {
-      name: "HR Management",
+      name: "Human Resource",
       icon:  "si si-people",
       subActivePaths: "/hr/",
       sub: [

@@ -20,7 +20,7 @@ const tableColumns = [
   { name: "Job Title Id", field: "job_title_id" },
   { name: "Facility Id", field: "facility_id" },
   { name: "Department Id", field: "department_id" },
-  { name: "Reports To Title Id", field: "reports_to_title_id" },
+  // { name: "Reports To Title Id", field: "reports_to_title_id" },
   { name: "Job Group Id", field: "job_group_id" },
   { name: "Status", field: "status" },
   { name: "Title Name", field: "title_name" },
@@ -30,9 +30,9 @@ const tableColumns = [
   { name: "License Type", field: "license_type" },
   { name: "Is Clinical", field: "is_clinical" },
   { name: "Is Supervisory", field: "is_supervisory" },
-  { name: "Is Deleted", field: "is_deleted" },
-  { name: "Created At", field: "created_at" },
-  { name: "Updated At", field: "updated_at" },
+  // { name: "Is Deleted", field: "is_deleted" },
+  // { name: "Created At", field: "created_at" },
+  // { name: "Updated At", field: "updated_at" },
   { name: "Actions", field: "actions" },
 ];
 

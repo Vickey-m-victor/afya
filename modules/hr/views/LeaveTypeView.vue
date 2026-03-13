@@ -23,9 +23,9 @@ const tableColumns = [
   { name: "Gender Specific", field: "gender_specific" },
   { name: "Paid", field: "paid" },
   { name: "Requires Approval", field: "requires_approval" },
-  { name: "Is Deleted", field: "is_deleted" },
-  { name: "Created At", field: "created_at" },
-  { name: "Updated At", field: "updated_at" },
+  // { name: "Is Deleted", field: "is_deleted" },
+  // { name: "Created At", field: "created_at" },
+  // { name: "Updated At", field: "updated_at" },
   { name: "Actions", field: "actions" },
 ];
 

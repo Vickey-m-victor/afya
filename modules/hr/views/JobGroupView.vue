@@ -27,9 +27,9 @@ const tableColumns = [
   { name: "Min Salary", field: "min_salary" },
   { name: "Max Salary", field: "max_salary" },
   { name: "Default Salary", field: "default_salary" },
-  { name: "Is Deleted", field: "is_deleted" },
-  { name: "Created At", field: "created_at" },
-  { name: "Updated At", field: "updated_at" },
+  // { name: "Is Deleted", field: "is_deleted" },
+  // { name: "Created At", field: "created_at" },
+  // { name: "Updated At", field: "updated_at" },
   { name: "Actions", field: "actions" },
 ];
 

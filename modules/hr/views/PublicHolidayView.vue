@@ -26,11 +26,11 @@ const tableColumns = [
   { name: "Double Pay If Worked", field: "double_pay_if_worked" },
   { name: "Description", field: "description" },
   { name: "Status", field: "status" },
-  { name: "Is Deleted", field: "is_deleted" },
-  { name: "Created At", field: "created_at" },
-  { name: "Updated At", field: "updated_at" },
-  { name: "Created By", field: "created_by" },
-  { name: "Updated By", field: "updated_by" },
+  // { name: "Is Deleted", field: "is_deleted" },
+  // { name: "Created At", field: "created_at" },
+  // { name: "Updated At", field: "updated_at" },
+  // { name: "Created By", field: "created_by" },
+  // { name: "Updated By", field: "updated_by" },
   { name: "Actions", field: "actions" },
 ];
 

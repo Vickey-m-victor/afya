@@ -24,9 +24,9 @@ const tableColumns = [
   { name: "Overtime Rate", field: "overtime_rate" },
   { name: "Tax Calculation Method", field: "tax_calculation_method" },
   { name: "Status", field: "status" },
-  { name: "Is Deleted", field: "is_deleted" },
-  { name: "Created At", field: "created_at" },
-  { name: "Updated At", field: "updated_at" },
+  // { name: "Is Deleted", field: "is_deleted" },
+  // { name: "Created At", field: "created_at" },
+  // { name: "Updated At", field: "updated_at" },
   { name: "Actions", field: "actions" },
 ];
 

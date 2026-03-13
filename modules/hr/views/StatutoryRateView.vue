@@ -27,9 +27,9 @@ const tableColumns = [
   { name: "Effective From", field: "effective_from" },
   { name: "Effective To", field: "effective_to" },
   { name: "Status", field: "status" },
-  { name: "Is Deleted", field: "is_deleted" },
-  { name: "Created At", field: "created_at" },
-  { name: "Updated At", field: "updated_at" },
+  // { name: "Is Deleted", field: "is_deleted" },
+  // { name: "Created At", field: "created_at" },
+  // { name: "Updated At", field: "updated_at" },
   { name: "Actions", field: "actions" },
 ];
 
