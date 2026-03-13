@@ -92,6 +92,14 @@ onMounted(() => {
         :fields="formFields" 
         :showSubmit="false" 
       />
+      <template #footer>
+        <button type="button" class="btn btn-sm btn-alt-secondary me-2" @click="showModal = false">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-sm btn-primary" @click="handleSave">
+          {{ isEditing ? 'Update' : 'Save' }}
+        </button>
+      </template>
     </BaseModal>
   </div>
 </template>
