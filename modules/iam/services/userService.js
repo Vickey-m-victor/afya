@@ -12,9 +12,9 @@ const userService = {
   create(data) {
     return api.post("/iam/user/create", data); // Fixed path
   },
-  // update(username, data) {
-  //   return api.put(`/iam/user/${username}`, data); 
-  // },
+  update(username, data) {
+    return api.put(`/iam/user/${username}`, data); 
+  },
   delete(username) {
     return api.delete(`/iam/user/${username}`); // Fixed path
   },

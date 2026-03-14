@@ -3,7 +3,7 @@ import BaseButton from "@/components/BaseButton.vue";
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
-  submitLabel: { type: String, default: "Save User" }
+  submitLabel: { type: String, default: "Save" }
 });
 
 const emit = defineEmits(["submit", "update:modelValue"]);

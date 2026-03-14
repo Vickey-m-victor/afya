@@ -2,8 +2,7 @@
 import { ref, reactive, onMounted } from "vue";
 import BaseTable from "@/components/BaseTable.vue";
 import BaseModal from "@/components/BaseModal.vue";
-import BaseForm from "@/components/BaseForm.vue";
-import BaseButton from "@/components/BaseButton.vue";
+import BaseGridForm from "@/components/BaseGridForm.vue";
 import BasePageHeading from "@/components/BasePageHeading.vue";
 import { usePermissionStore } from "~/iam/stores/permissionStore";
 import { useAlert } from "@/composables/alerts";
@@ -11,11 +10,10 @@ import { useAlert } from "@/composables/alerts";
 const { toastSuccess, toastError, confirmAction } = useAlert();
 const store = usePermissionStore();
 
-// --- UI State ---
 const showModal = ref(false);
 const isEditing = ref(false);
+let currentQuery = "";
 
-// --- Table Configuration ---
 const tableColumns = [
   { name: "Permission ID", field: "permission_id" },
   { name: "Permission Name", field: "permission_name" },
@@ -23,83 +21,38 @@ const tableColumns = [
   { name: "Actions", field: "actions" },
 ];
 
-// --- Form Configuration ---
 const formData = ref({});
-
 const formFields = reactive([
-{ label: "Permission Id", type: "text", name: "permission_id", placeholder: "Enter permission id" },
-{ label: "Permission Name", type: "text", name: "permission_name", placeholder: "Enter permission name" },  
-{ label: "Description", type: "text", name: "description", placeholder: "Enter Description" },
-
+  { label: "Permission ID", type: "text", name: "permission_id", placeholder: "Enter ID", col: "col-4" },
+  { label: "Permission Name", type: "text", name: "permission_name", placeholder: "Enter Name", col: "col-8" },  
+  { label: "Description", type: "textarea", name: "description", placeholder: "Enter Description", col: "col-12" },
 ]);
-// Add a variable to hold the current search string
-let currentQuery = "";
 
-const handleSearch = (query) => {
-  currentQuery = query; 
-  // 💡 Maintain the current perPage size when searching
-  store.fetchAll(query, 1, store.pagination.perPage); 
-};
+const handleSearch = (query) => { currentQuery = query; store.fetchAll(query, 1, store.pagination?.perPage || 25); };
+const handlePageChange = (newPage) => { store.fetchAll(currentQuery, newPage, store.pagination?.perPage || 25); };
+const handleSizeChange = (newSize) => { store.fetchAll(currentQuery, 1, newSize); };
 
-const handlePageChange = (newPage) => {
-  // 💡 Maintain the current perPage size when clicking Next Page
-  store.fetchAll(currentQuery, newPage, store.pagination.perPage); 
-};
-
-const handleSizeChange = (newSize) => {
-  // 💡 Send the new size to the store, and reset to Page 1
-  store.fetchAll(currentQuery, 1, newSize);
-};
-// --- Handlers ---
-const openCreateModal = () => {
-  isEditing.value = false;
-  formData.value = {}; // Clear form for new entry
-  showModal.value = true;
-};
-
-// 💡 NEW: Edit Handler
-const openEditModal = (row) => {
-  isEditing.value = true;
-  formData.value = { ...row }; // Copy row data into form
-  showModal.value = true;
-};
-
-// 💡 NEW: Delete Handler
-const handleDelete = async (row) => {
-  // Assuming the ID field is 'id' or 'uuid'. Adjust if your backend uses something like 'role_id'
-  const recordId = row.id || row.uuid || row[`permission_id`]; 
-  
-  const confirmed = await confirmAction("Are you sure?", "You won't be able to revert this!");
-  if (confirmed.isConfirmed) {
-    try {
-      await store.delete(recordId);
-      toastSuccess("Deleted!", "Record has been deleted.");
-    } catch (error) {
-      toastError("Error", "Failed to delete record.");
-    }
-  }
-};
+const openCreateModal = () => { isEditing.value = false; formData.value = {}; showModal.value = true; };
+const openEditModal = (row) => { isEditing.value = true; formData.value = { ...row }; showModal.value = true; };
 
 const handleSave = async () => {
   try {
-    if (isEditing.value) {
-      // Assuming ID field. Adjust if your backend uses a custom ID name
-      const recordId = formData.value.id || formData.value.uuid || formData.value[`permission_id`];
-      await store.update(recordId, formData.value);
-      toastSuccess("Success", "Permission updated successfully!");
-    } else {
-      await store.create(formData.value);
-      toastSuccess("Success", "Permission created successfully!");
-    }
+    const recordId = formData.value.id || formData.value.uuid || formData.value[`permission_id`];
+    if (isEditing.value) { await store.update(recordId, formData.value); toastSuccess("Success", "Permission updated!"); }
+    else { await store.create(formData.value); toastSuccess("Success", "Permission created!"); }
     showModal.value = false;
-  } catch (error) {
-    toastError("Error", error.response?.data?.message || "Failed to save data");
+  } catch (error) { toastError("Error", error.response?.data?.message || "Failed to save data"); }
+};
+
+const handleDelete = async (row) => {
+  const recordId = row.id || row.uuid || row[`permission_id`]; 
+  const confirmed = await confirmAction("Are you sure?", "You won't be able to revert this!");
+  if (confirmed.isConfirmed) {
+    try { await store.delete(recordId); toastSuccess("Deleted!", "Record has been deleted."); } catch { toastError("Error", "Failed to delete record."); }
   }
 };
 
-onMounted(() => {
-  store.fetchAll().catch(() => toastError("Error", "Failed to load data"));
-});
+onMounted(() => { store.fetchAll().catch(() => toastError("Error", "Failed to load data")); });
 </script>
 
 <template>
@@ -110,43 +63,33 @@ onMounted(() => {
       :data="store.items"
       :columns="tableColumns"
       :loading="store.loading"
-      :pagination="store.pagination" 
+      :pagination="store.pagination"
+      :show-index="false"
       @search="handleSearch"
       @page-change="handlePageChange"
       @size-change="handleSizeChange"
     >
-
       <template #header-actions>
-        <BaseButton label="Create Permission" variant="primary" @click="openCreateModal" />
+        <button class="btn btn-sm btn-primary" @click="openCreateModal"><i class="fa fa-plus me-1"></i> Create Permission</button>
       </template>
 
       <template #cell(status)="{ row }">
-        <span class="badge" :class="row.status === 'active' ? 'bg-success' : 'bg-warning'">
-          {{ row.status || 'N/A' }}
-        </span>
+        <span v-if="row.status" class="badge" :class="`bg-${row.status.theme || 'primary'}`">{{ row.status.label || 'N/A' }}</span>
+        <span v-else class="text-muted">N/A</span>
       </template>
 
       <template #cell(actions)="{ row }">
-        <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)">
-          <i class="fa fa-pencil-alt"></i>
-        </button>
-        <button class="btn btn-sm btn-alt-danger" @click="handleDelete(row)">
-          <i class="fa fa-trash"></i>
-        </button>
+        <button class="btn btn-sm btn-alt-primary me-1" @click="openEditModal(row)" title="Edit"><i class="fa fa-pencil-alt"></i></button>
+        <button class="btn btn-sm btn-alt-danger" @click="handleDelete(row)" title="Delete"><i class="fa fa-trash"></i></button>
       </template>
     </BaseTable>
 
-    <BaseModal 
-      :showModal="showModal" 
-      :title="isEditing ? 'Edit Permission' : 'Create Permission'" 
-      @close="showModal = false"
-    >
-      <BaseForm 
-        v-model="formData" 
-        :fields="formFields" 
-        submitLabel="Save" 
-        @submit="handleSave" 
-      />
+    <BaseModal :showModal="showModal" size="modal-lg" :title="isEditing ? 'Edit Permission' : 'Create Permission'" @close="showModal = false">
+      <BaseGridForm v-model="formData" :fields="formFields" :showSubmit="false" />
+      <template #footer>
+        <button type="button" class="btn btn-sm btn-alt-secondary me-2" @click="showModal = false">Cancel</button>
+        <button type="button" class="btn btn-sm btn-primary" @click="handleSave">{{ isEditing ? 'Update' : 'Save' }}</button>
+      </template>
     </BaseModal>
   </div>
 </template>
