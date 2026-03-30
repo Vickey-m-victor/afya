@@ -31,34 +31,58 @@ const {
   syncFromResponse,
   buildQueryParams,
 } = useDataTable({
-  initialSortBy: 'department_id',
+  initialSortBy: 'facility_id',
   initialSortDir: 'desc',
 });
 
 const tableColumns = [
   {
-    "field": "department_id",
-    "header": "Department Id"
-  },
-  {
     "field": "facility_id",
     "header": "Facility Id"
   },
   {
-    "field": "parent_id",
-    "header": "Parent Id"
+    "field": "employment_type_id",
+    "header": "Employment Type Id"
   },
   {
-    "field": "department_name",
-    "header": "Department Name"
+    "field": "residential_status_id",
+    "header": "Residential Status Id"
   },
   {
-    "field": "department_code",
-    "header": "Department Code"
+    "field": "department_id",
+    "header": "Department Id"
   },
   {
-    "field": "description",
-    "header": "Description"
+    "field": "job_title_id",
+    "header": "Job Title Id"
+  },
+  {
+    "field": "job_group_id",
+    "header": "Job Group Id"
+  },
+  {
+    "field": "work_shift_id",
+    "header": "Work Shift Id"
+  },
+  {
+    "field": "reports_to_employee_id",
+    "header": "Reports To Employee Id"
+  },
+  {
+    "field": "hire_date",
+    "header": "Hire Date"
+  },
+  {
+    "field": "probation_end_date",
+    "header": "Probation End Date"
+  },
+  {
+    "field": "confirmation_date",
+    "header": "Confirmation Date"
+  },
+  {
+    "field": "termination_date",
+    "header": "Termination Date"
   }
 ];
 
@@ -67,15 +91,15 @@ const loading = ref(false);
 const modalMode = ref('create');
 
 const endpoints = {
-  "list": "/hr/departments",
-  "create": "/hr/department",
-  "view": "/hr/department/{id}",
-  "update": "/hr/department/{id}",
-  "delete": "/hr/department/{id}"
+  "list": "/hr/employees",
+  "create": "/hr/employees/payroll",
+  "view": "/hr/employee/{id}",
+  "update": "/hr/employee/{id}",
+  "delete": "/hr/employee/{id}"
 };
 
 function rowId(row) {
-  return row.id ?? row.department_id ?? row[Object.keys(row).find((key) => key.endsWith('_id'))];
+  return row.id ?? row.employee_id ?? row[Object.keys(row).find((key) => key.endsWith('_id'))];
 }
 
 function normalizeRows(items) {
@@ -127,15 +151,7 @@ function openFormModal(title, formData = {}, readonly = false) {
 }
 
 function handleCreate() {
-  modalMode.value = 'create';
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
-
-  if (!modalStore.useModal) {
-    router.push({ name: 'hr/department/create' });
-    return;
-  }
-
-  openFormModal('Create Department', {}, false);
+  router.push({ name: 'hr/employee/onboard' });
 }
 
 function handleView(row) {
@@ -144,11 +160,11 @@ function handleView(row) {
 
   if (!modalStore.useModal) {
     const id = rowId(row);
-    router.push({ name: 'hr/department/view', params: { id } });
+    router.push({ name: 'hr/employee/view', params: { id } });
     return;
   }
 
-  openFormModal('View Department', { ...row }, true);
+  openFormModal('View Employee', { ...row }, true);
 }
 
 function handleEdit(row) {
@@ -157,11 +173,11 @@ function handleEdit(row) {
 
   if (!modalStore.useModal) {
     const id = rowId(row);
-    router.push({ name: 'hr/department/update', params: { id } });
+    router.push({ name: 'hr/employee/update', params: { id } });
     return;
   }
 
-  openFormModal('Edit Department', { ...row }, false);
+  openFormModal('Edit Employee', { ...row }, false);
 }
 
 async function handleDelete(row) {
@@ -190,7 +206,7 @@ async function handleDelete(row) {
     return;
   }
 
-  handleResponseAlert(alertStore, responseData.value, 'Department deleted successfully.');
+  handleResponseAlert(alertStore, responseData.value, 'Employee deleted successfully.');
   await fetchRows();
 }
 
@@ -234,8 +250,8 @@ async function handleSubmit(payload) {
     alertStore,
     responseData.value,
     isEdit
-      ? 'Department updated successfully.'
-      : 'Department created successfully.'
+      ? 'Employee updated successfully.'
+      : 'Employee created successfully.'
   );
 
   modalStore.closeModal();
@@ -267,7 +283,7 @@ onMounted(fetchRows);
 <template>
   <div class="content">
     <DataTable
-      title="Department"
+      title="Employee"
       :data="rows"
       :columns="tableColumns"
       :loading="loading"
@@ -275,8 +291,8 @@ onMounted(fetchRows);
       :actions="['view', 'edit', 'delete']"
       :total-count="totalCount"
       :search-query="searchQuery"
-      search-placeholder="Search department..."
-      create-label="New Department"
+      search-placeholder="Search employee..."
+      create-label="New Employee"
       :paginated="true"
       :current-page="currentPage"
       :total-pages="totalPages"

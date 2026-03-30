@@ -63,6 +63,11 @@ export default {
           icon: "fa fa-tachometer-alt",
         },
         {
+          name: "Employees",
+          to: "hr/employee",
+          icon: "fa fa-users",
+        },
+        {
           name: "Departments",
           to: "hr/department",
           icon: "fa fa-building",

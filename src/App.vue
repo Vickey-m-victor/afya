@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { layouts } from "@/layouts/layouts.js";
 import GlobalModal from "@/components/GlobalModal.vue";
+import GlobalOffcanvas from "@/components/GlobalOffcanvas.vue";
 
 const route = useRoute();
 
@@ -18,6 +19,8 @@ const layoutComponent = computed(() => {
   
   <!-- Global modal container -->
   <GlobalModal />
+  <!-- Global offcanvas container -->
+  <GlobalOffcanvas />
 </template>
 
 <style lang="scss">

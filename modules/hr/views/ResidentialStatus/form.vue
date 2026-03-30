@@ -102,23 +102,23 @@ async function handleSubmit() {
         <div class="row g-3">
             
             <div class="col-md-6">
-                <label class="form-label" for="field-department_id">Department id</label>
+                <label class="form-label" for="field-residential_status_id">ID</label>
                 
                 <input
-                    id="field-department_id"
-                    v-model.number="formData.department_id"
+                    id="field-residential_status_id"
+                    v-model.number="formData.residential_status_id"
                     type="number"
                     
                     class="form-control"
-                    :class="{ 'is-invalid': fieldError('department_id') }"
+                    :class="{ 'is-invalid': fieldError('residential_status_id') }"
                     :disabled="readonly || busy"
                 />
                 
-                <div v-if="fieldError('department_id')" class="invalid-feedback">{{ fieldError('department_id') }}</div>
+                <div v-if="fieldError('residential_status_id')" class="invalid-feedback">{{ fieldError('residential_status_id') }}</div>
             </div>
 
             <div class="col-md-6">
-                <label class="form-label" for="field-facility_id">Facility id</label>
+                <label class="form-label" for="field-facility_id">Facility ID</label>
                 
                 <input
                     id="field-facility_id"
@@ -134,65 +134,50 @@ async function handleSubmit() {
             </div>
 
             <div class="col-md-6">
-                <label class="form-label" for="field-parent_id">Parent id</label>
+                <label class="form-label" for="field-name">Name</label>
                 
                 <input
-                    id="field-parent_id"
-                    v-model.number="formData.parent_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('parent_id') }"
-                    :disabled="readonly || busy"
-                />
-                
-                <div v-if="fieldError('parent_id')" class="invalid-feedback">{{ fieldError('parent_id') }}</div>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label" for="field-department_name">Department name</label>
-                
-                <input
-                    id="field-department_name"
-                    v-model="formData.department_name"
+                    id="field-name"
+                    v-model="formData.name"
                     type="text"
                     
                     class="form-control"
-                    :class="{ 'is-invalid': fieldError('department_name') }"
+                    :class="{ 'is-invalid': fieldError('name') }"
                     :disabled="readonly || busy"
                 />
                 
-                <div v-if="fieldError('department_name')" class="invalid-feedback">{{ fieldError('department_name') }}</div>
+                <div v-if="fieldError('name')" class="invalid-feedback">{{ fieldError('name') }}</div>
             </div>
 
             <div class="col-md-6">
-                <label class="form-label" for="field-department_code">Department code</label>
+                <label class="form-label" for="field-code">Code</label>
                 
                 <input
-                    id="field-department_code"
-                    v-model="formData.department_code"
+                    id="field-code"
+                    v-model="formData.code"
                     type="text"
                     
                     class="form-control"
-                    :class="{ 'is-invalid': fieldError('department_code') }"
+                    :class="{ 'is-invalid': fieldError('code') }"
                     :disabled="readonly || busy"
                 />
                 
-                <div v-if="fieldError('department_code')" class="invalid-feedback">{{ fieldError('department_code') }}</div>
+                <div v-if="fieldError('code')" class="invalid-feedback">{{ fieldError('code') }}</div>
             </div>
 
-            <div class="col-12">
-                <label class="form-label" for="field-description">Description</label>
-                <textarea
-                    id="field-description"
-                    v-model="formData.description"
-                    rows="4"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('description') }"
-                    :disabled="readonly || busy"
-                ></textarea>
-                <div v-if="fieldError('description')" class="invalid-feedback">{{ fieldError('description') }}</div>
+            <div class="col-md-6 col-lg-4">
+                <div class="form-check mb-0">
+                    <input
+                        id="field-tax_applicable"
+                        v-model="formData.tax_applicable"
+                        class="form-check-input"
+                        type="checkbox"
+                        
+                        :disabled="readonly || busy"
+                    />
+                    <label class="form-check-label" for="field-tax_applicable">Tax applicable</label>
+                    <div v-if="fieldError('tax_applicable')" class="text-danger small mt-1">{{ fieldError('tax_applicable') }}</div>
+                </div>
             </div>
         </div>
 

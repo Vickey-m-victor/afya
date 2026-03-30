@@ -31,34 +31,38 @@ const {
   syncFromResponse,
   buildQueryParams,
 } = useDataTable({
-  initialSortBy: 'department_id',
+  initialSortBy: 'document_type_id',
   initialSortDir: 'desc',
 });
 
 const tableColumns = [
   {
-    "field": "department_id",
-    "header": "Department Id"
+    "field": "document_type_id",
+    "header": "Document Type Id"
   },
   {
     "field": "facility_id",
     "header": "Facility Id"
   },
   {
-    "field": "parent_id",
-    "header": "Parent Id"
+    "field": "name",
+    "header": "Name"
   },
   {
-    "field": "department_name",
-    "header": "Department Name"
-  },
-  {
-    "field": "department_code",
-    "header": "Department Code"
+    "field": "code",
+    "header": "Code"
   },
   {
     "field": "description",
     "header": "Description"
+  },
+  {
+    "field": "requires_expiry_date",
+    "header": "Requires Expiry Date"
+  },
+  {
+    "field": "is_mandatory_for_onboarding",
+    "header": "Is Mandatory For Onboarding"
   }
 ];
 
@@ -67,15 +71,15 @@ const loading = ref(false);
 const modalMode = ref('create');
 
 const endpoints = {
-  "list": "/hr/departments",
-  "create": "/hr/department",
-  "view": "/hr/department/{id}",
-  "update": "/hr/department/{id}",
-  "delete": "/hr/department/{id}"
+  "list": "/hr/document-types",
+  "create": "/hr/document-type",
+  "view": "/hr/document-type/{id}",
+  "update": "/hr/document-type/{id}",
+  "delete": "/hr/document-type/{id}"
 };
 
 function rowId(row) {
-  return row.id ?? row.department_id ?? row[Object.keys(row).find((key) => key.endsWith('_id'))];
+  return row.id ?? row.document_type_id ?? row[Object.keys(row).find((key) => key.endsWith('_id'))];
 }
 
 function normalizeRows(items) {
@@ -131,11 +135,11 @@ function handleCreate() {
   modalStore.toggleModalUsage(true); // set to false to navigate to page
 
   if (!modalStore.useModal) {
-    router.push({ name: 'hr/department/create' });
+    router.push({ name: 'hr/document-type/create' });
     return;
   }
 
-  openFormModal('Create Department', {}, false);
+  openFormModal('Create DocumentType', {}, false);
 }
 
 function handleView(row) {
@@ -144,11 +148,11 @@ function handleView(row) {
 
   if (!modalStore.useModal) {
     const id = rowId(row);
-    router.push({ name: 'hr/department/view', params: { id } });
+    router.push({ name: 'hr/document-type/view', params: { id } });
     return;
   }
 
-  openFormModal('View Department', { ...row }, true);
+  openFormModal('View DocumentType', { ...row }, true);
 }
 
 function handleEdit(row) {
@@ -157,11 +161,11 @@ function handleEdit(row) {
 
   if (!modalStore.useModal) {
     const id = rowId(row);
-    router.push({ name: 'hr/department/update', params: { id } });
+    router.push({ name: 'hr/document-type/update', params: { id } });
     return;
   }
 
-  openFormModal('Edit Department', { ...row }, false);
+  openFormModal('Edit DocumentType', { ...row }, false);
 }
 
 async function handleDelete(row) {
@@ -190,7 +194,7 @@ async function handleDelete(row) {
     return;
   }
 
-  handleResponseAlert(alertStore, responseData.value, 'Department deleted successfully.');
+  handleResponseAlert(alertStore, responseData.value, 'DocumentType deleted successfully.');
   await fetchRows();
 }
 
@@ -234,8 +238,8 @@ async function handleSubmit(payload) {
     alertStore,
     responseData.value,
     isEdit
-      ? 'Department updated successfully.'
-      : 'Department created successfully.'
+      ? 'DocumentType updated successfully.'
+      : 'DocumentType created successfully.'
   );
 
   modalStore.closeModal();
@@ -267,7 +271,7 @@ onMounted(fetchRows);
 <template>
   <div class="content">
     <DataTable
-      title="Department"
+      title="DocumentType"
       :data="rows"
       :columns="tableColumns"
       :loading="loading"
@@ -275,8 +279,8 @@ onMounted(fetchRows);
       :actions="['view', 'edit', 'delete']"
       :total-count="totalCount"
       :search-query="searchQuery"
-      search-placeholder="Search department..."
-      create-label="New Department"
+      search-placeholder="Search document-type..."
+      create-label="New DocumentType"
       :paginated="true"
       :current-page="currentPage"
       :total-pages="totalPages"
