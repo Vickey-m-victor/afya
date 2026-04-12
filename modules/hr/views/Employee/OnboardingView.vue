@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAlertStore } from '@/stores/alert';
+import { useApi } from '@/helpers/useApi';
 
 import StepPersonalInfo from './onboarding/StepPersonalInfo.vue';
 import StepEmployment from './onboarding/StepEmployment.vue';
@@ -62,12 +63,23 @@ function goToStep(stepId) {
   }
 }
 
-function handleNext(payload) {
+async function transitionBackendStage(targetStage) {
+  if (!employeeId.value) return;
+  const endpoint = `/hr/employee/${employeeId.value}/transition`;
+  const { request, error } = useApi(endpoint, { method: 'PUT', autoFetch: false, autoAlert: false });
+  await request({ target_stage: targetStage });
+  if (error.value) {
+    console.warn(`Backend transition to stage ${targetStage} failed or not yet implemented.`, error.value);
+  }
+}
+
+async function handleNext(payload) {
   if (currentStep.value === 1) {
     formData.value.profile = payload;
   } else if (currentStep.value === 2) {
     formData.value.employee = payload;
     if (payload.employee_id) employeeId.value = payload.employee_id;
+    await transitionBackendStage(2); // Wait for EMPLOYMENT_DETAILS transition
   } else if (currentStep.value === 3) {
     formData.value.payroll = payload;
   } else if (currentStep.value === 4) {
@@ -78,6 +90,11 @@ function handleNext(payload) {
     formData.value.experiences = payload;
   } else if (currentStep.value === 7) {
     formData.value.documents = payload;
+    await transitionBackendStage(3); // Wait for PENDING_APPROVAL transition
+  }
+
+  if (currentStep.value === steps.length) {
+    await transitionBackendStage(4); // Trigger ACTIVE stage before completing
   }
 
   if (!completedSteps.value.includes(currentStep.value)) {

@@ -96,9 +96,17 @@ const submit = async () => {
   fieldErrors.value = {};
   isLoading.value = true;
 
+  const employeeData = stripCrudSystemFields(localForm.value);
+  // Auto-inject dummy status to bypass backend validation rule before backend overwrites it
+  if (!employeeData.employment_status_id && options.value.employmentStatuses?.length) {
+    employeeData.employment_status_id = getOptionValue(options.value.employmentStatuses[0], ['employment_status_id']);
+  } else if (!employeeData.employment_status_id) {
+    employeeData.employment_status_id = 1; 
+  }
+
   const payload = {
     profile: props.formData.profile,
-    employee: stripCrudSystemFields(localForm.value)
+    employee: employeeData
   };
 
   const endpoint = props.employeeId ? `/hr/employee/${props.employeeId}` : '/hr/employee';
@@ -112,8 +120,17 @@ const submit = async () => {
   if (submitApi.error.value) {
     const parsed = parseBackendError(submitApi.error.value);
     fieldErrors.value = parsed.fieldErrors;
-    if (!parsed.isValidation) {
-      alertStore.show({ theme: 'danger', type: 'toast', message: parsed.message || 'Request failed.' });
+    
+    // If validation fails on Step 1 profile fields, they won't be visible here, so we must show an alert
+    const profileErrorKeys = ['first_name', 'last_name', 'email_address', 'mobile_number', 'national_id'];
+    const hasProfileErrors = profileErrorKeys.some(key => parsed.fieldErrors[key]);
+    
+    if (!parsed.isValidation || hasProfileErrors) {
+      alertStore.show({ 
+        theme: 'danger', 
+        type: 'toast', 
+        message: hasProfileErrors ? 'Personal Information is incomplete. Please go back to Step 1.' : (parsed.message || 'Request failed.')
+      });
     }
     return;
   }
@@ -197,21 +214,7 @@ const submit = async () => {
           <div class="invalid-feedback">{{ fieldErrors.employment_type_id }}</div>
         </div>
 
-        <!-- Employment Status -->
-        <div class="col-md-6">
-          <label class="form-label">Employment Status</label>
-          <select v-model.number="localForm.employment_status_id" class="form-select" :class="{'is-invalid': fieldErrors.employment_status_id}">
-            <option :value="undefined">Select Status...</option>
-            <option
-              v-for="opt in options.employmentStatuses"
-              :key="getOptionValue(opt, ['employment_status_id'])"
-              :value="getOptionValue(opt, ['employment_status_id'])"
-            >
-              {{ getOptionLabel(opt, 'employmentStatuses') }}
-            </option>
-          </select>
-          <div class="invalid-feedback">{{ fieldErrors.employment_status_id }}</div>
-        </div>
+
 
         <!-- Residential Status -->
         <div class="col-md-6">
