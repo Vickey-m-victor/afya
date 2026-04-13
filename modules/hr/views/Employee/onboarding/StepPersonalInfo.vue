@@ -1,7 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-import { useApi } from '@/helpers/useApi';
-import { parseBackendError } from '@/composables/useWarpHelpers';
 import { useAlertStore } from '@/stores/alert';
 
 const props = defineProps({
@@ -23,13 +21,6 @@ const submit = async () => {
   fieldErrors.value = {};
   isLoading.value = true;
 
-  // We hit the backend draft creation deliberately with empty employee data 
-  // so the backend returns 422 validations. We parse these to check if profile is valid.
-  const payload = {
-    profile: localForm.value,
-    employee: {}
-  };
-
   // If there's an existing employee ID we don't need to re-validate draft on Step 1.
   if (props.formData.employee?.employee_id) {
     emit('next', localForm.value);
@@ -37,36 +28,7 @@ const submit = async () => {
     return;
   }
 
-  const { request, error } = useApi('/hr/employee', { method: 'POST', autoFetch: false, autoAlert: false });
-  await request(payload);
-
   isLoading.value = false;
-
-  if (error.value) {
-    const parsed = parseBackendError(error.value);
-    
-    // Filter the merged backend errors to only catch the ones that belong to the profile model
-    const profileKeys = ['first_name', 'last_name', 'email_address', 'mobile_number', 'national_id', 'passport_number', 'tax_pin', 'title', 'gender', 'marital_status', 'date_of_birth', 'physical_address', 'postal_address'];
-    let hasProfileErrors = false;
-    
-    profileKeys.forEach(k => {
-      if (parsed.fieldErrors[k]) {
-        fieldErrors.value[k] = parsed.fieldErrors[k];
-        hasProfileErrors = true;
-      }
-    });
-    
-    // If the backend complained about our profile data, stop here and show them.
-    if (hasProfileErrors) {
-      alertStore.show({ theme: 'danger', type: 'toast', message: 'Please correct the highlighted errors in your Personal Information.' });
-      return; 
-    } else if (!parsed.isValidation) {
-      alertStore.show({ theme: 'danger', type: 'toast', message: parsed.message || 'An unexpected error occurred.' });
-      return;
-    }
-  }
-
-  // If we only got errors about the missing `employee` data, it means the profile itself passed backend validation!
   emit('next', localForm.value);
 };
 </script>
@@ -88,7 +50,7 @@ const submit = async () => {
           <div class="invalid-feedback">{{ fieldErrors.title }}</div>
         </div>
         <div class="col-md-4">
-          <label class="form-label">First Name <span class="text-danger">*</span></label>
+          <label class="form-label">First Name</label>
           <input v-model="localForm.first_name" type="text" class="form-control" :class="{'is-invalid': fieldErrors.first_name}">
           <div class="invalid-feedback">{{ fieldErrors.first_name }}</div>
         </div>
@@ -97,7 +59,7 @@ const submit = async () => {
           <input v-model="localForm.middle_name" type="text" class="form-control">
         </div>
         <div class="col-md-4">
-          <label class="form-label">Last Name <span class="text-danger">*</span></label>
+          <label class="form-label">Last Name</label>
           <input v-model="localForm.last_name" type="text" class="form-control" :class="{'is-invalid': fieldErrors.last_name}">
           <div class="invalid-feedback">{{ fieldErrors.last_name }}</div>
         </div>
@@ -132,7 +94,7 @@ const submit = async () => {
           <div class="invalid-feedback">{{ fieldErrors.tax_pin }}</div>
         </div>
         <div class="col-md-6">
-          <label class="form-label">Email Address <span class="text-danger">*</span></label>
+          <label class="form-label">Email Address</label>
           <input v-model="localForm.email_address" type="email" class="form-control" :class="{'is-invalid': fieldErrors.email_address}">
           <div class="invalid-feedback">{{ fieldErrors.email_address }}</div>
         </div>

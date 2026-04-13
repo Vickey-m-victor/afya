@@ -122,7 +122,7 @@ const submit = async () => {
           <div class="card-body">
               <div class="row g-3">
                   <div class="col-md-4">
-                      <label class="form-label">Document Type <span class="text-danger">*</span></label>
+                      <label class="form-label">Document Type</label>
                         <select v-model.number="item.document_type_id" class="form-select" :class="{'is-invalid': getFieldError(index, 'document_type_id')}">
                           <option :value="null">Select...</option>
                           <option v-for="type in getTypes()" :key="type.id" :value="type.id">{{ type.document_type_name || type.name || type.text }}</option>
@@ -130,7 +130,7 @@ const submit = async () => {
                       <div class="invalid-feedback">{{ getFieldError(index, 'document_type_id') }}</div>
                   </div>
                   <div class="col-md-4">
-                      <label class="form-label">Document Name <span class="text-danger">*</span></label>
+                      <label class="form-label">Document Name</label>
                       <input v-model="item.document_name" type="text" class="form-control" :class="{'is-invalid': getFieldError(index, 'document_name')}">
                       <div class="invalid-feedback">{{ getFieldError(index, 'document_name') }}</div>
                   </div>
@@ -148,7 +148,7 @@ const submit = async () => {
                       <input v-model="item.expiry_date" type="date" class="form-control" :class="{'is-invalid': getFieldError(index, 'expiry_date')}">
                   </div>
                   <div class="col-md-4">
-                      <label class="form-label">File Upload <span class="text-danger">*</span></label>
+                      <label class="form-label">File Upload</label>
                       <input type="file" class="form-control" @change="e => handleFileChange(e, item)" :class="{'is-invalid': getFieldError(index, 'file')}">
                       <div class="invalid-feedback">{{ getFieldError(index, 'file') }}</div>
                   </div>

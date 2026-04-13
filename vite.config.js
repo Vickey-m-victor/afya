@@ -21,7 +21,7 @@ export default defineConfig({
     host: true,
     proxy: {
       "/v2": {
-        target: process.env.API_BASE_URL || "http://localhost:8082/",
+        target: process.env.API_BASE_URL || "http://localhost:9365/",
         changeOrigin: true,
       },
 

@@ -22,9 +22,19 @@ const localForm = ref({ ...props.formData.payroll });
 const fieldErrors = ref({});
 const isLoading = ref(false);
 
+function hasExistingPayrollProfile() {
+  return !!(props.formData.payroll && Object.keys(props.formData.payroll).length && props.formData.payroll.employee_id);
+}
+
 const submit = async () => {
   fieldErrors.value = {};
   isLoading.value = true;
+
+  if (hasExistingPayrollProfile()) {
+    isLoading.value = false;
+    emit('next', localForm.value);
+    return;
+  }
   
   const payload = stripCrudSystemFields(localForm.value);
   const endpoint = `/hr/employees/${props.employeeId}/payroll`;
@@ -79,9 +89,8 @@ const submit = async () => {
           <select v-model="localForm.payment_method" class="form-select" :class="{'is-invalid': fieldErrors.payment_method}">
             <option value="">Select Method...</option>
             <option value="BANK_TRANSFER">Bank Transfer</option>
-            <option value="MOBILE_MONEY">Mobile Money</option>
+            <option value="MOBILE">Mobile Money</option>
             <option value="CASH">Cash</option>
-            <option value="CHEQUE">Cheque</option>
           </select>
           <div class="invalid-feedback">{{ fieldErrors.payment_method }}</div>
         </div>

@@ -37,36 +37,36 @@ const {
 
 const tableColumns = [
   {
-    "field": "facility_id",
-    "header": "Facility Id"
+    "field": "facility_name",
+    "header": "Facility"
   },
   {
-    "field": "employment_type_id",
-    "header": "Employment Type Id"
+    "field": "employment_type_name",
+    "header": "Employment Type"
   },
   {
-    "field": "residential_status_id",
-    "header": "Residential Status Id"
+    "field": "residential_status_name",
+    "header": "Residential Status"
   },
   {
-    "field": "department_id",
-    "header": "Department Id"
+    "field": "department_name",
+    "header": "Department"
   },
   {
-    "field": "job_title_id",
-    "header": "Job Title Id"
+    "field": "job_title_name",
+    "header": "Job Title"
   },
   {
-    "field": "job_group_id",
-    "header": "Job Group Id"
+    "field": "job_group_name",
+    "header": "Job Group"
   },
   {
-    "field": "work_shift_id",
-    "header": "Work Shift Id"
+    "field": "work_shift_name",
+    "header": "Work Shift"
   },
   {
     "field": "reports_to_employee_id",
-    "header": "Reports To Employee Id"
+    "header": "Reports To (Employee Id)"
   },
   {
     "field": "hire_date",
@@ -106,6 +106,21 @@ function normalizeRows(items) {
   const list = Array.isArray(items) ? items : Object.values(items || {});
   return list.map((row) => ({
     ...row,
+    // Flatten nested lookup objects from API so DataTable can render them
+    facility_id: row?.facility_id ?? row?.facility?.id ?? null,
+    facility_name: row?.facility_name ?? row?.facility?.name ?? null,
+    employment_type_id: row?.employment_type_id ?? row?.employment_type?.id ?? null,
+    employment_type_name: row?.employment_type_name ?? row?.employment_type?.name ?? null,
+    residential_status_id: row?.residential_status_id ?? row?.residential_status?.id ?? null,
+    residential_status_name: row?.residential_status_name ?? row?.residential_status?.name ?? null,
+    department_id: row?.department_id ?? row?.department?.id ?? null,
+    department_name: row?.department_name ?? row?.department?.name ?? null,
+    job_title_id: row?.job_title_id ?? row?.job_title?.id ?? null,
+    job_title_name: row?.job_title_name ?? row?.job_title?.name ?? null,
+    job_group_id: row?.job_group_id ?? row?.job_group?.id ?? null,
+    job_group_name: row?.job_group_name ?? row?.job_group?.name ?? null,
+    work_shift_id: row?.work_shift_id ?? row?.work_shift?.id ?? null,
+    work_shift_name: row?.work_shift_name ?? row?.work_shift?.name ?? null,
     __rowId: rowId(row),
   }));
 }
@@ -155,19 +170,20 @@ function handleCreate() {
 }
 
 function handleView(row) {
-  modalMode.value = 'view';
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
-
-  if (!modalStore.useModal) {
-    const id = rowId(row);
-    router.push({ name: 'hr/employee/view', params: { id } });
-    return;
-  }
-
-  openFormModal('View Employee', { ...row }, true);
+  const id = rowId(row);
+  router.push({ name: 'hr/employee/view', params: { id } });
 }
 
 function handleEdit(row) {
+  const stage = Number(row?.onboarding_stage ?? row?.onboarding_status?.current_stage ?? 0);
+  const isIncompleteOnboarding = stage > 0 && stage < 5;
+
+  if (isIncompleteOnboarding) {
+    const id = rowId(row);
+    router.push({ name: 'hr/employee/onboard', query: { id } });
+    return;
+  }
+
   modalMode.value = 'edit';
   modalStore.toggleModalUsage(true); // set to false to navigate to page
 

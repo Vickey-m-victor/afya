@@ -15,14 +15,17 @@ const alertStore = useAlertStore();
 const experiences = ref(
   props.formData.experiences?.length 
     ? [...props.formData.experiences] 
-    : [{ employer_name: '', job_title: '', department: '', start_date: '', end_date: '', is_current_employer: false }]
+    : [{ employer_name: '', employer_type_id: null, job_title: '', department: '', start_date: '', end_date: '', is_current_employer: false }]
 );
 
 const fieldErrors = ref({});
 const isLoading = ref(false);
+const { data: employerTypeData } = useApi('/hr/employer-type/search', { autoFetch: true, autoAlert: false });
+
+const getEmployerTypes = () => employerTypeData.value?.dataPayload?.data || [];
 
 const addRow = () => {
-  experiences.value.push({ employer_name: '', job_title: '', department: '', start_date: '', end_date: '', is_current_employer: false });
+  experiences.value.push({ employer_name: '', employer_type_id: null, job_title: '', department: '', start_date: '', end_date: '', is_current_employer: false });
 };
 
 const removeRow = (index) => {
@@ -105,22 +108,37 @@ const submit = async () => {
           <div class="card-body">
               <div class="row g-3">
                   <div class="col-md-5">
-                      <label class="form-label">Employer Name <span class="text-danger">*</span></label>
+                      <label class="form-label">Employer Name</label>
                       <input v-model="item.employer_name" type="text" class="form-control" :class="{'is-invalid': getFieldError(index, 'employer_name')}">
                       <div class="invalid-feedback">{{ getFieldError(index, 'employer_name') }}</div>
                   </div>
                   <div class="col-md-4">
-                      <label class="form-label">Job Title <span class="text-danger">*</span></label>
+                      <label class="form-label">Employer Type</label>
+                      <select v-model.number="item.employer_type_id" class="form-select" :class="{'is-invalid': getFieldError(index, 'employer_type_id')}">
+                          <option :value="null">Select...</option>
+                          <option
+                            v-for="type in getEmployerTypes()"
+                            :key="type.id"
+                            :value="type.id"
+                          >
+                            {{ type.employer_type_name || type.type_name || type.name || type.text }}
+                          </option>
+                      </select>
+                      <div class="invalid-feedback">{{ getFieldError(index, 'employer_type_id') }}</div>
+                  </div>
+
+                  <div class="col-md-3">
+                      <label class="form-label">Job Title</label>
                       <input v-model="item.job_title" type="text" class="form-control" :class="{'is-invalid': getFieldError(index, 'job_title')}">
                       <div class="invalid-feedback">{{ getFieldError(index, 'job_title') }}</div>
                   </div>
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                       <label class="form-label">Department</label>
                       <input v-model="item.department" type="text" class="form-control" :class="{'is-invalid': getFieldError(index, 'department')}">
                   </div>
                   
                   <div class="col-md-3">
-                      <label class="form-label">Start Date <span class="text-danger">*</span></label>
+                      <label class="form-label">Start Date</label>
                       <input v-model="item.start_date" type="date" class="form-control" :class="{'is-invalid': getFieldError(index, 'start_date')}">
                       <div class="invalid-feedback">{{ getFieldError(index, 'start_date') }}</div>
                   </div>

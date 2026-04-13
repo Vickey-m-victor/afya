@@ -58,6 +58,7 @@ const submit = async () => {
 
   for (let i = 0; i < validEducations.length; i++) {
         const item = validEducations[i];
+
         if (item.id) { // already added from a previous back-forward? Skip or update?
             successful.push(item);
             continue; 
@@ -113,7 +114,7 @@ const submit = async () => {
           <div class="card-body">
               <div class="row g-3">
                   <div class="col-md-4">
-                      <label class="form-label">Level <span class="text-danger">*</span></label>
+                      <label class="form-label">Level</label>
                       <select v-model.number="item.education_level_id" class="form-select" :class="{'is-invalid': getFieldError(index, 'education_level_id')}">
                           <option :value="null">Select...</option>
                           <option v-for="lvl in getLevels()" :key="lvl.id" :value="lvl.id">{{ lvl.education_level_name || lvl.name || lvl.text }}</option>
@@ -131,8 +132,9 @@ const submit = async () => {
                       <div class="invalid-feedback">{{ getFieldError(index, 'qualification_name') }}</div>
                   </div>
                   <div class="col-md-6">
-                      <label class="form-label">Field of Study</label>
+                        <label class="form-label">Field of Study</label>
                       <input v-model="item.field_of_study" type="text" class="form-control" :class="{'is-invalid': getFieldError(index, 'field_of_study')}">
+                      <div class="invalid-feedback">{{ getFieldError(index, 'field_of_study') }}</div>
                   </div>
                   <div class="col-md-3">
                       <label class="form-label">Start Date</label>

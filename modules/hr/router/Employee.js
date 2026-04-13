@@ -1,9 +1,10 @@
 const layout = 'LayoutBackend'
 export default [
   {
-    path: '/hr/employee/onboard',
+    path: '/hr/employee/onboard/:id?',
     name: 'hr/employee/onboard',
     component: () => import('../views/Employee/OnboardingView.vue'),
+    props: true,
     meta: { title: 'Afya365 - Onboard Employee', layout: layout }
   },
   {

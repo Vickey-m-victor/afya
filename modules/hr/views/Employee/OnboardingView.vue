@@ -1,8 +1,8 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAlertStore } from '@/stores/alert';
-import { useApi } from '@/helpers/useApi';
+import axiosInstance from '@/helpers/axiosInstance';
 
 import StepPersonalInfo from './onboarding/StepPersonalInfo.vue';
 import StepEmployment from './onboarding/StepEmployment.vue';
@@ -14,6 +14,7 @@ import StepDocuments from './onboarding/StepDocuments.vue';
 import StepReview from './onboarding/StepReview.vue';
 
 const router = useRouter();
+const route = useRoute();
 const alertStore = useAlertStore();
 
 const steps = [
@@ -21,15 +22,18 @@ const steps = [
   { id: 2, title: 'Employment',    component: 'employment', icon: 'fa fa-briefcase' },
   { id: 3, title: 'Payroll',       component: 'payroll', icon: 'fa fa-money-bill-wave' },
   { id: 4, title: 'Dependents',    component: 'dependents', icon: 'fa fa-users', optional: true },
-  { id: 5, title: 'Education',     component: 'education', icon: 'fa fa-graduation-cap', optional: true },
+  { id: 5, title: 'Education',     component: 'education', icon: 'fa fa-graduation-cap' },
   { id: 6, title: 'Experience',    component: 'experience', icon: 'fa fa-clock', optional: true },
-  { id: 7, title: 'Documents',     component: 'documents', icon: 'fa fa-file-alt', optional: true },
+  { id: 7, title: 'Documents',     component: 'documents', icon: 'fa fa-file-alt' },
   { id: 8, title: 'Review',        component: 'review', icon: 'fa fa-check-circle' },
 ];
 
 const currentStep = ref(1);
 const employeeId = ref(null);
 const completedSteps = ref([]);
+const isHydrating = ref(true);
+const transitionEnabled = ref(true);
+const transitionPath = ref('');
 
 const formData = ref({
   profile: {},
@@ -44,6 +48,103 @@ const formData = ref({
 const currentStepObj = computed(() => steps.find(s => s.id === currentStep.value));
 const isOptional = computed(() => currentStepObj.value?.optional === true);
 const progressPercent = computed(() => Math.round(((currentStep.value - 1) / (steps.length - 1)) * 100));
+
+function toNumberOrUndefined(value) {
+  if (value === null || value === undefined || value === '') return undefined;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : undefined;
+}
+
+function normalizeEmploymentFields(employee) {
+  return {
+    ...employee,
+    facility_id: toNumberOrUndefined(employee?.facility_id ?? employee?.facility?.id),
+    department_id: toNumberOrUndefined(employee?.department_id ?? employee?.department?.id),
+    job_title_id: toNumberOrUndefined(employee?.job_title_id ?? employee?.job_title?.id ?? employee?.jobTitle?.id),
+    job_group_id: toNumberOrUndefined(employee?.job_group_id ?? employee?.job_group?.id ?? employee?.jobGroup?.id),
+    employment_type_id: toNumberOrUndefined(employee?.employment_type_id ?? employee?.employment_type?.id ?? employee?.employmentType?.id),
+    employment_status_id: toNumberOrUndefined(employee?.employment_status_id ?? employee?.employment_status?.id ?? employee?.employmentStatus?.id),
+    residential_status_id: toNumberOrUndefined(employee?.residential_status_id ?? employee?.residential_status?.id ?? employee?.residentialStatus?.id),
+    work_shift_id: toNumberOrUndefined(employee?.work_shift_id ?? employee?.work_shift?.id ?? employee?.workShift?.id),
+    worker_union_id: toNumberOrUndefined(employee?.worker_union_id ?? employee?.worker_union?.id ?? employee?.workerUnion?.id),
+    reports_to_employee_id: toNumberOrUndefined(employee?.reports_to_employee_id ?? employee?.reportsToEmployee?.employee_id),
+  };
+}
+
+function normalizeProfileFields(employee) {
+  return {
+    ...(employee?.profile || {}),
+    title: employee?.profile?.title ?? employee?.title,
+    first_name: employee?.profile?.first_name ?? employee?.first_name,
+    middle_name: employee?.profile?.middle_name ?? employee?.middle_name,
+    last_name: employee?.profile?.last_name ?? employee?.last_name,
+    gender: employee?.profile?.gender ?? employee?.gender,
+    date_of_birth: employee?.profile?.date_of_birth ?? employee?.date_of_birth,
+    national_id: employee?.profile?.national_id ?? employee?.national_id,
+    passport_number: employee?.profile?.passport_number ?? employee?.passport_number,
+    tax_pin: employee?.profile?.tax_pin ?? employee?.tax_pin,
+    email_address: employee?.profile?.email_address ?? employee?.email_address,
+    mobile_number: employee?.profile?.mobile_number ?? employee?.mobile_number,
+    physical_address: employee?.profile?.physical_address ?? employee?.physical_address,
+    postal_address: employee?.profile?.postal_address ?? employee?.postal_address,
+  };
+}
+
+function resolveResumeStep(onboardingStage) {
+  const stage = Number(onboardingStage || 0);
+  if (stage <= 0) return 1;
+  if (stage === 1) return 2;
+  if (stage === 2) return 3;
+  return 8;
+}
+
+function markCompletedUpTo(stepId) {
+  completedSteps.value = [];
+  for (let id = 1; id < stepId; id += 1) {
+    completedSteps.value.push(id);
+  }
+}
+
+async function loadExistingEmployee() {
+  const routeId = route.params?.id || route.query?.id;
+  if (!routeId) return;
+
+  const id = Number(routeId);
+  if (!Number.isFinite(id)) return;
+
+  let response = null;
+  try {
+    response = await axiosInstance({
+      method: 'GET',
+      url: `/hr/employee/${id}?expand=profile,payrollProfile,dependents,educations,experiences,documents`,
+    });
+  } catch (err) {
+    alertStore.show({
+      theme: 'danger',
+      type: 'toast',
+      message: 'Unable to load employee onboarding progress.'
+    });
+    return;
+  }
+
+  const employee = response?.data?.dataPayload?.data;
+  const resolvedEmployeeId = employee?.employee_id || employee?.id;
+  if (!resolvedEmployeeId) return;
+
+  employeeId.value = resolvedEmployeeId;
+  formData.value.profile = normalizeProfileFields(employee);
+  formData.value.employee = normalizeEmploymentFields(employee);
+  formData.value.payroll = employee.payrollProfile || employee.payroll || employee.employeePayroll || employee.payroll_profile || {};
+  formData.value.dependents = employee.dependents || employee.employeeDependents || [];
+  formData.value.educations = employee.educations || employee.employeeEducations || [];
+  formData.value.experiences = employee.experiences || employee.employeeExperiences || [];
+  formData.value.documents = employee.documents || employee.employeeDocuments || [];
+  transitionPath.value = employee?._links?.transition || '';
+
+  const resumeStep = resolveResumeStep(employee.onboarding_stage ?? employee.onboarding_status?.current_stage);
+  currentStep.value = resumeStep;
+  markCompletedUpTo(resumeStep);
+}
 
 function getStepStatus(stepId) {
   if (completedSteps.value.includes(stepId)) return 'completed';
@@ -64,37 +165,88 @@ function goToStep(stepId) {
 }
 
 async function transitionBackendStage(targetStage) {
-  if (!employeeId.value) return;
-  const endpoint = `/hr/employee/${employeeId.value}/transition`;
-  const { request, error } = useApi(endpoint, { method: 'PUT', autoFetch: false, autoAlert: false });
-  await request({ target_stage: targetStage });
-  if (error.value) {
-    console.warn(`Backend transition to stage ${targetStage} failed or not yet implemented.`, error.value);
+  if (!employeeId.value || !transitionEnabled.value) return;
+  const endpoints = transitionPath.value
+    ? [transitionPath.value]
+    : [`/hr/employees/${employeeId.value}/transition`, `/hr/employee/${employeeId.value}/transition`];
+  const uniqueEndpoints = [...new Set(endpoints)];
+  const methods = ['post', 'put'];
+
+  let response = null;
+  let hasRouteMiss = false;
+  let lastError = null;
+
+  for (const endpoint of uniqueEndpoints) {
+    for (const method of methods) {
+      try {
+        response = await axiosInstance({
+          method,
+          url: endpoint,
+          data: { target_stage: targetStage },
+        });
+        lastError = null;
+        break;
+      } catch (err) {
+        const status = err?.response?.status;
+        if (status === 404 || status === 405) {
+          hasRouteMiss = true;
+          if (status === 404) {
+            break;
+          }
+        }
+        lastError = err;
+      }
+    }
+
+    if (response) break;
+  }
+
+  if (!response) {
+    if (hasRouteMiss) {
+      // Keep wizard progression functional even if transition endpoint is unavailable.
+      transitionEnabled.value = false;
+      return;
+    }
+    throw new Error(`Transition to stage ${targetStage} failed.`);
+  }
+
+  const serverStage = response?.data?.dataPayload?.data?.onboarding_stage;
+  if (serverStage !== undefined && Number(serverStage) !== Number(targetStage)) {
+    throw new Error(`Expected stage ${targetStage} but got ${serverStage ?? 'unknown'}.`);
   }
 }
 
 async function handleNext(payload) {
-  if (currentStep.value === 1) {
-    formData.value.profile = payload;
-  } else if (currentStep.value === 2) {
-    formData.value.employee = payload;
-    if (payload.employee_id) employeeId.value = payload.employee_id;
-    await transitionBackendStage(2); // Wait for EMPLOYMENT_DETAILS transition
-  } else if (currentStep.value === 3) {
-    formData.value.payroll = payload;
-  } else if (currentStep.value === 4) {
-    formData.value.dependents = payload;
-  } else if (currentStep.value === 5) {
-    formData.value.educations = payload;
-  } else if (currentStep.value === 6) {
-    formData.value.experiences = payload;
-  } else if (currentStep.value === 7) {
-    formData.value.documents = payload;
-    await transitionBackendStage(3); // Wait for PENDING_APPROVAL transition
-  }
+  try {
+    if (currentStep.value === 1) {
+      formData.value.profile = payload;
+    } else if (currentStep.value === 2) {
+      formData.value.employee = payload;
+      if (payload.employee_id) employeeId.value = payload.employee_id;
+      await transitionBackendStage(2);
+    } else if (currentStep.value === 3) {
+      formData.value.payroll = payload;
+    } else if (currentStep.value === 4) {
+      formData.value.dependents = payload;
+    } else if (currentStep.value === 5) {
+      formData.value.educations = payload;
+    } else if (currentStep.value === 6) {
+      formData.value.experiences = payload;
+    } else if (currentStep.value === 7) {
+      formData.value.documents = payload;
+      await transitionBackendStage(3);
+    }
 
-  if (currentStep.value === steps.length) {
-    await transitionBackendStage(4); // Trigger ACTIVE stage before completing
+    if (currentStep.value === steps.length) {
+      await transitionBackendStage(5);
+    }
+  } catch (err) {
+    alertStore.show({
+      theme: 'danger',
+      type: 'toast',
+      message: err?.message || 'Unable to progress onboarding stage. Please resolve the form errors and try again.'
+    });
+    return;
   }
 
   if (!completedSteps.value.includes(currentStep.value)) {
@@ -104,7 +256,7 @@ async function handleNext(payload) {
   if (currentStep.value < steps.length) {
     currentStep.value++;
   } else {
-    alertStore.show({ theme: 'success', type: 'toast', message: 'Employee onboarding completed successfully!' });
+    alertStore.show({ theme: 'success', type: 'toast', message: 'Employee onboarding submission completed successfully.' });
     router.push({ name: 'hr/employee' });
   }
 }
@@ -123,6 +275,26 @@ function handleSkip() {
     currentStep.value++;
   }
 }
+
+onMounted(async () => {
+  try {
+    await loadExistingEmployee();
+  } finally {
+    isHydrating.value = false;
+  }
+});
+
+watch(
+  () => [route.params?.id, route.query?.id],
+  async () => {
+    isHydrating.value = true;
+    try {
+      await loadExistingEmployee();
+    } finally {
+      isHydrating.value = false;
+    }
+  }
+);
 </script>
 
 <template>
@@ -196,7 +368,12 @@ function handleSkip() {
         </div>
 
         <!-- Step Content — use v-show so components stay mounted (prevents re-fetch on back/next) -->
-        <div class="step-content-wrapper py-2">
+        <div v-if="isHydrating" class="py-5 text-center">
+          <span class="spinner-border text-primary" role="status" aria-hidden="true"></span>
+          <div class="mt-2 text-muted">Loading onboarding data...</div>
+        </div>
+
+        <div v-else class="step-content-wrapper py-2">
           <div v-show="currentStep === 1">
             <StepPersonalInfo
               :form-data="formData"

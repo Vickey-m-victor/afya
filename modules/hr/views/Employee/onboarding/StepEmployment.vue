@@ -1,8 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useApi } from '@/helpers/useApi';
+import axiosInstance from '@/helpers/axiosInstance';
 import { useAlertStore } from '@/stores/alert';
-import { parseBackendError, stripCrudSystemFields } from '@/composables/useWarpHelpers';
+import { parseBackendError, stripCrudSystemFields, handleResponseAlert } from '@/composables/useWarpHelpers';
 
 const props = defineProps({
   formData: {
@@ -23,6 +24,7 @@ const fieldErrors = ref({});
 const isLoading = ref(false);
 
 const options = ref({
+  facilities: [],
   departments: [],
   jobTitles: [],
   jobGroups: [],
@@ -38,6 +40,7 @@ const { batchRequest } = useApi('', { autoFetch: false });
 
 onMounted(async () => {
   const results = await batchRequest([
+    { url: '/admin/facility/search-dropdown',  requestName: 'facilities' },
     { url: '/hr/department/search',           requestName: 'departments' },
     { url: '/hr/job-title/search',            requestName: 'jobTitles' },
     { url: '/hr/job-group/search',            requestName: 'jobGroups' },
@@ -61,6 +64,7 @@ const getOptionLabel = (opt, type) => {
   if (!opt) return 'Unknown';
   if (opt.text) return opt.text;
   const map = {
+    facilities:         opt.facility_name,
     departments:        opt.department_name,
     jobTitles:          opt.job_title_name,
     jobGroups:          opt.job_group_name,
@@ -109,16 +113,27 @@ const submit = async () => {
     employee: employeeData
   };
 
-  const endpoint = props.employeeId ? `/hr/employee/${props.employeeId}` : '/hr/employee';
-  const method   = props.employeeId ? 'PUT' : 'POST';
+  const isUpdate = !!props.employeeId;
+  const endpoint = isUpdate ? `/hr/employee/${props.employeeId}` : '/hr/employee';
+  const method   = isUpdate ? 'PUT' : 'POST';
+  const requestPayload = isUpdate ? employeeData : payload;
 
-  const submitApi = useApi(endpoint, { method, autoFetch: false });
-  await submitApi.request(payload);
+  let apiResponse = null;
+  let apiError = null;
+  try {
+    apiResponse = await axiosInstance({
+      method,
+      url: endpoint,
+      data: requestPayload,
+    });
+  } catch (err) {
+    apiError = err;
+  }
 
   isLoading.value = false;
 
-  if (submitApi.error.value) {
-    const parsed = parseBackendError(submitApi.error.value);
+  if (apiError) {
+    const parsed = parseBackendError(apiError.response?.data || apiError);
     fieldErrors.value = parsed.fieldErrors;
     
     // If validation fails on Step 1 profile fields, they won't be visible here, so we must show an alert
@@ -135,8 +150,16 @@ const submit = async () => {
     return;
   }
 
-  const responseData = submitApi.data.value?.dataPayload?.data || {};
+  const responseData = apiResponse?.data?.dataPayload?.data || {};
   const newEmployeeId = responseData.employee_id || props.employeeId;
+
+  if (!isUpdate) {
+    handleResponseAlert(
+      alertStore,
+      apiResponse?.data,
+      'Draft employee created successfully.'
+    );
+  }
 
   emit('next', { ...localForm.value, employee_id: newEmployeeId });
 };
@@ -149,6 +172,26 @@ const submit = async () => {
 
     <form @submit.prevent="submit">
       <div class="row g-4">
+
+        <!-- Facility -->
+        <div class="col-md-6">
+          <label class="form-label">Facility ID</label>
+          <select
+            v-model.number="localForm.facility_id"
+            class="form-select"
+            :class="{'is-invalid': fieldErrors.facility_id}"
+          >
+            <option :value="undefined">Select Facility...</option>
+            <option
+              v-for="opt in options.facilities"
+              :key="getOptionValue(opt, ['facility_id'])"
+              :value="getOptionValue(opt, ['facility_id'])"
+            >
+              {{ getOptionLabel(opt, 'facilities') }}
+            </option>
+          </select>
+          <div class="invalid-feedback">{{ fieldErrors.facility_id }}</div>
+        </div>
 
         <!-- Department -->
         <div class="col-md-6">
@@ -168,7 +211,7 @@ const submit = async () => {
 
         <!-- Job Title -->
         <div class="col-md-6">
-          <label class="form-label">Job Title <span class="text-danger">*</span></label>
+          <label class="form-label">Job Title</label>
           <select v-model.number="localForm.job_title_id" class="form-select" :class="{'is-invalid': fieldErrors.job_title_id}">
             <option :value="undefined">Select Title...</option>
             <option
@@ -200,7 +243,7 @@ const submit = async () => {
 
         <!-- Employment Type -->
         <div class="col-md-6">
-          <label class="form-label">Employment Type <span class="text-danger">*</span></label>
+          <label class="form-label">Employment Type</label>
           <select v-model.number="localForm.employment_type_id" class="form-select" :class="{'is-invalid': fieldErrors.employment_type_id}">
             <option :value="undefined">Select Type...</option>
             <option
@@ -285,7 +328,7 @@ const submit = async () => {
 
         <!-- Hire Date -->
         <div class="col-md-4">
-          <label class="form-label">Hire Date <span class="text-danger">*</span></label>
+          <label class="form-label">Hire Date</label>
           <input v-model="localForm.hire_date" type="date" class="form-control" :class="{'is-invalid': fieldErrors.hire_date}">
           <div class="invalid-feedback">{{ fieldErrors.hire_date }}</div>
         </div>
