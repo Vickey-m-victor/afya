@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useApi } from '@/helpers/useApi';
 import { useAlertStore } from '@/stores/alert';
 import { parseBackendError } from '@/composables/useWarpHelpers';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 
 const props = defineProps({
   formData: { type: Object, required: true },
@@ -20,9 +21,7 @@ const experiences = ref(
 
 const fieldErrors = ref({});
 const isLoading = ref(false);
-const { data: employerTypeData } = useApi('/hr/employer-type/search', { autoFetch: true, autoAlert: false });
-
-const getEmployerTypes = () => employerTypeData.value?.dataPayload?.data || [];
+// Employer types are loaded lazily by LazySearchSelect.
 
 const addRow = () => {
   experiences.value.push({ employer_name: '', employer_type_id: null, job_title: '', department: '', start_date: '', end_date: '', is_current_employer: false });
@@ -114,16 +113,13 @@ const submit = async () => {
                   </div>
                   <div class="col-md-4">
                       <label class="form-label">Employer Type</label>
-                      <select v-model.number="item.employer_type_id" class="form-select" :class="{'is-invalid': getFieldError(index, 'employer_type_id')}">
-                          <option :value="null">Select...</option>
-                          <option
-                            v-for="type in getEmployerTypes()"
-                            :key="type.id"
-                            :value="type.id"
-                          >
-                            {{ type.employer_type_name || type.type_name || type.name || type.text }}
-                          </option>
-                      </select>
+                      <LazySearchSelect
+                        v-model="item.employer_type_id"
+                        endpoint="/hr/employer-type/search"
+                        placeholder="Select..."
+                        :disabled="isLoading"
+                        :invalid="!!getFieldError(index, 'employer_type_id')"
+                      />
                       <div class="invalid-feedback">{{ getFieldError(index, 'employer_type_id') }}</div>
                   </div>
 

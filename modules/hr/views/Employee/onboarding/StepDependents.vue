@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useApi } from '@/helpers/useApi';
 import { useAlertStore } from '@/stores/alert';
 import { parseBackendError } from '@/composables/useWarpHelpers';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 
 const props = defineProps({
   formData: { type: Object, required: true },
@@ -13,10 +14,9 @@ const emit = defineEmits(['next', 'back', 'skip']);
 const alertStore = useAlertStore();
 
 const normalizeDependentForApi = (row) => {
-  const relationshipTypeId =
-    row?.relationship_type_id ??
-    row?.relationship?.id ??
-    null;
+  // Backend currently expects a fixed relationship_type_id value.
+  // Regardless of what the UI selects, always send `1` (per API requirement).
+  const relationshipTypeId = 1;
 
   const type = row?.type === 'dependent' || row?.type === 'next_of_kin' || row?.type === 'beneficiary'
     ? row.type
@@ -27,11 +27,22 @@ const normalizeDependentForApi = (row) => {
       ? (row?.beneficiary_percentage ?? null)
       : null;
 
+  const asLower = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    return String(value).toLowerCase();
+  };
+
+  const toNumberOrNull = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    const num = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(num) ? num : null;
+  };
+
   return {
     type,
     full_name: row?.full_name ?? '',
     relationship_type_id: relationshipTypeId,
-    gender: row?.gender ?? null,
+    gender: asLower(row?.gender),
     date_of_birth: row?.date_of_birth ?? null,
     national_id: row?.national_id ?? null,
     birth_certificate_number: row?.birth_certificate_number ?? null,
@@ -39,9 +50,9 @@ const normalizeDependentForApi = (row) => {
     email: row?.email ?? null,
     physical_address: row?.physical_address ?? null,
     city_of_residence: row?.city_of_residence ?? null,
-    beneficiary_percentage: beneficiaryPercentage,
+    beneficiary_percentage: toNumberOrNull(beneficiaryPercentage),
     medical_card_number: row?.medical_card_number ?? null,
-    notes: row?.notes ?? null
+    notes: row?.notes ?? null,
   };
 };
 
@@ -54,9 +65,7 @@ const dependents = ref(
 
 const fieldErrors = ref({});
 const isLoading = ref(false);
-const { data: relData } = useApi('/hr/dependent-relationship-type/search', { autoFetch: true, autoAlert: false });
-
-const getRelTypes = () => relData.value?.dataPayload?.data || [];
+// Relationship list is now loaded lazily by LazySearchSelect (no auto-fetch).
 
 const addRow = () => {
   dependents.value.push({ type: 'dependent', full_name: '', relationship_type_id: null });
@@ -82,9 +91,6 @@ const validateDependents = (rows) => {
     if (!d.full_name || !String(d.full_name).trim()) {
       errors[`dependents.${index}.full_name`] = 'Full name is required';
     }
-    if (!d.relationship_type_id) {
-      errors[`dependents.${index}.relationship_type_id`] = 'Relationship is required';
-    }
     if (d.type === 'beneficiary') {
       const val = d.beneficiary_percentage;
       const num = typeof val === 'number' ? val : Number(val);
@@ -105,8 +111,13 @@ const submit = async () => {
   
   // Clean empty rows if they submitted a single empty row by accident
   const payloadDependents = dependents.value
-    .map(normalizeDependentForApi)
-    .filter(d => d.full_name || d.relationship_type_id || d.phone_number);
+    .filter((d) => {
+      const name = String(d?.full_name ?? '').trim();
+      const phone = String(d?.phone_number ?? '').trim();
+      const email = String(d?.email ?? '').trim();
+      return Boolean(name || phone || email);
+    })
+    .map(normalizeDependentForApi);
   
   if (payloadDependents.length === 0) {
       isLoading.value = false;
@@ -179,10 +190,13 @@ const submit = async () => {
                   </div>
                   <div class="col-md-4">
                       <label class="form-label">Relationship</label>
-                      <select v-model.number="item.relationship_type_id" class="form-select" :class="{'is-invalid': getFieldError(index, 'relationship_type_id')}">
-                          <option :value="null">Select...</option>
-                          <option v-for="rel in getRelTypes()" :key="rel.id" :value="rel.id">{{ rel.relationship_name || rel.name || rel.text }}</option>
-                      </select>
+                      <LazySearchSelect
+                        v-model="item.relationship_type_id"
+                        endpoint="/hr/dependent-relationship-type/search"
+                        placeholder="Select..."
+                        :disabled="isLoading"
+                        :invalid="!!getFieldError(index, 'relationship_type_id')"
+                      />
                       <div class="invalid-feedback">{{ getFieldError(index, 'relationship_type_id') }}</div>
                   </div>
                   

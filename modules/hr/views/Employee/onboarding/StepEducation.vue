@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useApi } from '@/helpers/useApi';
 import { useAlertStore } from '@/stores/alert';
 import { parseBackendError } from '@/composables/useWarpHelpers';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 
 const props = defineProps({
   formData: { type: Object, required: true },
@@ -15,17 +16,62 @@ const alertStore = useAlertStore();
 const educations = ref(
   props.formData.educations?.length 
     ? [...props.formData.educations] 
-    : [{ education_level_id: null, institution_name: '', qualification_name: '', start_date: '', completion_date: '' }]
+    : [{
+        education_level_id: null,
+        institution_name: '',
+        field_of_study: '',
+        qualification_name: '',
+        grade_gpa: '',
+        start_date: '',
+        completion_date: '',
+        is_currently_studying: false,
+        is_verified: true,
+        notes: '',
+      }]
 );
 
 const fieldErrors = ref({});
 const isLoading = ref(false);
-const { data: levelData } = useApi('/hr/education-level/search', { autoFetch: true, autoAlert: false });
-
-const getLevels = () => levelData.value?.dataPayload?.data || [];
+// Education levels are loaded lazily by LazySearchSelect.
 
 const addRow = () => {
-  educations.value.push({ education_level_id: null, institution_name: '', qualification_name: '', start_date: '', completion_date: '' });
+  educations.value.push({
+    education_level_id: null,
+    institution_name: '',
+    field_of_study: '',
+    qualification_name: '',
+    grade_gpa: '',
+    start_date: '',
+    completion_date: '',
+    is_currently_studying: false,
+    is_verified: true,
+    notes: '',
+  });
+};
+
+const normalizeEducationForApi = (row) => {
+  const toBool = (value, fallback = false) => {
+    if (value === true || value === false) return value;
+    if (value === null || value === undefined || value === '') return fallback;
+    const s = String(value).toLowerCase();
+    if (s === 'true' || s === '1' || s === 'yes') return true;
+    if (s === 'false' || s === '0' || s === 'no') return false;
+    return fallback;
+  };
+
+  return {
+    education_level_id: row?.education_level_id ?? null,
+    institution_name: row?.institution_name ?? '',
+    field_of_study: row?.field_of_study ?? null,
+    qualification_name: row?.qualification_name ?? '',
+    grade_gpa: row?.grade_gpa ?? null,
+    start_date: row?.start_date ?? null,
+    completion_date: row?.completion_date ?? null,
+    // These are NOT NULL in DB (per backend error) so always send booleans
+    is_currently_studying: toBool(row?.is_currently_studying, false),
+    is_verified: toBool(row?.is_verified, true),
+    notes: row?.notes ?? null,
+  };
 };
 
 const removeRow = (index) => {
@@ -42,7 +88,14 @@ const submit = async () => {
   fieldErrors.value = {};
   isLoading.value = true;
   
-  const validEducations = educations.value.filter(e => e.institution_name || e.qualification_name || e.education_level_id);
+  const validEducations = educations.value.filter(e =>
+    e.institution_name ||
+    e.qualification_name ||
+    e.education_level_id ||
+    e.field_of_study ||
+    e.grade_gpa ||
+    e.notes
+  );
   
   if (validEducations.length === 0) {
       isLoading.value = false;
@@ -57,7 +110,7 @@ const submit = async () => {
   let hasError = false;
 
   for (let i = 0; i < validEducations.length; i++) {
-        const item = validEducations[i];
+        const item = normalizeEducationForApi(validEducations[i]);
 
         if (item.id) { // already added from a previous back-forward? Skip or update?
             successful.push(item);
@@ -115,10 +168,13 @@ const submit = async () => {
               <div class="row g-3">
                   <div class="col-md-4">
                       <label class="form-label">Level</label>
-                      <select v-model.number="item.education_level_id" class="form-select" :class="{'is-invalid': getFieldError(index, 'education_level_id')}">
-                          <option :value="null">Select...</option>
-                          <option v-for="lvl in getLevels()" :key="lvl.id" :value="lvl.id">{{ lvl.education_level_name || lvl.name || lvl.text }}</option>
-                      </select>
+                      <LazySearchSelect
+                        v-model="item.education_level_id"
+                        endpoint="/hr/education-level/search"
+                        placeholder="Select..."
+                        :disabled="isLoading"
+                        :invalid="!!getFieldError(index, 'education_level_id')"
+                      />
                       <div class="invalid-feedback">{{ getFieldError(index, 'education_level_id') }}</div>
                   </div>
                   <div class="col-md-4">
@@ -143,6 +199,22 @@ const submit = async () => {
                   <div class="col-md-3">
                       <label class="form-label">Completion Date</label>
                       <input v-model="item.completion_date" type="date" class="form-control" :class="{'is-invalid': getFieldError(index, 'completion_date')}">
+                  </div>
+                  <div class="col-md-3">
+                      <label class="form-label">Grade / GPA</label>
+                      <input v-model="item.grade_gpa" type="text" class="form-control" :class="{'is-invalid': getFieldError(index, 'grade_gpa')}">
+                      <div class="invalid-feedback">{{ getFieldError(index, 'grade_gpa') }}</div>
+                  </div>
+                  <div class="col-md-3 d-flex align-items-end">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" v-model="item.is_currently_studying" :id="'studying_' + index">
+                        <label class="form-check-label" :for="'studying_' + index">Currently studying</label>
+                      </div>
+                  </div>
+                  <div class="col-md-12">
+                      <label class="form-label">Notes</label>
+                      <textarea v-model="item.notes" rows="2" class="form-control" :class="{'is-invalid': getFieldError(index, 'notes')}"></textarea>
+                      <div class="invalid-feedback">{{ getFieldError(index, 'notes') }}</div>
                   </div>
               </div>
           </div>

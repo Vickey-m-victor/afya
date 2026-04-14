@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useApi } from '@/helpers/useApi';
+import { ref } from 'vue';
 import axiosInstance from '@/helpers/axiosInstance';
 import { useAlertStore } from '@/stores/alert';
 import { parseBackendError, stripCrudSystemFields, handleResponseAlert } from '@/composables/useWarpHelpers';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 
 const props = defineProps({
   formData: {
@@ -23,90 +23,13 @@ const localForm = ref({ ...props.formData.employee });
 const fieldErrors = ref({});
 const isLoading = ref(false);
 
-const options = ref({
-  facilities: [],
-  departments: [],
-  jobTitles: [],
-  jobGroups: [],
-  employmentTypes: [],
-  employmentStatuses: [],
-  residentialStatuses: [],
-  workShifts: [],
-  workerUnions: [],
-  employees: []
-});
-
-const { batchRequest } = useApi('', { autoFetch: false });
-
-onMounted(async () => {
-  const results = await batchRequest([
-    { url: '/admin/facility/search-dropdown',  requestName: 'facilities' },
-    { url: '/hr/department/search',           requestName: 'departments' },
-    { url: '/hr/job-title/search',            requestName: 'jobTitles' },
-    { url: '/hr/job-group/search',            requestName: 'jobGroups' },
-    { url: '/hr/employment-type/search',      requestName: 'employmentTypes' },
-    { url: '/hr/employment-status/search',    requestName: 'employmentStatuses' },
-    { url: '/hr/residential-status/search',   requestName: 'residentialStatuses' },
-    { url: '/hr/work-shift/search',           requestName: 'workShifts' },
-    { url: '/hr/worker-union/search',         requestName: 'workerUnions' },
-    { url: '/hr/employee/search',             requestName: 'employees' },
-  ], { autoAlert: false });
-
-  results.forEach(res => {
-    if (res.success && res.data?.dataPayload?.data) {
-      options.value[res.requestName] = res.data.dataPayload.data;
-    }
-  });
-});
-
-// Resolve the label for each dropdown item based on known field names
-const getOptionLabel = (opt, type) => {
-  if (!opt) return 'Unknown';
-  if (opt.text) return opt.text;
-  const map = {
-    facilities:         opt.facility_name,
-    departments:        opt.department_name,
-    jobTitles:          opt.job_title_name,
-    jobGroups:          opt.job_group_name,
-    employmentTypes:    opt.employment_type_name,
-    employmentStatuses: opt.employment_status_name,
-    residentialStatuses:opt.residential_status_name,
-    workShifts:         opt.shift_name || opt.work_shift_name,
-    workerUnions:       opt.union_name || opt.worker_union_name,
-  };
-  return map[type] || opt.name || opt.text || Object.values(opt).find(v => typeof v === 'string' && v.length > 0) || 'Unknown';
-};
-
-const getOptionValue = (opt, fallbackKeys = []) => {
-  if (!opt) return undefined;
-  if (opt.id !== undefined && opt.id !== null) return Number(opt.id);
-  for (const key of fallbackKeys) {
-    if (opt[key] !== undefined && opt[key] !== null) {
-      return Number(opt[key]);
-    }
-  }
-  return undefined;
-};
-
-// Employees use employee_id (not id) as the PK
-const getEmployeeLabel = (emp) => {
-  if (!emp) return 'Unknown';
-  if (emp.text) return emp.text;
-  const names = [emp.first_name, emp.last_name].filter(Boolean).join(' ');
-  return names || emp.email_address || String(emp.employee_id || emp.id || '');
-};
-
 const submit = async () => {
   fieldErrors.value = {};
   isLoading.value = true;
 
   const employeeData = stripCrudSystemFields(localForm.value);
   // Auto-inject dummy status to bypass backend validation rule before backend overwrites it
-  if (!employeeData.employment_status_id && options.value.employmentStatuses?.length) {
-    employeeData.employment_status_id = getOptionValue(options.value.employmentStatuses[0], ['employment_status_id']);
-  } else if (!employeeData.employment_status_id) {
-    employeeData.employment_status_id = 1; 
-  }
+  if (!employeeData.employment_status_id) employeeData.employment_status_id = 1;
 
   const payload = {
     profile: props.formData.profile,
@@ -176,84 +99,65 @@ const submit = async () => {
         <!-- Facility -->
         <div class="col-md-6">
           <label class="form-label">Facility ID</label>
-          <select
-            v-model.number="localForm.facility_id"
-            class="form-select"
-            :class="{'is-invalid': fieldErrors.facility_id}"
-          >
-            <option :value="undefined">Select Facility...</option>
-            <option
-              v-for="opt in options.facilities"
-              :key="getOptionValue(opt, ['facility_id'])"
-              :value="getOptionValue(opt, ['facility_id'])"
-            >
-              {{ getOptionLabel(opt, 'facilities') }}
-            </option>
-          </select>
+          <LazySearchSelect
+            v-model="localForm.facility_id"
+            endpoint="/admin/facility/search-dropdown"
+            placeholder="Select Facility..."
+            :disabled="isLoading"
+            :invalid="!!fieldErrors.facility_id"
+          />
           <div class="invalid-feedback">{{ fieldErrors.facility_id }}</div>
         </div>
 
         <!-- Department -->
         <div class="col-md-6">
           <label class="form-label">Department</label>
-          <select v-model.number="localForm.department_id" class="form-select" :class="{'is-invalid': fieldErrors.department_id}">
-            <option :value="undefined">Select Department...</option>
-            <option
-              v-for="opt in options.departments"
-              :key="getOptionValue(opt, ['department_id'])"
-              :value="getOptionValue(opt, ['department_id'])"
-            >
-              {{ getOptionLabel(opt, 'departments') }}
-            </option>
-          </select>
+          <LazySearchSelect
+            v-model="localForm.department_id"
+            endpoint="/hr/department/search"
+            placeholder="Select Department..."
+            :disabled="isLoading"
+            :invalid="!!fieldErrors.department_id"
+          />
           <div class="invalid-feedback">{{ fieldErrors.department_id }}</div>
         </div>
 
         <!-- Job Title -->
         <div class="col-md-6">
           <label class="form-label">Job Title</label>
-          <select v-model.number="localForm.job_title_id" class="form-select" :class="{'is-invalid': fieldErrors.job_title_id}">
-            <option :value="undefined">Select Title...</option>
-            <option
-              v-for="opt in options.jobTitles"
-              :key="getOptionValue(opt, ['job_title_id'])"
-              :value="getOptionValue(opt, ['job_title_id'])"
-            >
-              {{ getOptionLabel(opt, 'jobTitles') }}
-            </option>
-          </select>
+          <LazySearchSelect
+            v-model="localForm.job_title_id"
+            endpoint="/hr/job-title/search"
+            placeholder="Select Title..."
+            :disabled="isLoading"
+            :invalid="!!fieldErrors.job_title_id"
+          />
           <div class="invalid-feedback">{{ fieldErrors.job_title_id }}</div>
         </div>
 
         <!-- Job Group -->
         <div class="col-md-6">
           <label class="form-label">Job Group</label>
-          <select v-model.number="localForm.job_group_id" class="form-select" :class="{'is-invalid': fieldErrors.job_group_id}">
-            <option :value="undefined">Select Group...</option>
-            <option
-              v-for="opt in options.jobGroups"
-              :key="getOptionValue(opt, ['job_group_id'])"
-              :value="getOptionValue(opt, ['job_group_id'])"
-            >
-              {{ getOptionLabel(opt, 'jobGroups') }}
-            </option>
-          </select>
+          <LazySearchSelect
+            v-model="localForm.job_group_id"
+            endpoint="/hr/job-group/search"
+            placeholder="Select Group..."
+            :disabled="isLoading"
+            :invalid="!!fieldErrors.job_group_id"
+          />
           <div class="invalid-feedback">{{ fieldErrors.job_group_id }}</div>
         </div>
 
         <!-- Employment Type -->
         <div class="col-md-6">
           <label class="form-label">Employment Type</label>
-          <select v-model.number="localForm.employment_type_id" class="form-select" :class="{'is-invalid': fieldErrors.employment_type_id}">
-            <option :value="undefined">Select Type...</option>
-            <option
-              v-for="opt in options.employmentTypes"
-              :key="getOptionValue(opt, ['employment_type_id'])"
-              :value="getOptionValue(opt, ['employment_type_id'])"
-            >
-              {{ getOptionLabel(opt, 'employmentTypes') }}
-            </option>
-          </select>
+          <LazySearchSelect
+            v-model="localForm.employment_type_id"
+            endpoint="/hr/employment-type/search"
+            placeholder="Select Type..."
+            :disabled="isLoading"
+            :invalid="!!fieldErrors.employment_type_id"
+          />
           <div class="invalid-feedback">{{ fieldErrors.employment_type_id }}</div>
         </div>
 
@@ -262,64 +166,57 @@ const submit = async () => {
         <!-- Residential Status -->
         <div class="col-md-6">
           <label class="form-label">Residential Status</label>
-          <select v-model.number="localForm.residential_status_id" class="form-select" :class="{'is-invalid': fieldErrors.residential_status_id}">
-            <option :value="undefined">Select Residential Status...</option>
-            <option
-              v-for="opt in options.residentialStatuses"
-              :key="getOptionValue(opt, ['residential_status_id'])"
-              :value="getOptionValue(opt, ['residential_status_id'])"
-            >
-              {{ getOptionLabel(opt, 'residentialStatuses') }}
-            </option>
-          </select>
+          <LazySearchSelect
+            v-model="localForm.residential_status_id"
+            endpoint="/hr/residential-status/search"
+            placeholder="Select Residential Status..."
+            :disabled="isLoading"
+            :invalid="!!fieldErrors.residential_status_id"
+          />
           <div class="invalid-feedback">{{ fieldErrors.residential_status_id }}</div>
         </div>
 
         <!-- Work Shift -->
         <div class="col-md-6">
           <label class="form-label">Work Shift</label>
-          <select v-model.number="localForm.work_shift_id" class="form-select" :class="{'is-invalid': fieldErrors.work_shift_id}">
-            <option :value="undefined">Select Shift...</option>
-            <option
-              v-for="opt in options.workShifts"
-              :key="getOptionValue(opt, ['work_shift_id'])"
-              :value="getOptionValue(opt, ['work_shift_id'])"
-            >
-              {{ getOptionLabel(opt, 'workShifts') }}
-            </option>
-          </select>
+          <LazySearchSelect
+            v-model="localForm.work_shift_id"
+            endpoint="/hr/work-shift/search"
+            placeholder="Select Shift..."
+            :disabled="isLoading"
+            :invalid="!!fieldErrors.work_shift_id"
+          />
           <div class="invalid-feedback">{{ fieldErrors.work_shift_id }}</div>
         </div>
 
         <!-- Worker Union -->
         <div class="col-md-6">
           <label class="form-label">Worker Union</label>
-          <select v-model.number="localForm.worker_union_id" class="form-select" :class="{'is-invalid': fieldErrors.worker_union_id}">
-            <option :value="undefined">Select Union...</option>
-            <option
-              v-for="opt in options.workerUnions"
-              :key="getOptionValue(opt, ['worker_union_id'])"
-              :value="getOptionValue(opt, ['worker_union_id'])"
-            >
-              {{ getOptionLabel(opt, 'workerUnions') }}
-            </option>
-          </select>
+          <LazySearchSelect
+            v-model="localForm.worker_union_id"
+            endpoint="/hr/worker-union/search"
+            placeholder="Select Union..."
+            :disabled="isLoading"
+            :invalid="!!fieldErrors.worker_union_id"
+          />
           <div class="invalid-feedback">{{ fieldErrors.worker_union_id }}</div>
         </div>
 
         <!-- Manager (Reports To) -->
         <div class="col-md-6">
           <label class="form-label">Manager (Reports To)</label>
-          <select v-model.number="localForm.reports_to_employee_id" class="form-select" :class="{'is-invalid': fieldErrors.reports_to_employee_id}">
-            <option :value="undefined">Select Manager...</option>
-            <option
-              v-for="emp in options.employees"
-              :key="getOptionValue(emp, ['employee_id'])"
-              :value="getOptionValue(emp, ['employee_id'])"
-            >
-              {{ getEmployeeLabel(emp) }}
-            </option>
-          </select>
+          <LazySearchSelect
+            v-model="localForm.reports_to_employee_id"
+            endpoint="/hr/employee/search"
+            placeholder="Select Manager..."
+            :disabled="isLoading"
+            :invalid="!!fieldErrors.reports_to_employee_id"
+            :value-fn="(emp) => emp?.employee_id ?? emp?.id"
+            :label-fn="(emp) => {
+              const names = [emp?.first_name, emp?.last_name].filter(Boolean).join(' ');
+              return names || emp?.email_address || emp?.text || String(emp?.employee_id ?? emp?.id ?? '');
+            }"
+          />
           <div class="invalid-feedback">{{ fieldErrors.reports_to_employee_id }}</div>
         </div>
 

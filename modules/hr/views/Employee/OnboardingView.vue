@@ -268,7 +268,9 @@ function handleBack() {
 }
 
 function handleSkip() {
-  if (isOptional.value && currentStep.value < steps.length) {
+  // Skip is triggered by the step component (only steps that show a Skip button emit it).
+  // Do not block skip based on the `optional` flag, otherwise the UI can show Skip but do nothing.
+  if (currentStep.value < steps.length) {
     if (!completedSteps.value.includes(currentStep.value)) {
       completedSteps.value.push(currentStep.value);
     }

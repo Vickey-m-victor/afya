@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useApi } from '@/helpers/useApi';
 import { useAlertStore } from '@/stores/alert';
 import { parseBackendError } from '@/composables/useWarpHelpers';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 
 const props = defineProps({
   formData: { type: Object, required: true },
@@ -20,9 +21,7 @@ const documents = ref(
 
 const fieldErrors = ref({});
 const isLoading = ref(false);
-const { data: typeData } = useApi('/hr/document-type/search', { autoFetch: true, autoAlert: false });
-
-const getTypes = () => typeData.value?.dataPayload?.data || [];
+// Document types are loaded lazily by LazySearchSelect.
 
 const addRow = () => {
   documents.value.push({ document_type_id: null, document_name: '', document_number: '', issue_date: '', expiry_date: '', file: null });
@@ -33,9 +32,8 @@ const removeRow = (index) => {
 };
 
 const handleFileChange = (e, item) => {
-    if (e.target.files.length) {
-        item.file = e.target.files[0];
-    }
+    const files = e?.target?.files;
+    item.file = files && files.length ? files[0] : null;
 };
 
 const getFieldError = (index, field) => {
@@ -48,7 +46,10 @@ const submit = async () => {
   fieldErrors.value = {};
   isLoading.value = true;
   
-  const validDocs = documents.value.filter(d => d.document_type_id || d.file);
+  const isRealFile = (value) =>
+    typeof File !== 'undefined' && value instanceof File;
+
+  const validDocs = documents.value.filter((d) => d.document_type_id || isRealFile(d.file));
   
   if (validDocs.length === 0) {
       isLoading.value = false;
@@ -64,6 +65,13 @@ const submit = async () => {
             successful.push(item);
             continue; 
         }
+
+        // Backend requires a file. If user picked none, stop early with a friendly inline error.
+        if (!isRealFile(item.file)) {
+          fieldErrors.value[`documents.${i}.file`] = 'File is required';
+          hasError = true;
+          continue;
+        }
         
         const payloadData = new FormData();
         if (item.document_type_id) payloadData.append('document_type_id', item.document_type_id);
@@ -71,10 +79,17 @@ const submit = async () => {
         if (item.document_number) payloadData.append('document_number', item.document_number);
         if (item.issue_date) payloadData.append('issue_date', item.issue_date);
         if (item.expiry_date) payloadData.append('expiry_date', item.expiry_date);
-        if (item.file) payloadData.append('file', item.file);
+        payloadData.append('file', item.file);
 
         const endpoint = `/hr/employees/${props.employeeId}/documents`;
-        const { request, error } = useApi(endpoint, { method: 'POST', autoFetch: false });
+        const { request, error } = useApi(endpoint, {
+          method: 'POST',
+          autoFetch: false,
+          // IMPORTANT: ensure axios sends FormData correctly (otherwise File becomes `{}`).
+          options: {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          },
+        });
         await request(payloadData);
         
         if (error.value) {
@@ -123,10 +138,13 @@ const submit = async () => {
               <div class="row g-3">
                   <div class="col-md-4">
                       <label class="form-label">Document Type</label>
-                        <select v-model.number="item.document_type_id" class="form-select" :class="{'is-invalid': getFieldError(index, 'document_type_id')}">
-                          <option :value="null">Select...</option>
-                          <option v-for="type in getTypes()" :key="type.id" :value="type.id">{{ type.document_type_name || type.name || type.text }}</option>
-                      </select>
+                      <LazySearchSelect
+                        v-model="item.document_type_id"
+                        endpoint="/hr/document-type/search"
+                        placeholder="Select..."
+                        :disabled="isLoading"
+                        :invalid="!!getFieldError(index, 'document_type_id')"
+                      />
                       <div class="invalid-feedback">{{ getFieldError(index, 'document_type_id') }}</div>
                   </div>
                   <div class="col-md-4">

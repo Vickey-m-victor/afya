@@ -9,6 +9,7 @@ import { useAlertStore } from '@/stores/alert';
 import { useAlert } from '@/composables/alerts';
 import { parseBackendError, stripCrudSystemFields, withId, handleResponseAlert } from '@/composables/useWarpHelpers';
 import Form from './form.vue';
+import QuickCreateEmployeeModal from './QuickCreateEmployeeModal.vue';
 
 const modalStore = useModalStore();
 const alertStore = useAlertStore();
@@ -184,7 +185,18 @@ function openFormModal(title, formData = {}, readonly = false) {
 }
 
 function handleCreate() {
-  router.push({ name: 'hr/employee/onboard' });
+  modalStore.openModal({
+    component: QuickCreateEmployeeModal,
+    title: 'New Employee',
+    size: 'xl',
+    showFooter: false,
+    scrollable: true,
+    props: {
+      onCreated: async () => {
+        await fetchRows();
+      },
+    },
+  });
 }
 
 function handleView(row) {
