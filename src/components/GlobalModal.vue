@@ -1,8 +1,10 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, useSlots, watch } from 'vue';
 import { useModalStore } from '@/stores/modal';
+import { useOffcanvasStore } from '@/stores/offcanvas';
 
 const modalStore = useModalStore();
+const offcanvasStore = useOffcanvasStore();
 const slots = useSlots();
 
 const modalRef = ref(null);
@@ -114,6 +116,10 @@ const trapFocus = (event) => {
 
 const handleKeydown = (event) => {
   if (!modalStore.isOpen) {
+    return;
+  }
+
+  if (offcanvasStore.isOpen) {
     return;
   }
 

@@ -31,30 +31,26 @@ const {
   syncFromResponse,
   buildQueryParams,
 } = useDataTable({
-  initialSortBy: 'department_id',
+  initialSortBy: 'relationship_type_id',
   initialSortDir: 'desc',
 });
 
 const tableColumns = [
   {
-    "field": "department_id",
-    "header": "Department Id"
+    "field": "relationship_type_id",
+    "header": "Relationship Type Id"
   },
   {
     "field": "facility_id",
     "header": "Facility Id"
   },
   {
-    "field": "parent_id",
-    "header": "Parent Id"
+    "field": "name",
+    "header": "Name"
   },
   {
-    "field": "department_name",
-    "header": "Department Name"
-  },
-  {
-    "field": "department_code",
-    "header": "Department Code"
+    "field": "code",
+    "header": "Code"
   },
   {
     "field": "description",
@@ -67,15 +63,15 @@ const loading = ref(false);
 const modalMode = ref('create');
 
 const endpoints = {
-  "list": "/hr/departments",
-  "create": "/hr/department",
-  "view": "/hr/department/{id}",
-  "update": "/hr/department/{id}",
-  "delete": "/hr/department/{id}"
+  "list": "/hr/dependent-relationship-types",
+  "create": "/hr/dependent-relationship-type",
+  "view": "/hr/dependent-relationship-type/{id}",
+  "update": "/hr/dependent-relationship-type/{id}",
+  "delete": "/hr/dependent-relationship-type/{id}"
 };
 
 function rowId(row) {
-  return row.id ?? row.department_id ?? row[Object.keys(row).find((key) => key.endsWith('_id'))];
+  return row.id ?? row.dependent_relationship_type_id ?? row[Object.keys(row).find((key) => key.endsWith('_id'))];
 }
 
 function normalizeRows(items) {
@@ -131,11 +127,11 @@ function handleCreate() {
   modalStore.toggleModalUsage(true); // set to false to navigate to page
 
   if (!modalStore.useModal) {
-    router.push({ name: 'hr/department/create' });
+    router.push({ name: 'hr/dependent-relationship-type/create' });
     return;
   }
 
-  openFormModal('Create Department', {}, false);
+  openFormModal('Create DependentRelationshipType', {}, false);
 }
 
 function handleView(row) {
@@ -144,11 +140,11 @@ function handleView(row) {
 
   if (!modalStore.useModal) {
     const id = rowId(row);
-    router.push({ name: 'hr/department/view', params: { id } });
+    router.push({ name: 'hr/dependent-relationship-type/view', params: { id } });
     return;
   }
 
-  openFormModal('View Department', { ...row }, true);
+  openFormModal('View DependentRelationshipType', { ...row }, true);
 }
 
 function handleEdit(row) {
@@ -157,11 +153,11 @@ function handleEdit(row) {
 
   if (!modalStore.useModal) {
     const id = rowId(row);
-    router.push({ name: 'hr/department/update', params: { id } });
+    router.push({ name: 'hr/dependent-relationship-type/update', params: { id } });
     return;
   }
 
-  openFormModal('Edit Department', { ...row }, false);
+  openFormModal('Edit DependentRelationshipType', { ...row }, false);
 }
 
 async function handleDelete(row) {
@@ -190,7 +186,7 @@ async function handleDelete(row) {
     return;
   }
 
-  handleResponseAlert(alertStore, responseData.value, 'Department deleted successfully.');
+  handleResponseAlert(alertStore, responseData.value, 'DependentRelationshipType deleted successfully.');
   await fetchRows();
 }
 
@@ -234,8 +230,8 @@ async function handleSubmit(payload) {
     alertStore,
     responseData.value,
     isEdit
-      ? 'Department updated successfully.'
-      : 'Department created successfully.'
+      ? 'DependentRelationshipType updated successfully.'
+      : 'DependentRelationshipType created successfully.'
   );
 
   modalStore.closeModal();
@@ -267,7 +263,7 @@ onMounted(fetchRows);
 <template>
   <div class="content">
     <DataTable
-      title="Department"
+      title="DependentRelationshipType"
       :data="rows"
       :columns="tableColumns"
       :loading="loading"
@@ -275,8 +271,8 @@ onMounted(fetchRows);
       :actions="['view', 'edit', 'delete']"
       :total-count="totalCount"
       :search-query="searchQuery"
-      search-placeholder="Search department..."
-      create-label="New Department"
+      search-placeholder="Search dependent-relationship-type..."
+      create-label="New DependentRelationshipType"
       :paginated="true"
       :current-page="currentPage"
       :total-pages="totalPages"

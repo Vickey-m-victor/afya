@@ -136,8 +136,9 @@ async function handleView(user) {
     component: UserDetailsModal,
     props: {
       user: fullUser,
+      onRefresh: fetchUsers,
     },
-    title: `User Profile`,
+    title: `User Details`,
     size: "lg",
     showFooter: false,
     showConfirm: false,
