@@ -21,13 +21,6 @@ export default [
     meta: { title: 'Afya365 - View Employee', layout: layout }
   },
   {
-    path: '/hr/employee/update/:id',
-    name: 'hr/employee/update',
-    component: () => import('../views/Employee/update.vue'),
-    props: true,
-    meta: { title: 'Afya365 - Update Employee', layout: layout }
-  },
-  {
     path: '/hr/employee',
     name: 'hr/employee',
     component: () => import('../views/Employee/index.vue'),

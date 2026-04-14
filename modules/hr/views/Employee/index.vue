@@ -99,7 +99,25 @@ const endpoints = {
 };
 
 function rowId(row) {
-  return row.id ?? row.employee_id ?? row[Object.keys(row).find((key) => key.endsWith('_id'))];
+  if (!row || typeof row !== 'object') return null;
+
+  // Be strict: avoid accidentally using `facility_id`, `department_id`, etc.
+  const preferredKeys = [
+    'employee_id',
+    'employeeId',
+    'hr_employee_id',
+    'hrEmployeeId',
+    'id',
+  ];
+
+  for (const key of preferredKeys) {
+    const value = row?.[key];
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+
+  // As a last resort, accept obvious variants (but still avoid random *_id fields)
+  const candidate = row?.employee_number ?? row?.employeeNo ?? null;
+  return candidate || null;
 }
 
 function normalizeRows(items) {
@@ -171,6 +189,10 @@ function handleCreate() {
 
 function handleView(row) {
   const id = rowId(row);
+  if (!id) {
+    alertStore.show({ theme: 'danger', type: 'toast', message: 'Employee id not found for this row.' });
+    return;
+  }
   router.push({ name: 'hr/employee/view', params: { id } });
 }
 
@@ -189,7 +211,7 @@ function handleEdit(row) {
 
   if (!modalStore.useModal) {
     const id = rowId(row);
-    router.push({ name: 'hr/employee/update', params: { id } });
+    router.push({ name: 'hr/employee/onboard', query: { id } });
     return;
   }
 
