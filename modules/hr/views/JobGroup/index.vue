@@ -37,14 +37,6 @@ const {
 
 const tableColumns = [
   {
-    "field": "job_group_id",
-    "header": "Job Group Id"
-  },
-  {
-    "field": "facility_id",
-    "header": "Facility Id"
-  },
-  {
     "field": "group_name",
     "header": "Group Name"
   },

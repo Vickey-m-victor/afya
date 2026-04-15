@@ -102,22 +102,6 @@ async function handleSubmit() {
         <div class="row g-3">
             
             <div class="col-md-6">
-                <label class="form-label" for="field-leave_type_id">Leave type id</label>
-                
-                <input
-                    id="field-leave_type_id"
-                    v-model.number="formData.leave_type_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('leave_type_id') }"
-                    :disabled="readonly || busy"
-                />
-                
-                <div v-if="fieldError('leave_type_id')" class="invalid-feedback">{{ fieldError('leave_type_id') }}</div>
-            </div>
-
-            <div class="col-md-6">
                 <label class="form-label" for="field-name">Name</label>
                 
                 <input

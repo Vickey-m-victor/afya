@@ -45,10 +45,7 @@ const tableColumns = [
     "field": "employment_type_name",
     "header": "Employment Type"
   },
-  {
-    "field": "residential_status_name",
-    "header": "Residential Status"
-  },
+
   {
     "field": "department_name",
     "header": "Department"
@@ -61,14 +58,7 @@ const tableColumns = [
     "field": "job_group_name",
     "header": "Job Group"
   },
-  {
-    "field": "work_shift_name",
-    "header": "Work Shift"
-  },
-  {
-    "field": "reports_to_employee_id",
-    "header": "Reports To (Employee Id)"
-  },
+
   {
     "field": "hire_date",
     "header": "Hire Date"

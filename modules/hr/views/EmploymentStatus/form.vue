@@ -1,6 +1,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 
 const props = defineProps({
     formData: {
@@ -102,32 +103,15 @@ async function handleSubmit() {
         <div class="row g-3">
             
             <div class="col-md-6">
-                <label class="form-label" for="field-employment_status_id">Employment status id</label>
-                
-                <input
-                    id="field-employment_status_id"
-                    v-model.number="formData.employment_status_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('employment_status_id') }"
-                    :disabled="readonly || busy"
-                />
-                
-                <div v-if="fieldError('employment_status_id')" class="invalid-feedback">{{ fieldError('employment_status_id') }}</div>
-            </div>
-
-            <div class="col-md-6">
                 <label class="form-label" for="field-facility_id">Facility id</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-facility_id"
-                    v-model.number="formData.facility_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('facility_id') }"
+                    v-model="formData.facility_id"
+                    endpoint="/admin/facility/search-dropdown"
+                    placeholder="Select facility..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('facility_id')"
                 />
                 
                 <div v-if="fieldError('facility_id')" class="invalid-feedback">{{ fieldError('facility_id') }}</div>

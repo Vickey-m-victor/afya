@@ -37,10 +37,6 @@ const {
 
 const tableColumns = [
   {
-    "field": "leave_type_id",
-    "header": "Leave Type Id"
-  },
-  {
     "field": "name",
     "header": "Name"
   },

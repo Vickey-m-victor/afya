@@ -102,22 +102,6 @@ async function handleSubmit() {
         <div class="row g-3">
             
             <div class="col-md-6">
-                <label class="form-label" for="field-union_id">Union id</label>
-                
-                <input
-                    id="field-union_id"
-                    v-model.number="formData.union_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('union_id') }"
-                    :disabled="readonly || busy"
-                />
-                
-                <div v-if="fieldError('union_id')" class="invalid-feedback">{{ fieldError('union_id') }}</div>
-            </div>
-
-            <div class="col-md-6">
                 <label class="form-label" for="field-union_name">Union name</label>
                 
                 <input

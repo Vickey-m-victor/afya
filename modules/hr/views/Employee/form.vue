@@ -1,6 +1,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 
 const props = defineProps({
     formData: {
@@ -104,14 +105,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-facility_id">Facility ID</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-facility_id"
-                    v-model.number="formData.facility_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('facility_id') }"
+                    v-model="formData.facility_id"
+                    endpoint="/admin/facility/search-dropdown"
+                    placeholder="Select facility..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('facility_id')"
                 />
                 
                 <div v-if="fieldError('facility_id')" class="invalid-feedback">{{ fieldError('facility_id') }}</div>
@@ -120,14 +120,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-employment_type_id">Employment Type ID</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-employment_type_id"
-                    v-model.number="formData.employment_type_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('employment_type_id') }"
+                    v-model="formData.employment_type_id"
+                    endpoint="/hr/employment-type/search"
+                    placeholder="Select employment type..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('employment_type_id')"
                 />
                 
                 <div v-if="fieldError('employment_type_id')" class="invalid-feedback">{{ fieldError('employment_type_id') }}</div>
@@ -136,14 +135,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-residential_status_id">Residential Status ID</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-residential_status_id"
-                    v-model.number="formData.residential_status_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('residential_status_id') }"
+                    v-model="formData.residential_status_id"
+                    endpoint="/hr/residential-status/search"
+                    placeholder="Select residential status..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('residential_status_id')"
                 />
                 
                 <div v-if="fieldError('residential_status_id')" class="invalid-feedback">{{ fieldError('residential_status_id') }}</div>
@@ -152,14 +150,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-department_id">Department ID</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-department_id"
-                    v-model.number="formData.department_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('department_id') }"
+                    v-model="formData.department_id"
+                    endpoint="/hr/department/search"
+                    placeholder="Select department..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('department_id')"
                 />
                 
                 <div v-if="fieldError('department_id')" class="invalid-feedback">{{ fieldError('department_id') }}</div>
@@ -168,14 +165,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-job_title_id">Job Title ID</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-job_title_id"
-                    v-model.number="formData.job_title_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('job_title_id') }"
+                    v-model="formData.job_title_id"
+                    endpoint="/hr/job-title/search"
+                    placeholder="Select job title..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('job_title_id')"
                 />
                 
                 <div v-if="fieldError('job_title_id')" class="invalid-feedback">{{ fieldError('job_title_id') }}</div>
@@ -184,14 +180,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-job_group_id">Job Group ID</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-job_group_id"
-                    v-model.number="formData.job_group_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('job_group_id') }"
+                    v-model="formData.job_group_id"
+                    endpoint="/hr/job-group/search"
+                    placeholder="Select job group..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('job_group_id')"
                 />
                 
                 <div v-if="fieldError('job_group_id')" class="invalid-feedback">{{ fieldError('job_group_id') }}</div>
@@ -200,14 +195,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-work_shift_id">Work Shift ID</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-work_shift_id"
-                    v-model.number="formData.work_shift_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('work_shift_id') }"
+                    v-model="formData.work_shift_id"
+                    endpoint="/hr/work-shift/search"
+                    placeholder="Select work shift..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('work_shift_id')"
                 />
                 
                 <div v-if="fieldError('work_shift_id')" class="invalid-feedback">{{ fieldError('work_shift_id') }}</div>
@@ -216,14 +210,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-reports_to_employee_id">Reports To Employee ID</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-reports_to_employee_id"
-                    v-model.number="formData.reports_to_employee_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('reports_to_employee_id') }"
+                    v-model="formData.reports_to_employee_id"
+                    endpoint="/hr/employee/search"
+                    placeholder="Select reporting manager..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('reports_to_employee_id')"
                 />
                 
                 <div v-if="fieldError('reports_to_employee_id')" class="invalid-feedback">{{ fieldError('reports_to_employee_id') }}</div>

@@ -41,10 +41,6 @@ const tableColumns = [
     "header": "Residential Status Id"
   },
   {
-    "field": "facility_id",
-    "header": "Facility Id"
-  },
-  {
     "field": "name",
     "header": "Name"
   },
