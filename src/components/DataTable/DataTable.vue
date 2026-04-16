@@ -99,6 +99,7 @@ const emit = defineEmits([
   "toggleStatus",
   "ban",
   "manageGroups",
+  "restore",
   "search",
   "change-page",
   "change-per-page",
@@ -141,8 +142,13 @@ const emit = defineEmits([
       @toggleStatus="emit('toggleStatus', $event)"
       @ban="emit('ban', $event)"
       @manageGroups="emit('manageGroups', $event)"
+      @restore="emit('restore', $event)"
       @change-sort="emit('change-sort', $event)"
     >
+      <template #actions="{ row }">
+        <slot name="actions" :row="row" />
+      </template>
+
       <template #loading>
         <slot name="loading" />
       </template>

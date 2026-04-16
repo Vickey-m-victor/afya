@@ -134,9 +134,9 @@ function handleCreate() {
   openFormModal('Create PayrollSetting', {}, false);
 }
 
-function handleView(row) {
+async function handleView(row) {
   modalMode.value = 'view';
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
+  modalStore.toggleModalUsage(true);
 
   if (!modalStore.useModal) {
     const id = rowId(row);
@@ -144,12 +144,31 @@ function handleView(row) {
     return;
   }
 
-  openFormModal('View PayrollSetting', { ...row }, true);
+  const id = rowId(row);
+  if (!id) {
+    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
+    return;
+  }
+
+  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
+    method: 'GET',
+    autoFetch: false,
+  });
+
+  await request();
+
+  if (error.value) {
+    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    return;
+  }
+
+  const payload = responseData.value?.dataPayload || responseData.value || {};
+  openFormModal('View PayrollSetting', payload.data || {}, true);
 }
 
-function handleEdit(row) {
+async function handleEdit(row) {
   modalMode.value = 'edit';
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
+  modalStore.toggleModalUsage(true);
 
   if (!modalStore.useModal) {
     const id = rowId(row);
@@ -157,7 +176,26 @@ function handleEdit(row) {
     return;
   }
 
-  openFormModal('Edit PayrollSetting', { ...row }, false);
+  const id = rowId(row);
+  if (!id) {
+    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
+    return;
+  }
+
+  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
+    method: 'GET',
+    autoFetch: false,
+  });
+
+  await request();
+
+  if (error.value) {
+    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    return;
+  }
+
+  const payload = responseData.value?.dataPayload || responseData.value || {};
+  openFormModal('Edit PayrollSetting', payload.data || {}, false);
 }
 
 async function handleDelete(row) {
@@ -167,26 +205,27 @@ async function handleDelete(row) {
     return;
   }
 
+  const isRestore = row.is_deleted === 1;
   const result = await confirmAction(
-    'Delete this record?',
-    'This action cannot be undone. The record will be permanently removed.'
+    isRestore ? 'Restore this record?' : 'Delete this record?',
+    isRestore ? 'The record will be restored and become active again.' : 'This action cannot be undone. The record will be permanently removed.'
   );
   if (!result.isConfirmed) return;
 
   const deleteUrl = withId(endpoints.delete, id);
   const { data: responseData, request, error } = useApi(deleteUrl, {
-    method: 'DELETE',
+    method: isRestore ? 'PATCH' : 'DELETE',
     autoFetch: false,
   });
 
   await request();
 
   if (error.value) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to delete record.' });
+    alertStore.show({ theme: 'danger', type: 'toast', message: isRestore ? 'Failed to restore record.' : 'Failed to delete record.' });
     return;
   }
 
-  handleResponseAlert(alertStore, responseData.value, 'PayrollSetting deleted successfully.');
+  handleResponseAlert(alertStore, responseData.value, isRestore ? 'PayrollSetting restored successfully.' : 'PayrollSetting deleted successfully.');
   await fetchRows();
 }
 
