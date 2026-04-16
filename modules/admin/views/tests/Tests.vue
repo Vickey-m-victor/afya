@@ -26,7 +26,7 @@ const alertStore = useAlertStore();
 const { confirmAction } = useAlert();
 const router = useRouter();
 
-const layout = ref('table'); // Toggles between 'table' and 'cards'
+const layout = ref("table"); // Toggles between 'table' and 'cards'
 
 const {
   searchQuery,
@@ -49,26 +49,30 @@ const {
 
 // 2. Updated Column Definitions for GridProvider
 const tableColumns = [
-  { attribute: "username", label: "Username", filter: true },
-  { attribute: "profile.first_name", label: "First Name", filter: true },
-  { attribute: "profile.last_name", label: "Last Name", filter: true },
+  { attribute: "username", label: "Username" },
+  { attribute: "profile.first_name", label: "First Name" },
+  { attribute: "profile.last_name", label: "Last Name" },
   { attribute: "profile.email_address", label: "Email" },
   { attribute: "profile.mobile_number", label: "Mobile" },
   { attribute: "status", label: "Status", contentClass: "text-center" },
   // Action column replaces the separate prop
-  { class: "ActionColumn", actions: ["view", "manageGroups", "ban", "delete"] }
+  { class: "ActionColumn", actions: ["view", "manageGroups", "ban", "delete"] },
 ];
 
 const users = ref([]);
 const loading = ref(false);
 const togglingUser = ref(null);
 
-//  Data Fetching (Unchanged) 
+//  Data Fetching (Unchanged)
 
 const fetchUsers = async (additionalFilters = {}) => {
   loading.value = true;
   try {
-    const { data: responseData, request, error } = useApi("/iam/users", {
+    const {
+      data: responseData,
+      request,
+      error,
+    } = useApi("/iam/users", {
       method: "GET",
       autoFetch: false,
     });
@@ -94,7 +98,7 @@ const fetchUsers = async (additionalFilters = {}) => {
   }
 };
 
-//Grid Event Handlers 
+//Grid Event Handlers
 
 // GridProvider emits { by, dir }
 function handleGridSort({ by, dir }) {
@@ -105,22 +109,26 @@ function handleGridSort({ by, dir }) {
 // GridProvider emits the filter object when a user types in the column headers
 function handleGridFilter(filterModel) {
   // Reset to page 1 on new search
-  setPage(1); 
+  setPage(1);
   // Pass the column filters directly to the API fetcher
-  fetchUsers(filterModel); 
+  fetchUsers(filterModel);
 }
 
 // Central Dispatcher for Actions
 function handleGridAction({ action, row }) {
   switch (action) {
-    case 'view': return handleView(row);
-    case 'delete': return handleDelete(row);
-    case 'manageGroups': return handleManageGroups(row);
-    case 'ban': return handleBan(row);
+    case "view":
+      return handleView(row);
+    case "delete":
+      return handleDelete(row);
+    case "manageGroups":
+      return handleManageGroups(row);
+    case "ban":
+      return handleBan(row);
   }
 }
 
-//Table Event Handlers 
+//Table Event Handlers
 
 function handleSearch(query) {
   setSearchDebounced(query, fetchUsers);
@@ -141,7 +149,7 @@ function handleSort(field) {
   fetchUsers();
 }
 
-//Alert Helpers 
+//Alert Helpers
 
 function handleResponseAlert(response, fallbackMessage) {
   const payload =
@@ -152,17 +160,21 @@ function handleResponseAlert(response, fallbackMessage) {
   if (payload) {
     alertStore.show(payload);
   } else {
-    alertStore.show({ theme: "success", type: "toast", message: fallbackMessage });
+    alertStore.show({
+      theme: "success",
+      type: "toast",
+      message: fallbackMessage,
+    });
   }
 }
 
-//View User 
+//View User
 
 async function handleView(user) {
   modalStore.toggleModalUsage(true); // set to false to navigate to page
 
   if (!modalStore.useModal) {
-    router.push({ name: 'iam/users/view', params: { id: user.username } });
+    router.push({ name: "iam/users/view", params: { id: user.username } });
     return;
   }
 
@@ -173,7 +185,8 @@ async function handleView(user) {
 
   await request();
   const resData = detailData.value;
-  const fullUser = resData?.dataPayload?.data || resData?.dataPayload || resData?.data || user;
+  const fullUser =
+    resData?.dataPayload?.data || resData?.dataPayload || resData?.data || user;
 
   modalStore.openModal({
     component: UserDetailsModal,
@@ -189,13 +202,13 @@ async function handleView(user) {
   });
 }
 
-//Create User 
+//Create User
 
 function handleCreate() {
   modalStore.toggleModalUsage(true); // set to false to navigate to page
 
   if (!modalStore.useModal) {
-    router.push({ name: 'iam/users/create' });
+    router.push({ name: "iam/users/create" });
     return;
   }
 
@@ -226,13 +239,17 @@ function handleCreate() {
   });
 }
 
-//Form Submit (Create only) 
+//Form Submit (Create only)
 
 async function handleSubmit(data) {
   modalStore.props.isLoading = true;
   modalStore.props.fieldErrors = {};
 
-  const { data: responseData, request, error } = useApi("/iam/user/create", {
+  const {
+    data: responseData,
+    request,
+    error,
+  } = useApi("/iam/user/create", {
     method: "POST",
     autoFetch: false,
   });
@@ -242,7 +259,9 @@ async function handleSubmit(data) {
 
   if (error.value) {
     const errors =
-      typeof error.value === "object" && !Array.isArray(error.value) ? error.value : {};
+      typeof error.value === "object" && !Array.isArray(error.value)
+        ? error.value
+        : {};
     modalStore.props.fieldErrors = errors;
     return;
   }
@@ -252,7 +271,7 @@ async function handleSubmit(data) {
   await fetchUsers();
 }
 
-//Delete User 
+//Delete User
 
 async function handleDelete(user) {
   const result = await confirmAction(
@@ -262,7 +281,11 @@ async function handleDelete(user) {
   if (!result.isConfirmed) return;
 
   try {
-    const { data: responseData, request, error } = useApi(`/iam/user/${user.username}`, {
+    const {
+      data: responseData,
+      request,
+      error,
+    } = useApi(`/iam/user/${user.username}`, {
       method: "DELETE",
       autoFetch: false,
     });
@@ -272,35 +295,52 @@ async function handleDelete(user) {
     await fetchUsers();
   } catch (err) {
     console.error("Failed to delete user:", err);
-    alertStore.show({ theme: "error", type: "toast", message: "Failed to delete user." });
+    alertStore.show({
+      theme: "error",
+      type: "toast",
+      message: "Failed to delete user.",
+    });
   }
 }
 
-//Toggle Status 
+//Toggle Status
 
 async function handleToggleStatus(user) {
-  const currentLabel = (user.status?.label || user.status || '').toString().toLowerCase();
-  const newStatus = currentLabel === 'active' ? 'inactive' : 'active';
+  const currentLabel = (user.status?.label || user.status || "")
+    .toString()
+    .toLowerCase();
+  const newStatus = currentLabel === "active" ? "inactive" : "active";
 
   togglingUser.value = user.username;
   try {
-    const { data: responseData, request, error } = useApi(`/iam/user/status/${user.username}`, {
+    const {
+      data: responseData,
+      request,
+      error,
+    } = useApi(`/iam/user/status/${user.username}`, {
       method: "PATCH",
       autoFetch: false,
     });
     await request({ status: newStatus });
     if (error.value) throw error.value;
-    handleResponseAlert(responseData.value, `User ${newStatus === 'active' ? 'activated' : 'deactivated'}.`);
+    handleResponseAlert(
+      responseData.value,
+      `User ${newStatus === "active" ? "activated" : "deactivated"}.`
+    );
     await fetchUsers();
   } catch (err) {
     console.error("Failed to toggle status:", err);
-    alertStore.show({ theme: "danger", type: "toast", message: "Failed to update user status." });
+    alertStore.show({
+      theme: "danger",
+      type: "toast",
+      message: "Failed to update user status.",
+    });
   } finally {
     togglingUser.value = null;
   }
 }
 
-//Ban User 
+//Ban User
 
 async function handleBan(user) {
   const result = await confirmAction(
@@ -310,7 +350,11 @@ async function handleBan(user) {
   if (!result.isConfirmed) return;
 
   try {
-    const { data: responseData, request, error } = useApi(`/iam/user/ban/${user.username}`, {
+    const {
+      data: responseData,
+      request,
+      error,
+    } = useApi(`/iam/user/ban/${user.username}`, {
       method: "POST",
       autoFetch: false,
     });
@@ -320,11 +364,15 @@ async function handleBan(user) {
     await fetchUsers();
   } catch (err) {
     console.error("Failed to ban user:", err);
-    alertStore.show({ theme: "error", type: "toast", message: "Failed to ban user." });
+    alertStore.show({
+      theme: "error",
+      type: "toast",
+      message: "Failed to ban user.",
+    });
   }
 }
 
-//Manage Groups 
+//Manage Groups
 
 function handleManageGroups(user) {
   modalStore.openModal({
@@ -340,7 +388,7 @@ function handleManageGroups(user) {
   });
 }
 
-//Status Badge 
+//Status Badge
 
 function statusBadgeClass(status) {
   if (status?.theme) return `bg-${status.theme}`;
@@ -372,43 +420,67 @@ onMounted(() => {
       :current-page="currentPage"
       :search-query="searchQuery"
       :per-page="perPage"
-      @change-page="(page) => { setPage(page); fetchUsers(); }"
+      @change-page="
+        (page) => {
+          setPage(page);
+          fetchUsers();
+        }
+      "
       @sort="handleGridSort"
       @filter="handleGridFilter"
       @action-click="handleGridAction"
-
     >
-      
       <BaseBlock title="Users Management" content-full>
-        
         <template #options>
-          <button 
-            class="btn btn-sm btn-alt-secondary me-1" 
-            :class="{ 'active': layout === 'cards' }"
-            @click="layout = 'cards'"
-          >
-            <i class="fa fa-th-large"></i>
-          </button>
-          <button 
-            class="btn btn-sm btn-alt-secondary me-3" 
-            :class="{ 'active': layout === 'table' }"
-            @click="layout = 'table'"
-          >
-            <i class="fa fa-list"></i>
-          </button>
+          <div class="d-flex align-items-center gap-2">
+            <div class="input-group input-group-sm w-auto me-3">
+              <span class="input-group-text bg-body-light border-end-0">
+                <i class="fa fa-search text-muted"></i>
+              </span>
+              <input
+                type="text"
+                class="form-control border-start-0"
+                placeholder="Search ..."
+                style="width: 200px"
+                :value="searchQuery"
+                @input="(e) => handleSearch(e.target.value)"
+              />
+            </div>
 
-          <button type="button" class="btn btn-sm btn-primary" @click="handleCreate">
-            <i class="fa fa-plus me-1"></i> New User
-          </button>
+            <button
+              class="btn btn-sm btn-alt-secondary"
+              :class="{ active: layout === 'cards' }"
+              @click="layout = 'cards'"
+            >
+              <i class="fa fa-th-large"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-alt-secondary me-3"
+              :class="{ active: layout === 'table' }"
+              @click="layout = 'table'"
+            >
+              <i class="fa fa-list"></i>
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              @click="handleCreate"
+            >
+              <i class="fa fa-plus me-1"></i> New Department
+            </button>
+          </div>
         </template>
 
         <GridTable v-if="layout === 'table'">
           <GridHeaders />
           <GridBody>
-            
             <template #cell-username="{ row }">
               <div class="d-flex align-items-center">
-                <div class="rounded-circle bg-body-light d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                <div
+                  class="rounded-circle bg-body-light d-flex align-items-center justify-content-center me-2"
+                  style="width: 32px; height: 32px"
+                >
                   <i class="fa fa-user text-muted"></i>
                 </div>
                 <span class="fw-semibold">{{ row.username }}</span>
@@ -417,7 +489,8 @@ onMounted(() => {
 
             <template #cell-profile.email_address="{ row }">
               <span v-if="row.profile?.email_address">
-                <i class="fa fa-envelope text-muted me-1"></i> {{ row.profile.email_address }}
+                <i class="fa fa-envelope text-muted me-1"></i>
+                {{ row.profile.email_address }}
               </span>
               <span v-else class="text-muted">-</span>
             </template>
@@ -430,31 +503,57 @@ onMounted(() => {
                 :disabled="togglingUser === row.username"
                 @click="handleToggleStatus(row)"
               >
-                <i class="fa fa-fw" :class="statusLabel(row.status).toLowerCase() === 'active' ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
+                <i
+                  class="fa fa-fw"
+                  :class="
+                    statusLabel(row.status).toLowerCase() === 'active'
+                      ? 'fa-toggle-on'
+                      : 'fa-toggle-off'
+                  "
+                ></i>
                 {{ statusLabel(row.status) }}
               </button>
             </template>
-
           </GridBody>
         </GridTable>
 
         <ListBody v-else>
           <template #card="{ row }">
-            <div class="block block-rounded block-bordered h-100 mb-0 shadow-sm">
+            <div
+              class="block block-rounded block-bordered h-100 mb-0 shadow-sm"
+            >
               <div class="block-content text-center py-4">
-                <div class="rounded-circle bg-body-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                <div
+                  class="rounded-circle bg-body-light d-inline-flex align-items-center justify-content-center mb-3"
+                  style="width: 64px; height: 64px"
+                >
                   <i class="fa fa-user fa-2x text-primary"></i>
                 </div>
-                <h4 class="mb-1">{{ row.profile?.first_name }} {{ row.profile?.last_name }}</h4>
+                <h4 class="mb-1">
+                  {{ row.profile?.first_name }} {{ row.profile?.last_name }}
+                </h4>
                 <p class="text-muted fs-sm mb-2">@{{ row.username }}</p>
-                <span class="badge" :class="statusBadgeClass(row.status)">{{ statusLabel(row.status) }}</span>
+                <span class="badge" :class="statusBadgeClass(row.status)">{{
+                  statusLabel(row.status)
+                }}</span>
               </div>
-              
-              <div class="block-content block-content-full bg-body-light mt-auto">
+
+              <div
+                class="block-content block-content-full bg-body-light mt-auto"
+              >
                 <div class="d-flex justify-content-center gap-3">
-                  <i class="fa fa-eye text-primary cursor-pointer" @click="handleView(row)"></i>
-                  <i class="fa fa-users text-info cursor-pointer" @click="handleManageGroups(row)"></i>
-                  <i class="fa fa-ban text-danger cursor-pointer" @click="handleBan(row)"></i>
+                  <i
+                    class="fa fa-eye text-primary cursor-pointer"
+                    @click="handleView(row)"
+                  ></i>
+                  <i
+                    class="fa fa-users text-info cursor-pointer"
+                    @click="handleManageGroups(row)"
+                  ></i>
+                  <i
+                    class="fa fa-ban text-danger cursor-pointer"
+                    @click="handleBan(row)"
+                  ></i>
                 </div>
               </div>
             </div>
@@ -466,9 +565,7 @@ onMounted(() => {
             <GridPagination />
           </div>
         </template>
-
       </BaseBlock>
-
     </GridProvider>
   </div>
 </template>

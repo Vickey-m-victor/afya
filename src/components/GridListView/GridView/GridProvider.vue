@@ -1,6 +1,6 @@
 <!-- manages state and logic -->
 <!-- create, provide data and logic -->
- <!-- this will shar everything using provide -->
+<!-- this will shar everything using provide -->
 <script setup>
 import { provide, reactive, computed, toRefs } from "vue";
 
@@ -12,6 +12,10 @@ const props = defineProps({
   totalCount: { type: Number, default: 0 },
   perPage: { type: Number, default: 20 },
   currentPage: { type: Number, default: 1 },
+  searchPlaceholder: {
+    type: String,
+    default: "Search...",
+  },
 });
 // defining the actions
 const emit = defineEmits(["sort", "filter", "change-page", "action-click"]);
