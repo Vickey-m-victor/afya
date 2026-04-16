@@ -63,7 +63,7 @@ const users = ref([]);
 const loading = ref(false);
 const togglingUser = ref(null);
 
-// ──────────────────── Data Fetching (Unchanged) ────────────────────
+//  Data Fetching (Unchanged) 
 
 const fetchUsers = async (additionalFilters = {}) => {
   loading.value = true;
@@ -94,7 +94,7 @@ const fetchUsers = async (additionalFilters = {}) => {
   }
 };
 
-// ──────────────────── Grid Event Handlers ────────────────────
+//Grid Event Handlers 
 
 // GridProvider emits { by, dir }
 function handleGridSort({ by, dir }) {
@@ -120,7 +120,7 @@ function handleGridAction({ action, row }) {
   }
 }
 
-// ──────────────────── Table Event Handlers ────────────────────
+//Table Event Handlers 
 
 function handleSearch(query) {
   setSearchDebounced(query, fetchUsers);
@@ -141,7 +141,7 @@ function handleSort(field) {
   fetchUsers();
 }
 
-// ──────────────────── Alert Helpers ────────────────────
+//Alert Helpers 
 
 function handleResponseAlert(response, fallbackMessage) {
   const payload =
@@ -156,7 +156,7 @@ function handleResponseAlert(response, fallbackMessage) {
   }
 }
 
-// ──────────────────── View User ────────────────────
+//View User 
 
 async function handleView(user) {
   modalStore.toggleModalUsage(true); // set to false to navigate to page
@@ -189,7 +189,7 @@ async function handleView(user) {
   });
 }
 
-// ──────────────────── Create User ────────────────────
+//Create User 
 
 function handleCreate() {
   modalStore.toggleModalUsage(true); // set to false to navigate to page
@@ -226,7 +226,7 @@ function handleCreate() {
   });
 }
 
-// ──────────────────── Form Submit (Create only) ────────────────────
+//Form Submit (Create only) 
 
 async function handleSubmit(data) {
   modalStore.props.isLoading = true;
@@ -252,7 +252,7 @@ async function handleSubmit(data) {
   await fetchUsers();
 }
 
-// ──────────────────── Delete User ────────────────────
+//Delete User 
 
 async function handleDelete(user) {
   const result = await confirmAction(
@@ -276,7 +276,7 @@ async function handleDelete(user) {
   }
 }
 
-// ──────────────────── Toggle Status ────────────────────
+//Toggle Status 
 
 async function handleToggleStatus(user) {
   const currentLabel = (user.status?.label || user.status || '').toString().toLowerCase();
@@ -300,7 +300,7 @@ async function handleToggleStatus(user) {
   }
 }
 
-// ──────────────────── Ban User ────────────────────
+//Ban User 
 
 async function handleBan(user) {
   const result = await confirmAction(
@@ -324,7 +324,7 @@ async function handleBan(user) {
   }
 }
 
-// ──────────────────── Manage Groups ────────────────────
+//Manage Groups 
 
 function handleManageGroups(user) {
   modalStore.openModal({
@@ -340,7 +340,7 @@ function handleManageGroups(user) {
   });
 }
 
-// ──────────────────── Status Badge ────────────────────
+//Status Badge 
 
 function statusBadgeClass(status) {
   if (status?.theme) return `bg-${status.theme}`;
@@ -370,6 +370,7 @@ onMounted(() => {
       :loading="loading"
       :total-count="totalCount"
       :current-page="currentPage"
+      :search-query="searchQuery"
       :per-page="perPage"
       @change-page="(page) => { setPage(page); fetchUsers(); }"
       @sort="handleGridSort"
