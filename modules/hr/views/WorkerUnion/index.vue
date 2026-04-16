@@ -37,10 +37,6 @@ const {
 
 const tableColumns = [
   {
-    "field": "union_id",
-    "header": "Union Id"
-  },
-  {
     "field": "union_name",
     "header": "Union Name"
   },

@@ -1,6 +1,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 
 const props = defineProps({
     formData: {
@@ -102,33 +103,15 @@ async function handleSubmit() {
         <div class="row g-3">
             
             <div class="col-md-6">
-                <label class="form-label" for="field-relationship_type_id">Relationship type id</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa fa-map-marker"></i></span>
-                <input
-                    id="field-relationship_type_id"
-                    v-model.number="formData.relationship_type_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('relationship_type_id') }"
-                    :disabled="readonly || busy"
-                />
-                </div>
-                <div v-if="fieldError('relationship_type_id')" class="invalid-feedback">{{ fieldError('relationship_type_id') }}</div>
-            </div>
-
-            <div class="col-md-6">
                 <label class="form-label" for="field-facility_id">Facility id</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-facility_id"
-                    v-model.number="formData.facility_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('facility_id') }"
+                    v-model="formData.facility_id"
+                    endpoint="/admin/facility/search-dropdown"
+                    placeholder="Select facility..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('facility_id')"
                 />
                 
                 <div v-if="fieldError('facility_id')" class="invalid-feedback">{{ fieldError('facility_id') }}</div>

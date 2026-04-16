@@ -37,30 +37,6 @@ const {
 
 const tableColumns = [
   {
-    "field": "job_title_id",
-    "header": "Job Title Id"
-  },
-  {
-    "field": "facility_id",
-    "header": "Facility Id"
-  },
-  {
-    "field": "department_id",
-    "header": "Department Id"
-  },
-  {
-    "field": "reports_to_title_id",
-    "header": "Reports To Title Id"
-  },
-  {
-    "field": "job_group_id",
-    "header": "Job Group Id"
-  },
-  {
-    "field": "status",
-    "header": "Status"
-  },
-  {
     "field": "title_name",
     "header": "Title Name"
   },
@@ -87,6 +63,10 @@ const tableColumns = [
   {
     "field": "is_supervisory",
     "header": "Is Supervisory"
+  },
+  {
+    "field": "status",
+    "header": "Status"
   }
 ];
 

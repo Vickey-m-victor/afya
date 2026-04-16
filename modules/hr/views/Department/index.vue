@@ -37,18 +37,6 @@ const {
 
 const tableColumns = [
   {
-    "field": "department_id",
-    "header": "Department Id"
-  },
-  {
-    "field": "facility_id",
-    "header": "Facility Id"
-  },
-  {
-    "field": "parent_id",
-    "header": "Parent Id"
-  },
-  {
     "field": "department_name",
     "header": "Department Name"
   },

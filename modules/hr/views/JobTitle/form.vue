@@ -1,6 +1,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 
 const props = defineProps({
     formData: {
@@ -102,32 +103,15 @@ async function handleSubmit() {
         <div class="row g-3">
             
             <div class="col-md-6">
-                <label class="form-label" for="field-job_title_id">Job title id</label>
-                
-                <input
-                    id="field-job_title_id"
-                    v-model.number="formData.job_title_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('job_title_id') }"
-                    :disabled="readonly || busy"
-                />
-                
-                <div v-if="fieldError('job_title_id')" class="invalid-feedback">{{ fieldError('job_title_id') }}</div>
-            </div>
-
-            <div class="col-md-6">
                 <label class="form-label" for="field-facility_id">Facility id</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-facility_id"
-                    v-model.number="formData.facility_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('facility_id') }"
+                    v-model="formData.facility_id"
+                    endpoint="/admin/facility/search-dropdown"
+                    placeholder="Select facility..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('facility_id')"
                 />
                 
                 <div v-if="fieldError('facility_id')" class="invalid-feedback">{{ fieldError('facility_id') }}</div>
@@ -136,14 +120,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-department_id">Department id</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-department_id"
-                    v-model.number="formData.department_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('department_id') }"
+                    v-model="formData.department_id"
+                    endpoint="/hr/department/search"
+                    placeholder="Select department..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('department_id')"
                 />
                 
                 <div v-if="fieldError('department_id')" class="invalid-feedback">{{ fieldError('department_id') }}</div>
@@ -152,14 +135,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-reports_to_title_id">Reports to title id</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-reports_to_title_id"
-                    v-model.number="formData.reports_to_title_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('reports_to_title_id') }"
+                    v-model="formData.reports_to_title_id"
+                    endpoint="/hr/job-title/search"
+                    placeholder="Select reporting title..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('reports_to_title_id')"
                 />
                 
                 <div v-if="fieldError('reports_to_title_id')" class="invalid-feedback">{{ fieldError('reports_to_title_id') }}</div>
@@ -168,14 +150,13 @@ async function handleSubmit() {
             <div class="col-md-6">
                 <label class="form-label" for="field-job_group_id">Job group id</label>
                 
-                <input
+                <LazySearchSelect
                     id="field-job_group_id"
-                    v-model.number="formData.job_group_id"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('job_group_id') }"
+                    v-model="formData.job_group_id"
+                    endpoint="/hr/job-group/search"
+                    placeholder="Select job group..."
                     :disabled="readonly || busy"
+                    :invalid="!!fieldError('job_group_id')"
                 />
                 
                 <div v-if="fieldError('job_group_id')" class="invalid-feedback">{{ fieldError('job_group_id') }}</div>

@@ -37,14 +37,6 @@ const {
 
 const tableColumns = [
   {
-    "field": "payroll_setting_id",
-    "header": "Payroll Setting Id"
-  },
-  {
-    "field": "facility_id",
-    "header": "Facility Id"
-  },
-  {
     "field": "pay_cycle",
     "header": "Pay Cycle"
   },

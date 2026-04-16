@@ -37,14 +37,6 @@ const {
 
 const tableColumns = [
   {
-    "field": "statutory_rate_id",
-    "header": "Statutory Rate Id"
-  },
-  {
-    "field": "facility_id",
-    "header": "Facility Id"
-  },
-  {
     "field": "name",
     "header": "Name"
   },
