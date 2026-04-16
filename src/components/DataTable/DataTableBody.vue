@@ -40,7 +40,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["view", "edit", "delete", "manage", "toggleStatus", "ban", "manageGroups", "change-sort"]);
+const emit = defineEmits(["view", "edit", "delete", "manage", "toggleStatus", "ban", "manageGroups", "restore", "change-sort"]);
 
 function rowId(row, index) {
   return row?.[props.rowKey] ?? index;
@@ -124,18 +124,21 @@ function sortIcon(column) {
           </td>
 
           <td v-if="actions.length" class="text-center">
-            <DataTableActionButtons
-              :actions="actions"
-              :action-icons="actionIcons"
-              :row="row"
-              @view="emit('view', $event)"
-              @edit="emit('edit', $event)"
-              @manage="emit('manage', $event)"
-              @delete="emit('delete', $event)"
-              @toggleStatus="emit('toggleStatus', $event)"
-              @ban="emit('ban', $event)"
-              @manageGroups="emit('manageGroups', $event)"
-            />
+            <slot name="actions" :row="row">
+              <DataTableActionButtons
+                :actions="actions"
+                :action-icons="actionIcons"
+                :row="row"
+                @view="emit('view', $event)"
+                @edit="emit('edit', $event)"
+                @manage="emit('manage', $event)"
+                @delete="emit('delete', $event)"
+                @toggleStatus="emit('toggleStatus', $event)"
+                @ban="emit('ban', $event)"
+                @manageGroups="emit('manageGroups', $event)"
+                @restore="emit('restore', $event)"
+              />
+            </slot>
           </td>
         </tr>
       </tbody>

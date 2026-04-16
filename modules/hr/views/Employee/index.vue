@@ -227,26 +227,27 @@ async function handleDelete(row) {
     return;
   }
 
+  const isRestore = row.is_deleted === 1;
   const result = await confirmAction(
-    'Delete this record?',
-    'This action cannot be undone. The record will be permanently removed.'
+    isRestore ? 'Restore this record?' : 'Delete this record?',
+    isRestore ? 'The record will be restored and become active again.' : 'This action cannot be undone. The record will be permanently removed.'
   );
   if (!result.isConfirmed) return;
 
   const deleteUrl = withId(endpoints.delete, id);
   const { data: responseData, request, error } = useApi(deleteUrl, {
-    method: 'DELETE',
+    method: isRestore ? 'PATCH' : 'DELETE',
     autoFetch: false,
   });
 
   await request();
 
   if (error.value) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to delete record.' });
+    alertStore.show({ theme: 'danger', type: 'toast', message: isRestore ? 'Failed to restore record.' : 'Failed to delete record.' });
     return;
   }
 
-  handleResponseAlert(alertStore, responseData.value, 'Employee deleted successfully.');
+  handleResponseAlert(alertStore, responseData.value, isRestore ? 'Employee restored successfully.' : 'Employee deleted successfully.');
   await fetchRows();
 }
 
