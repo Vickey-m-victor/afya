@@ -156,9 +156,10 @@ export default {
     },
     {
       name: "Tests",
-      to: "tests/components",
+      to: "admin/test/tests",
       icon: "si si-settings",
     },
+  
   ],
 
 
