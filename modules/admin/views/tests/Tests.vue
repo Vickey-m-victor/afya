@@ -42,9 +42,11 @@ const {
   setSort,
   syncFromResponse,
   buildQueryParams,
+  
 } = useDataTable({
   initialSortBy: "user_id",
   initialSortDir: "desc",
+  perPageOptions: [10, 20, 25, 50, 100] // You can set it here if your composable supports it
 });
 
 // 2. Updated Column Definitions for GridProvider
@@ -211,7 +213,7 @@ function handleCreate() {
     router.push({ name: "iam/users/create" });
     return;
   }
-  perPageOptions = [10, 20, 25, 50, 100]
+  
   
   modalStore.openModal({
     component: UsersForm,
