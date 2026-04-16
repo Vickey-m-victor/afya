@@ -4,6 +4,7 @@ import moduleRoutes from "./moduleRoutes.js";
 import appConfig from "./config/app.js";
 import { useAuthStore } from "./stores/auth.js";
 
+
 // Set all routes
 const routes = [
   {

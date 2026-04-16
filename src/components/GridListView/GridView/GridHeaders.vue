@@ -1,4 +1,4 @@
-
+<!-- sorting, filtering -->
 <script setup>
 import { inject, computed } from 'vue';
 
@@ -11,7 +11,6 @@ const sortDir = grid.sortDir;
 const filterModel = grid.filterModel;
 const handleSort = grid.handleSort;
 const handleFilter = grid.handleFilter;
-
 const hasFilters = computed(() => columns.value.some(col => col.filter));
 </script>
 
@@ -27,6 +26,7 @@ const hasFilters = computed(() => columns.value.some(col => col.filter));
       >
         <div class="d-flex align-items-center justify-content-between gap-2">
           <span>{{ col.label || col.attribute }}</span>
+          <!-- icon change based on state -->
           <i v-if="col.sortable !== false && col.attribute" 
              :class="[
                'fa', 
@@ -36,7 +36,7 @@ const hasFilters = computed(() => columns.value.some(col => col.filter));
         </div>
       </th>
     </tr>
-
+<!-- v-if has filters will allow each column cn optionally show filter input -->
     <tr v-if="hasFilters" class="bg-body-light">
       <td v-for="(col, index) in columns" :key="'filter-' + index" class="py-2">
         <input 

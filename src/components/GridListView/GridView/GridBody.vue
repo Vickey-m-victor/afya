@@ -1,7 +1,8 @@
-
+<!--  this will render actual table rows, empty , loading states -->
 <script setup>
 import { inject } from 'vue';
 
+// Now it has access to everything from provider.
 const grid = inject('gridContext');
 
 const data = grid.data;

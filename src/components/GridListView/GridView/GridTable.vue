@@ -1,4 +1,4 @@
-
+<!-- the layout of the table -->
 <script setup>
 defineProps({
   tableClass: { 
