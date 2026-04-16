@@ -25,7 +25,7 @@ const hasFilters = computed(() => columns.value.some(col => col.filter));
         @click="col.sortable !== false && col.attribute ? handleSort(col.attribute) : null"
       >
         <div class="d-flex align-items-center justify-content-between gap-2">
-          <span>{{ col.label || col.attribute }}</span>
+          <span>{{ col.label || (col.class === 'ActionColumn' ? 'Actions' : col.attribute) }}</span>
           <!-- icon change based on state -->
           <i v-if="col.sortable !== false && col.attribute" 
              :class="[
