@@ -211,7 +211,8 @@ function handleCreate() {
     router.push({ name: "iam/users/create" });
     return;
   }
-
+  perPageOptions = [10, 20, 25, 50, 100]
+  
   modalStore.openModal({
     component: UsersForm,
     props: {
@@ -562,7 +563,10 @@ onMounted(() => {
 
         <template #footer>
           <div class="p-3 bg-body-light border-top">
-            <GridPagination />
+            <GridPagination 
+              :per-page-options="perPageOptions"
+              @change-per-page="handlePerPageChange" 
+            />
           </div>
         </template>
       </BaseBlock>
