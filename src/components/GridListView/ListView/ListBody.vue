@@ -1,25 +1,16 @@
 <!-- card layout -->
 <script setup>
-import { inject } from 'vue';
-
+import { inject } from "vue";
+import GridActions from "../GridView/GridActions.vue"; // <-- Import the new component
 // inject
-const grid = inject('gridContext');
+const grid = inject("gridContext");
 
 const data = grid.data;
 const loading = grid.loading;
-const handleAction = grid.handleAction;
-
-// Default Action Icons
-const actionConfig = {
-  view: { icon: "fa fa-eye", color: "text-primary" },
-  edit: { icon: "fa fa-pencil", color: "text-success" },
-  delete: { icon: "fa fa-trash", color: "text-danger" }
-};
 </script>
 
 <template>
   <div class="list-body-container p-3">
-    
     <div v-if="loading" class="text-center py-5">
       <div class="spinner-border text-primary" role="status"></div>
     </div>
@@ -37,21 +28,11 @@ const actionConfig = {
               <pre class="fs-sm">{{ row }}</pre>
             </div>
             <div class="block-content block-content-full bg-body-light mt-auto">
-              <div class="d-flex justify-content-end gap-2">
-                <i v-for="action in ['view', 'edit', 'delete']" 
-                   :key="action"
-                   class="action-icon"
-                   :class="[actionConfig[action]?.icon, actionConfig[action]?.color]"
-                   style="cursor: pointer;"
-                   @click="handleAction(action, row)"
-                ></i>
-              </div>
+              <GridActions :row="row" :actions="['view', 'edit', 'delete']" />
             </div>
           </div>
         </slot>
-        
       </div>
     </div>
-
   </div>
 </template>

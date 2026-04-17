@@ -1,7 +1,7 @@
 <!--  this will render actual table rows, empty , loading states -->
 <script setup>
 import { inject } from 'vue';
-
+import GridActions from './GridActions.vue'; // Import the component
 // Now it has access to everything from provider.
 const grid = inject('gridContext');
 
@@ -10,19 +10,13 @@ const columns = grid.columns;
 const loading = grid.loading;
 const currentPage = grid.currentPage;
 const perPage = grid.perPage;
-const handleAction = grid.handleAction;
+
 
 function resolveAttribute(row, attribute) {
   if (!attribute) return null;
   return attribute.split('.').reduce((o, i) => (o ? o[i] : null), row);
 }
 
-// Default Action Icons
-const actionConfig = {
-  view: { icon: "fa fa-eye", color: "text-primary" },
-  edit: { icon: "fa fa-pencil", color: "text-success" },
-  delete: { icon: "fa fa-trash", color: "text-danger" }
-};
 </script>
 
 <template>
@@ -49,15 +43,7 @@ const actionConfig = {
           </template>
 
           <template v-else-if="col.class === 'ActionColumn'">
-            <div class="d-flex justify-content-center gap-2">
-              <i v-for="action in (col.actions || ['view', 'edit', 'delete'])" 
-                 :key="action"
-                 class="action-icon"
-                 :class="[actionConfig[action]?.icon, actionConfig[action]?.color]"
-                 style="cursor: pointer;"
-                 @click="handleAction(action, row)"
-              ></i>
-            </div>
+            <GridActions :row="row" :actions="col.actions" />
           </template>
 
           <span v-else-if="col.value" v-html="col.value(row)"></span>

@@ -470,7 +470,7 @@ onMounted(() => {
               class="btn btn-sm btn-primary"
               @click="handleCreate"
             >
-              <i class="fa fa-plus me-1"></i> New Department
+              <i class="fa fa-plus me-1"></i> New User
             </button>
           </div>
         </template>

@@ -197,7 +197,7 @@ async function handleDelete(row) {
     return;
   }
 
-  const isRestore = row.is_deleted === 1;
+  const isRestore = row.is_deleted === 1 || row.is_deleted === true;
 
   const result = await confirmAction(
     isRestore ? 'Restore this record?' : 'Delete this record?',
