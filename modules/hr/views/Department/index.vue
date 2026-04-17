@@ -1,7 +1,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import DataTable from '@/components/DataTable/DataTable.vue';
+
+// 1. Remove the old DataTable and import the new Grid Components
+import BaseBlock from '@/components/BaseBlock.vue';
+import GridProvider from '@/components/GridListView/GridView/GridProvider.vue';
+import GridTable from '@/components/GridListView/GridView/GridTable.vue';
+import GridHeaders from '@/components/GridListView/GridView/GridHeaders.vue';
+import GridBody from '@/components/GridListView/GridView/GridBody.vue';
+import GridPagination from '@/components/GridListView/GridView/GridPagination.vue';
+import GridActions from '@/components/GridListView/GridView/GridActions.vue'; // For our custom card
+import ListBody from '@/components/GridListView/ListView/ListBody.vue'; 
+
 import { useDataTable } from '@/composables/useDataTable';
 import { useApi } from '@/helpers/useApi';
 import { useModalStore } from '@/stores/modal';
@@ -14,6 +24,9 @@ const modalStore = useModalStore();
 const alertStore = useAlertStore();
 const { confirmAction } = useAlert();
 const router = useRouter();
+
+// 2. Add Layout State (Table vs Cards)
+const layout = ref("table");
 
 const {
   searchQuery,
@@ -35,19 +48,12 @@ const {
   initialSortDir: 'desc',
 });
 
+// 3. Update Column Definitions (using 'attribute' instead of 'field' + removing filter:true for global search)
 const tableColumns = [
-  {
-    "field": "department_name",
-    "header": "Department Name"
-  },
-  {
-    "field": "department_code",
-    "header": "Department Code"
-  },
-  {
-    "field": "description",
-    "header": "Description"
-  }
+  { attribute: "department_name", label: "Department Name" },
+  { attribute: "department_code", label: "Department Code" },
+  { attribute: "description", label: "Description" },
+  { class: "ActionColumn", actions: ["view", "edit", "delete"] }
 ];
 
 const rows = ref([]);
@@ -74,7 +80,9 @@ function normalizeRows(items) {
   }));
 }
 
-async function fetchRows() {
+// ──────────────────── Data Fetching ────────────────────
+
+async function fetchRows(additionalFilters = {}) {
   loading.value = true;
 
   const { data: responseData, request, error } = useApi(endpoints.list, {
@@ -83,8 +91,11 @@ async function fetchRows() {
   });
 
   try {
-    await request(null, buildQueryParams());
+    const queryParams = { ...buildQueryParams(), ...additionalFilters };
+    await request(null, queryParams);
+    
     if (error.value) throw error.value;
+    
     const payload = responseData.value?.dataPayload || responseData.value || {};
     syncFromResponse(payload);
     rows.value = normalizeRows(payload?.data);
@@ -94,6 +105,43 @@ async function fetchRows() {
     loading.value = false;
   }
 }
+
+// ──────────────────── Grid Event Handlers ────────────────────
+
+function handleGridSort({ by, dir }) {
+  setSort(by);
+  fetchRows();
+}
+
+function handleGridFilter(filterModel) {
+  setPage(1);
+  fetchRows(filterModel);
+}
+
+function handleGridAction({ action, row }) {
+  switch (action) {
+    case "view": return handleView(row);
+    case "edit": return handleEdit(row);
+    case "delete":
+    case "restore": return handleDelete(row);
+  }
+}
+
+function handleSearch(query) {
+  setSearchDebounced(query, fetchRows);
+}
+
+function handlePageChange(page) {
+  setPage(page);
+  fetchRows();
+}
+
+function handlePerPageChange(value) {
+  setPerPage(value);
+  fetchRows();
+}
+
+// ──────────────────── CRUD Actions ────────────────────
 
 function openFormModal(title, formData = {}, readonly = false) {
   modalStore.openModal({
@@ -116,7 +164,7 @@ function openFormModal(title, formData = {}, readonly = false) {
 
 function handleCreate() {
   modalMode.value = 'create';
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
+  modalStore.toggleModalUsage(true);
 
   if (!modalStore.useModal) {
     router.push({ name: 'hr/department/create' });
@@ -130,13 +178,13 @@ async function handleView(row) {
   modalMode.value = 'view';
   modalStore.toggleModalUsage(true);
 
+  const id = rowId(row);
+
   if (!modalStore.useModal) {
-    const id = rowId(row);
     router.push({ name: 'hr/department/view', params: { id } });
     return;
   }
 
-  const id = rowId(row);
   if (!id) {
     alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
     return;
@@ -162,13 +210,13 @@ async function handleEdit(row) {
   modalMode.value = 'edit';
   modalStore.toggleModalUsage(true);
 
+  const id = rowId(row);
+
   if (!modalStore.useModal) {
-    const id = rowId(row);
     router.push({ name: 'hr/department/update', params: { id } });
     return;
   }
 
-  const id = rowId(row);
   if (!id) {
     alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
     return;
@@ -197,6 +245,7 @@ async function handleDelete(row) {
     return;
   }
 
+  // Double-checking both true and 1 to support the restore toggle!
   const isRestore = row.is_deleted === 1 || row.is_deleted === true;
 
   const result = await confirmAction(
@@ -261,32 +310,11 @@ async function handleSubmit(payload) {
   handleResponseAlert(
     alertStore,
     responseData.value,
-    isEdit
-      ? 'Department updated successfully.'
-      : 'Department created successfully.'
+    isEdit ? 'Department updated successfully.' : 'Department created successfully.'
   );
 
   modalStore.closeModal();
   await fetchRows();
-}
-
-function handleSearch(query) {
-  setSearchDebounced(query, fetchRows);
-}
-
-function handlePageChange(page) {
-  setPage(page);
-  fetchRows();
-}
-
-function handlePerPageChange(value) {
-  setPerPage(value);
-  fetchRows();
-}
-
-function handleSort(field) {
-  setSort(field);
-  fetchRows();
 }
 
 onMounted(fetchRows);
@@ -294,33 +322,105 @@ onMounted(fetchRows);
 
 <template>
   <div class="content">
-    <DataTable
-      title="Department"
+    
+    <GridProvider
       :data="rows"
       :columns="tableColumns"
       :loading="loading"
-      row-key="__rowId"
-      :actions="['view', 'edit', 'delete']"
       :total-count="totalCount"
-      :search-query="searchQuery"
-      search-placeholder="Search department..."
-      create-label="New Department"
-      :paginated="true"
       :current-page="currentPage"
-      :total-pages="totalPages"
       :per-page="perPage"
-      :per-page-options="perPageOptions"
-      :sort-by="sortBy"
-      :sort-dir="sortDir"
-      empty-text="No records found"
-      @create="handleCreate"
-      @view="handleView"
-      @edit="handleEdit"
-      @delete="handleDelete"
-      @search="handleSearch"
       @change-page="handlePageChange"
-      @change-per-page="handlePerPageChange"
-      @change-sort="handleSort"
-    />
+      @sort="handleGridSort"
+      @filter="handleGridFilter"
+      @action-click="handleGridAction"
+    >
+      <BaseBlock title="Department Management" content-full>
+        
+        <template #options>
+          <div class="d-flex align-items-center gap-2">
+            
+            <div class="input-group input-group-sm w-auto me-3">
+              <span class="input-group-text bg-body-light border-end-0">
+                <i class="fa fa-search text-muted"></i>
+              </span>
+              <input
+                type="text"
+                class="form-control border-start-0"
+                placeholder="Search departments..."
+                style="width: 200px"
+                :value="searchQuery"
+                @input="(e) => handleSearch(e.target.value)"
+              />
+            </div>
+
+            <button
+              class="btn btn-sm btn-alt-secondary"
+              :class="{ active: layout === 'cards' }"
+              @click="layout = 'cards'"
+            >
+              <i class="fa fa-th-large"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-alt-secondary me-3"
+              :class="{ active: layout === 'table' }"
+              @click="layout = 'table'"
+            >
+              <i class="fa fa-list"></i>
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              @click="handleCreate"
+            >
+              <i class="fa fa-plus me-1"></i> New Department
+            </button>
+          </div>
+        </template>
+
+        <GridTable v-if="layout === 'table'">
+          <GridHeaders />
+          <GridBody>
+             </GridBody>
+        </GridTable>
+
+        <ListBody v-else>
+          <template #card="{ row }">
+            <div class="block block-rounded block-bordered h-100 mb-0 shadow-sm">
+              <div class="block-content text-center py-4">
+                
+                <div class="rounded-circle bg-body-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px">
+                  <i class="fa fa-building fa-2x text-primary"></i>
+                </div>
+                
+                <h4 class="mb-1">{{ row.department_name }}</h4>
+                <p class="text-muted fs-sm mb-2">{{ row.department_code }}</p>
+                
+                <span v-if="row.status" class="badge" :class="row.status?.theme ? `bg-${row.status.theme}` : 'bg-info'">
+                  {{ row.status?.label || row.status }}
+                </span>
+                
+              </div>
+
+              <div class="block-content block-content-full bg-body-light mt-auto">
+                <GridActions :row="row" :actions="['view', 'edit', 'delete']" />
+              </div>
+            </div>
+          </template>
+        </ListBody>
+
+        <template #footer>
+          <div class="p-3 bg-body-light border-top">
+            <GridPagination 
+              :per-page-options="perPageOptions"
+              @change-per-page="handlePerPageChange" 
+            />
+          </div>
+        </template>
+
+      </BaseBlock>
+    </GridProvider>
+    
   </div>
 </template>

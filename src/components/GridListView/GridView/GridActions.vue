@@ -13,7 +13,7 @@ const actionConfig = {
   view: { icon: "fa fa-eye", color: "text-primary", label: "View" },
   edit: { icon: "fa fa-pencil", color: "text-success", label: "Edit" },
   delete: { icon: "fa fa-trash", color: "text-danger", label: "Delete" },
-  restore: { icon: "fa fa-trash-restore", color: "text-warning", label: "Restore" },
+  restore: { icon: "fa fa-rotate-left", color: "text-secondary", label: "Restore" },
   manageGroups: { icon: "fa fa-users", color: "text-info", label: "Groups" },
   ban: { icon: "fa fa-ban", color: "text-danger", label: "Ban" }
 };
