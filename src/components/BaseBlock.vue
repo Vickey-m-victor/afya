@@ -445,7 +445,7 @@ defineExpose({
     <!-- Default Block Footer -->
     <div
       v-if="!$slots.content && $slots.footer"
-      class="block-content block-content-full block-content-sm bg-body-light fs-sm"
+      class="block-content block-content-full block-content-sm  fs-sm"
       :class="classContainerFooter"
     >
       <slot name="footer"></slot>

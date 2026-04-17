@@ -411,7 +411,7 @@ onMounted(fetchRows);
         </ListBody>
 
         <template #footer>
-          <div class="p-3 bg-body-light border-top">
+          <div class="p-3  border-top">
             <GridPagination 
               :per-page-options="perPageOptions"
               @change-per-page="handlePerPageChange" 
