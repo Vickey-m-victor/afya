@@ -12,6 +12,11 @@ export default {
       icon: "si si-speedometer",
     },
     {
+      name: "Patient Reception",
+      to: "main/reception",
+      icon: "fa fa-notes-medical",
+    },
+    {
       name: "IAM",
       heading: true,
     },

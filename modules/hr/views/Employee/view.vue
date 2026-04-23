@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '@/helpers/useApi';
 import { parseBackendError } from '@/composables/useWarpHelpers';
 import { useModalStore } from '@/stores/modal';
+import LazySearchSelect from '@/components/inputs/LazySearchSelect.vue';
 import EmployeeSectionEditModal from './EmployeeSectionEditModal.vue';
 
 const route = useRoute();
@@ -163,6 +164,77 @@ const copyToClipboard = async (text, label = 'Copied') => {
 
 const safeEmail = computed(() => profile.value?.email_address || formData.value?.email_address || null);
 const safePhone = computed(() => profile.value?.mobile_number || formData.value?.mobile_number || null);
+
+const documentUpload = ref({
+  document_type_id: null,
+  document_name: '',
+  document_number: '',
+  issue_date: '',
+  expiry_date: '',
+  file: null,
+});
+
+const documentUploadErrors = ref({});
+const documentUploadLoading = ref(false);
+
+const handleDocumentFileChange = (event) => {
+  const files = event?.target?.files;
+  documentUpload.value.file = files && files.length ? files[0] : null;
+};
+
+const uploadEmployeeDocument = async () => {
+  documentUploadErrors.value = {};
+
+  if (!documentUpload.value.file) {
+    documentUploadErrors.value.file = 'File is required';
+    return;
+  }
+
+  documentUploadLoading.value = true;
+
+  try {
+    const payload = new FormData();
+    if (documentUpload.value.document_type_id) payload.append('document_type_id', documentUpload.value.document_type_id);
+    if (documentUpload.value.document_name) payload.append('document_name', documentUpload.value.document_name);
+    if (documentUpload.value.document_number) payload.append('document_number', documentUpload.value.document_number);
+    if (documentUpload.value.issue_date) payload.append('issue_date', documentUpload.value.issue_date);
+    if (documentUpload.value.expiry_date) payload.append('expiry_date', documentUpload.value.expiry_date);
+    payload.append('file', documentUpload.value.file);
+
+    const endpoint = `/hr/employees/${id.value}/documents`;
+    const { request: uploadRequest, error: uploadError } = useApi(endpoint, {
+      method: 'POST',
+      autoFetch: false,
+      options: {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      },
+    });
+
+    await uploadRequest(payload);
+
+    if (uploadError.value) {
+      const parsed = parseBackendError(uploadError.value);
+      documentUploadErrors.value = parsed.fieldErrors || {};
+      if (!parsed.isValidation) {
+        showToast(parsed.message || 'Document upload failed');
+      }
+      return;
+    }
+
+    showToast('Document uploaded successfully');
+    documentUpload.value = {
+      document_type_id: null,
+      document_name: '',
+      document_number: '',
+      issue_date: '',
+      expiry_date: '',
+      file: null,
+    };
+    await request();
+  } finally {
+    documentUploadLoading.value = false;
+  }
+};
 
 const openSectionEdit = (section) => {
   const sectionTitles = {
@@ -338,28 +410,28 @@ onMounted(() => {
               </div>
 
               <!-- Key facts -->
-              <div class="key-facts rounded-3 p-3 text-start mb-3">
-                <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="key-facts rounded-3 p-2 text-start mb-2">
+                <div class="d-flex align-items-center justify-content-between mb-1">
                   <span class="text-muted d-inline-flex align-items-center">
-                    <i class="ti ti-id me-2"></i>Employee No
+                    <i class="ti ti-id me-1"></i>Employee No
                   </span>
                   <span class="fw-medium text-dark">{{ formData.employee_number ?? '—' }}</span>
                 </div>
-                <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center justify-content-between mb-1">
                   <span class="text-muted d-inline-flex align-items-center">
-                    <i class="ti ti-star me-2"></i>Department
+                    <i class="ti ti-star me-1"></i>Department
                   </span>
                   <span class="fw-medium text-dark text-end">{{ departmentName || '—' }}</span>
                 </div>
-                <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center justify-content-between mb-1">
                   <span class="text-muted d-inline-flex align-items-center">
-                    <i class="ti ti-building me-2"></i>Facility
+                    <i class="ti ti-building me-1"></i>Facility
                   </span>
                   <span class="fw-medium text-dark text-end">{{ facilityName || '—' }}</span>
                 </div>
                 <div class="d-flex align-items-center justify-content-between">
                   <span class="text-muted d-inline-flex align-items-center">
-                    <i class="ti ti-calendar-check me-2"></i>Hire Date
+                    <i class="ti ti-calendar-check me-1"></i>Hire Date
                   </span>
                   <span class="fw-medium text-dark text-end">
                     {{ hireDateLabel || '—' }}
@@ -369,25 +441,25 @@ onMounted(() => {
               </div>
 
               <div>
-                <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center justify-content-between mb-1">
                   <span class="d-inline-flex align-items-center">
-                    <i class="ti ti-star me-2"></i>
+                    <i class="ti ti-star me-1"></i>
                     Team
                   </span>
-                  <p class="text-dark">{{ departmentName || '—' }}</p>
+                  <p class="text-dark mb-0">{{ departmentName || '—' }}</p>
                 </div>
 
-                <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center justify-content-between mb-1">
                   <span class="d-inline-flex align-items-center">
-                    <i class="ti ti-calendar-check me-2"></i>
+                    <i class="ti ti-calendar-check me-1"></i>
                     Date Of Join
                   </span>
-                  <p class="text-dark">{{ hireDateLabel || '—' }}</p>
+                  <p class="text-dark mb-0">{{ hireDateLabel || '—' }}</p>
                 </div>
 
                 <div class="d-flex align-items-center justify-content-between">
                   <span class="d-inline-flex align-items-center">
-                    <i class="ti ti-calendar-check me-2"></i>
+                    <i class="ti ti-calendar-check me-1"></i>
                     Report Office
                   </span>
                   <div class="d-flex align-items-center">
@@ -398,7 +470,7 @@ onMounted(() => {
                   </div>
                 </div>
 
-                <div class="row gx-2 mt-3">
+                <div class="row gx-2 mt-2">
                   <div class="col-6">
                     <div>
                       <button
@@ -422,9 +494,9 @@ onMounted(() => {
             </div>
 
             <!-- Basic information -->
-            <div class="p-3 border-bottom">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <h6>Basic information</h6>
+            <div class="p-3 border-bottom sidebar-info-section">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <h6 class="mb-0">Basic information</h6>
                 <button
                   type="button"
                   class="btn btn-icon btn-sm"
@@ -435,7 +507,7 @@ onMounted(() => {
                 </button>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-phone me-2"></i>
                   Phone
@@ -449,7 +521,7 @@ onMounted(() => {
                   >
                     {{ safePhone }}
                   </a>
-                  <span v-else class="text-dark">—</span>
+                  <span v-else class="text-dark sidebar-info-value">—</span>
                   <button
                     v-if="safePhone"
                     type="button"
@@ -462,7 +534,7 @@ onMounted(() => {
                 </div>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-mail-check me-2"></i>
                   Email
@@ -476,7 +548,7 @@ onMounted(() => {
                   >
                     {{ safeEmail }}
                   </a>
-                  <span v-else class="text-dark">—</span>
+                  <span v-else class="text-dark sidebar-info-value">—</span>
                   <button
                     v-if="safeEmail"
                     type="button"
@@ -489,35 +561,35 @@ onMounted(() => {
                 </div>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-gender-male me-2"></i>
                   Gender
                 </span>
-                <p class="text-dark text-end">{{ profile.gender || formData.gender || '—' }}</p>
+                <p class="text-dark text-end sidebar-info-value">{{ profile.gender || formData.gender || '—' }}</p>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-cake me-2"></i>
                   Birthday
                 </span>
-                <p class="text-dark text-end">{{ profile.date_of_birth || formData.date_of_birth || '—' }}</p>
+                <p class="text-dark text-end sidebar-info-value">{{ profile.date_of_birth || formData.date_of_birth || '—' }}</p>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row mb-0">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-map-pin-check me-2"></i>
                   Address
                 </span>
-                <p class="text-dark text-end">{{ profile.physical_address || formData.physical_address || '—' }}</p>
+                <p class="text-dark text-end sidebar-info-value">{{ profile.physical_address || formData.physical_address || '—' }}</p>
               </div>
             </div>
 
             <!-- Personal Information -->
-            <div class="p-3 border-bottom">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <h6>Personal Information</h6>
+            <div class="p-3 border-bottom sidebar-info-section">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <h6 class="mb-0">Personal Information</h6>
                 <button
                   type="button"
                   class="btn btn-icon btn-sm"
@@ -528,52 +600,52 @@ onMounted(() => {
                 </button>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-e-passport me-2"></i>
                   Passport No
                 </span>
-                <p class="text-dark">{{ profile.passport_number || formData.passport_number || '—' }}</p>
+                <p class="text-dark sidebar-info-value">{{ profile.passport_number || formData.passport_number || '—' }}</p>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-id me-2"></i>
                   National ID
                 </span>
-                <p class="text-dark">{{ profile.national_id || formData.national_id || '—' }}</p>
+                <p class="text-dark sidebar-info-value">{{ profile.national_id || formData.national_id || '—' }}</p>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-receipt me-2"></i>
                   KRA PIN
                 </span>
-                <p class="text-dark text-end">{{ profile.tax_pin || formData.tax_pin || '—' }}</p>
+                <p class="text-dark text-end sidebar-info-value">{{ profile.tax_pin || formData.tax_pin || '—' }}</p>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-bookmark-plus me-2"></i>
                   Religion
                 </span>
-                <p class="text-dark text-end">{{ profile.religion || formData.religion || '—' }}</p>
+                <p class="text-dark text-end sidebar-info-value">{{ profile.religion || formData.religion || '—' }}</p>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-hotel-service me-2"></i>
                   Marital status
                 </span>
-                <p class="text-dark text-end">{{ profile.marital_status || formData.marital_status || '—' }}</p>
+                <p class="text-dark text-end sidebar-info-value">{{ profile.marital_status || formData.marital_status || '—' }}</p>
               </div>
 
-              <div class="d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center justify-content-between sidebar-info-row mb-0">
                 <span class="d-inline-flex align-items-center">
                   <i class="ti ti-gender-male me-2"></i>
                   Nationality
                 </span>
-                <p class="text-dark text-end">{{ profile.nationality || formData.nationality || '—' }}</p>
+                <p class="text-dark text-end sidebar-info-value">{{ profile.nationality || formData.nationality || '—' }}</p>
               </div>
             </div>
           </div>
@@ -588,9 +660,7 @@ onMounted(() => {
         <div class="sticky-actions mb-3">
           <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2 flex-wrap">
-              <button type="button" class="btn btn-primary" @click="router.push({ name: 'hr/employee/onboard', query: { id } })">
-                <i class="ti ti-edit me-1"></i>Edit Employee
-              </button>
+
               <button type="button" class="btn btn-outline-secondary" @click="router.push({ name: 'hr/employee' })">
                 <i class="ti ti-arrow-left me-1"></i>Back
               </button>
@@ -1053,7 +1123,50 @@ onMounted(() => {
                           <i class="fa fa-file-alt"></i>
                         </div>
                       </div>
-                      <div class="mt-3 text-muted small">No documents linked yet.</div>
+                      <div class="row g-2 mt-1">
+                        <div class="col-12">
+                          <label class="form-label small mb-1">Document Type</label>
+                          <LazySearchSelect
+                            v-model="documentUpload.document_type_id"
+                            endpoint="/hr/document-type/search"
+                            placeholder="Select..."
+                            :disabled="documentUploadLoading"
+                            :invalid="!!documentUploadErrors.document_type_id"
+                          />
+                          <div v-if="documentUploadErrors.document_type_id" class="invalid-feedback d-block">{{ documentUploadErrors.document_type_id }}</div>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label small mb-1">Document Name</label>
+                          <input v-model="documentUpload.document_name" type="text" class="form-control" :disabled="documentUploadLoading" :class="{ 'is-invalid': documentUploadErrors.document_name }" />
+                          <div v-if="documentUploadErrors.document_name" class="invalid-feedback">{{ documentUploadErrors.document_name }}</div>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label small mb-1">Document Number</label>
+                          <input v-model="documentUpload.document_number" type="text" class="form-control" :disabled="documentUploadLoading" :class="{ 'is-invalid': documentUploadErrors.document_number }" />
+                          <div v-if="documentUploadErrors.document_number" class="invalid-feedback">{{ documentUploadErrors.document_number }}</div>
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label small mb-1">Issue Date</label>
+                          <input v-model="documentUpload.issue_date" type="date" class="form-control" :disabled="documentUploadLoading" :class="{ 'is-invalid': documentUploadErrors.issue_date }" />
+                          <div v-if="documentUploadErrors.issue_date" class="invalid-feedback">{{ documentUploadErrors.issue_date }}</div>
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label small mb-1">Expiry Date</label>
+                          <input v-model="documentUpload.expiry_date" type="date" class="form-control" :disabled="documentUploadLoading" :class="{ 'is-invalid': documentUploadErrors.expiry_date }" />
+                          <div v-if="documentUploadErrors.expiry_date" class="invalid-feedback">{{ documentUploadErrors.expiry_date }}</div>
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label small mb-1">File</label>
+                          <input type="file" class="form-control" :disabled="documentUploadLoading" :class="{ 'is-invalid': documentUploadErrors.file }" @change="handleDocumentFileChange" />
+                          <div v-if="documentUploadErrors.file" class="invalid-feedback">{{ documentUploadErrors.file }}</div>
+                        </div>
+                        <div class="col-12 mt-2">
+                          <button type="button" class="btn btn-sm btn-primary" :disabled="documentUploadLoading" @click="uploadEmployeeDocument">
+                            <span v-if="documentUploadLoading" class="spinner-border spinner-border-sm me-1"></span>
+                            Upload Document
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1249,6 +1362,26 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.sidebar-info-section {
+  padding-top: 0.8rem !important;
+  padding-bottom: 0.8rem !important;
+}
+
+.sidebar-info-row {
+  margin-bottom: 0.35rem;
+  gap: 0.5rem;
+}
+
+.sidebar-info-row > span,
+.sidebar-info-row > div,
+.sidebar-info-value {
+  line-height: 1.2;
+}
+
+.sidebar-info-value {
+  margin-bottom: 0;
 }
 
 @keyframes skeleton-loading {
