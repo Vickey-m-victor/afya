@@ -1,62 +1,14 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import { usePatientService } from '../services/patientService';
+import BaseDatepicker from "@/components/BaseDatepicker.vue";
 
-const patientsDB = ref([
-  {
-    id: 'P1001',
-    mrn: 'MRN-1001',
-    title: 'Mr',
-    firstName: 'James',
-    lastName: 'Mwangi',
-    dob: '1985-06-12',
-    gender: 'Male',
-    phone: '+254 712 345678',
-    email: 'james.mwangi@email.com',
-    nhif: 'NHIF-28736452',
-    kinName: 'Mary Mwangi',
-    kinRelation: 'Spouse',
-    kinPhone: '+254 723 987654',
-    address: 'Nairobi, Kilimani',
-    nextOfKinContact: '+254 723 987654',
-    emergencyContact: '+254 722 111222'
-  },
-  {
-    id: 'P1002',
-    mrn: 'MRN-1002',
-    title: 'Ms',
-    firstName: 'Aisha',
-    lastName: 'Hassan',
-    dob: '1992-11-03',
-    gender: 'Female',
-    phone: '+254 700 123456',
-    email: 'aisha.h@afya.co.ke',
-    nhif: 'NHIF-99234817',
-    kinName: 'Omar Hassan',
-    kinRelation: 'Brother',
-    kinPhone: '+254 710 445566',
-    address: 'Mombasa, Nyali',
-    nextOfKinContact: '+254 710 445566',
-    emergencyContact: '+254 733 998877'
-  },
-  {
-    id: 'P1003',
-    mrn: 'MRN-1003',
-    title: 'Mrs',
-    firstName: 'Grace',
-    lastName: 'Otieno',
-    dob: '1978-02-20',
-    gender: 'Female',
-    phone: '+254 722 998877',
-    email: 'grace.otieno@clinic.com',
-    nhif: 'NHIF-55678322',
-    kinName: 'Peter Otieno',
-    kinRelation: 'Husband',
-    kinPhone: '+254 721 334455',
-    address: 'Kisumu, Milimani',
-    nextOfKinContact: '+254 721 334455',
-    emergencyContact: '+254 722 998877'
-  }
-]);
+const patientService = usePatientService();
+
+const patientsDB = ref([]);
+const isLoading = ref(false);
+const isSearching = ref(false);
+const metaData = ref({ gender: [], marital_status: [] });
 
 const selectedPatient = ref(null);
 const isNewPatientMode = ref(false);
@@ -69,17 +21,17 @@ const searchContact = ref('');
 
 const newPatientForm = ref({
   title: 'Mr',
-  firstName: '',
-  lastName: '',
-  dob: '',
-  gender: 'Male',
-  phone: '',
+  first_name: '',
+  last_name: '',
+  date_of_birth: '',
+  gender: 'male',
+  phone_number: '',
   email: '',
-  nhif: '',
-  kinName: '',
-  kinRelation: '',
-  kinPhone: '',
-  emergency: ''
+  kin_name: '',
+  kin_relationship: '',
+  kin_phone: '',
+  emergency_contact: '',
+  facility_id: 1,
 });
 
 const filteredPatients = computed(() => {
@@ -90,19 +42,19 @@ const filteredPatients = computed(() => {
 
   if (mrnQuery) {
     filtered = filtered.filter(
-      (p) => p.mrn.toLowerCase().includes(mrnQuery) || (p.nhif && p.nhif.toLowerCase().includes(mrnQuery))
+      (p) => (p.mrn || '').toLowerCase().includes(mrnQuery)
     );
   }
 
   if (nameQuery) {
     filtered = filtered.filter(
-      (p) => p.firstName.toLowerCase().includes(nameQuery) || p.lastName.toLowerCase().includes(nameQuery)
+      (p) => (p.name || '').toLowerCase().includes(nameQuery)
     );
   }
 
   if (contactQuery) {
     filtered = filtered.filter(
-      (p) => p.phone.includes(contactQuery) || (p.email || '').toLowerCase().includes(contactQuery)
+      (p) => (p.phone || '').includes(contactQuery)
     );
   }
 
@@ -118,7 +70,8 @@ function showToast(message, type = 'info') {
 
 function formatDate(dateStr) {
   if (!dateStr) return '-';
-  return new Date(dateStr).toLocaleDateString('en-GB');
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-GB');
 }
 
 function calculateAge(dobStr) {
@@ -133,17 +86,128 @@ function calculateAge(dobStr) {
   return age;
 }
 
-function selectPatient(patient) {
-  selectedPatient.value = patient;
-  isNewPatientMode.value = false;
-  encounterMessage.value = '';
-  showToast(`Loaded: ${patient.firstName} ${patient.lastName}`, 'info');
+function extractPatientsList(response) {
+  const root = response?.dataPayload ?? response?.payload ?? response ?? {};
+  const dataNode = root?.data ?? root;
+  const list = dataNode?.data ?? dataNode?.patients ?? dataNode ?? [];
+
+  // Common backend shape: { data: { data: [...], count: n } }
+  if (Array.isArray(list?.data)) return list.data;
+  if (Array.isArray(list)) return list;
+  return [];
+}
+
+function extractPatientDetails(response) {
+  const root = response?.dataPayload ?? response?.payload ?? response ?? {};
+  const dataNode = root?.data ?? root;
+
+  // Typical shapes we might receive:
+  // - { payload: { patient, identifiers, contacts, address } }
+  // - { dataPayload: { patient, identifiers, contacts, address } }
+  // - { dataPayload: { data: { patient, identifiers, contacts, address } } }
+  const patient = dataNode?.patient ?? root?.patient ?? null;
+  const identifiers = dataNode?.identifiers ?? root?.identifiers ?? [];
+  const contacts = dataNode?.contacts ?? root?.contacts ?? [];
+  const address = dataNode?.address ?? root?.address ?? null;
+
+  return { patient, identifiers, contacts, address };
+}
+
+async function loadPatients() {
+  isLoading.value = true;
+  try {
+    const { data, error } = await patientService.listPatients(50);
+    if (error?.value) throw error.value;
+    patientsDB.value = extractPatientsList(data.value);
+  } catch (e) {
+    console.error('Failed to load patients:', e);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+async function loadMeta() {
+  try {
+    const { data } = await patientService.getMeta();
+    if (data.value?.payload) {
+      metaData.value = data.value.payload;
+    }
+  } catch (e) {
+    console.error('Failed to load meta:', e);
+  }
+}
+
+async function searchPatients() {
+  const query = searchName.value || searchMrn.value || searchContact.value;
+  if (!query) {
+    await loadPatients();
+    return;
+  }
+  
+  isSearching.value = true;
+  try {
+    const { data, error } = await patientService.searchPatients(query);
+    if (error?.value) throw error.value;
+    patientsDB.value = extractPatientsList(data.value);
+  } catch (e) {
+    console.error('Search failed:', e);
+    showToast('Search failed', 'warning');
+  } finally {
+    isSearching.value = false;
+  }
+}
+
+async function selectPatient(patient) {
+  isLoading.value = true;
+  try {
+    const patientIdentifier = patient?.patient_id ?? patient?.id;
+    if (!patientIdentifier) {
+      showToast('Patient record is missing an identifier', 'warning');
+      return;
+    }
+
+    const { data, error } = await patientService.getPatient(patientIdentifier);
+    if (error?.value) throw error.value;
+
+    const details = extractPatientDetails(data.value);
+    if (details?.patient) {
+      const patientData = details.patient;
+      selectedPatient.value = {
+        patient_id: patientData.patient_id ?? patientData.id ?? patientIdentifier,
+        mrn: details.identifiers?.find((i) => i.type === 'MRN')?.value || patientData.mrn || '-',
+        title: patientData.title || 'Mr',
+        firstName: patientData.first_name ?? patientData.firstName ?? '',
+        lastName: patientData.last_name ?? patientData.lastName ?? '',
+        dob: patientData.date_of_birth ?? patientData.dob ?? null,
+        gender: patientData.gender ?? '-',
+        phone: details.contacts?.find((c) => c.type === 'phone')?.value || patientData.phone || patientData.phone_number || '-',
+        email: details.contacts?.find((c) => c.type === 'email')?.value || patientData.email || '-',
+        address: details.address ? `${details.address.address}, ${details.address.city}` : (patientData.address || '-'),
+        kinName: patientData.kin_name || patientData.kinName || '-',
+        kinRelation: patientData.kin_relationship || patientData.kinRelation || '-',
+        kinPhone: patientData.kin_phone || patientData.kinPhone || '-',
+        emergencyContact: patientData.emergency_contact || patientData.emergencyContact || '-',
+        nhif: patientData.nhif_number || patientData.nhif || '-',
+      };
+      isNewPatientMode.value = false;
+      encounterMessage.value = '';
+      showToast(`Loaded: ${selectedPatient.value.firstName} ${selectedPatient.value.lastName}`, 'info');
+    } else {
+      showToast('Patient details not found in response', 'warning');
+    }
+  } catch (e) {
+    console.error('Failed to load patient details:', e);
+    showToast('Failed to load patient details', 'warning');
+  } finally {
+    isLoading.value = false;
+  }
 }
 
 function clearSearch() {
   searchMrn.value = '';
   searchName.value = '';
   searchContact.value = '';
+  loadPatients();
 }
 
 function openNewPatient() {
@@ -152,17 +216,17 @@ function openNewPatient() {
   encounterMessage.value = '';
   newPatientForm.value = {
     title: 'Mr',
-    firstName: '',
-    lastName: '',
-    dob: '',
-    gender: 'Male',
-    phone: '',
+    first_name: '',
+    last_name: '',
+    date_of_birth: '',
+    gender: 'male',
+    phone_number: '',
     email: '',
-    nhif: '',
-    kinName: '',
-    kinRelation: '',
-    kinPhone: '',
-    emergency: ''
+    kin_name: '',
+    kin_relationship: '',
+    kin_phone: '',
+    emergency_contact: '',
+    facility_id: 1,
   };
 }
 
@@ -170,149 +234,337 @@ function cancelNewPatient() {
   isNewPatientMode.value = false;
 }
 
-function createPatient() {
-  const firstName = newPatientForm.value.firstName.trim();
-  const lastName = newPatientForm.value.lastName.trim();
+async function createPatient() {
+  const firstName = newPatientForm.value.first_name.trim();
+  const lastName = newPatientForm.value.last_name.trim();
 
   if (!firstName || !lastName) {
     showToast('Please provide first and last name', 'warning');
     return;
   }
 
-  const newId = `P${patientsDB.value.length + 1001}`;
-  const newMrn = `MRN-${3000 + patientsDB.value.length + 1}`;
-  const newPatient = {
-    id: newId,
-    mrn: newMrn,
-    title: newPatientForm.value.title,
-    firstName,
-    lastName,
-    dob: newPatientForm.value.dob || '2000-01-01',
-    gender: newPatientForm.value.gender,
-    phone: newPatientForm.value.phone,
-    email: newPatientForm.value.email,
-    nhif: newPatientForm.value.nhif,
-    kinName: newPatientForm.value.kinName,
-    kinRelation: newPatientForm.value.kinRelation,
-    kinPhone: newPatientForm.value.kinPhone,
-    address: 'Address to update',
-    emergencyContact: newPatientForm.value.emergency,
-    nextOfKinContact: newPatientForm.value.kinPhone
-  };
+  isLoading.value = true;
+  try {
+    const { data, error } = await patientService.registerAndStartEncounter({
+      first_name: firstName,
+      last_name: lastName,
+      title: newPatientForm.value.title,
+      date_of_birth: newPatientForm.value.date_of_birth || null,
+      gender: newPatientForm.value.gender,
+      phone_number: newPatientForm.value.phone_number,
+      email: newPatientForm.value.email,
+      kin_name: newPatientForm.value.kin_name,
+      kin_relationship: newPatientForm.value.kin_relationship,
+      kin_phone: newPatientForm.value.kin_phone,
+      emergency_contact: newPatientForm.value.emergency_contact,
+      facility_id: newPatientForm.value.facility_id,
+    });
 
-  patientsDB.value.push(newPatient);
-  selectedPatient.value = newPatient;
-  isNewPatientMode.value = false;
-  showToast(`Patient ${newPatient.firstName} ${newPatient.lastName} created (MRN: ${newPatient.mrn})`, 'success');
+    if (data.value?.payload) {
+      const patient = data.value.payload.patient;
+      selectedPatient.value = {
+        patient_id: patient.patient_id,
+        mrn: patient.mrn || '-',
+        title: patient.title || 'Mr',
+        firstName: patient.first_name,
+        lastName: patient.last_name,
+        dob: patient.date_of_birth,
+        gender: patient.gender,
+        phone: patient.phone_number || '-',
+        email: patient.email || '-',
+        address: '-',
+        kinName: patient.kin_name || '-',
+        kinRelation: patient.kin_relationship || '-',
+        kinPhone: patient.kin_phone || '-',
+        emergencyContact: patient.emergency_contact || '-',
+        nhif: patient.nhif_number || '-',
+      };
+      isNewPatientMode.value = false;
+      
+      const encounter = data.value.payload.encounter;
+      const timestamp = new Date().toLocaleString();
+      encounterMessage.value = `New encounter opened for ${firstName} ${lastName} at ${timestamp}. (Encounter ID: ${encounter?.encounter_id || 'N/A'})`;
+      
+      showToast(`Patient registered and sent to triage`, 'success');
+      await loadPatients();
+    }
+  } catch (e) {
+    console.error('Failed to create patient:', e);
+    showToast(e.message || 'Failed to register patient', 'warning');
+  } finally {
+    isLoading.value = false;
+  }
 }
 
-function startEncounter() {
+async function createPatientViaEndpoint() {
+  const firstName = newPatientForm.value.first_name.trim();
+  const lastName = newPatientForm.value.last_name.trim();
+
+  if (!firstName || !lastName) {
+    showToast('Please provide first and last name', 'warning');
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+    const payload = {
+      facility_id: newPatientForm.value.facility_id,
+      first_name: firstName,
+      last_name: lastName,
+      date_of_birth: newPatientForm.value.date_of_birth || null,
+      gender: newPatientForm.value.gender === 'male' ? 1 : newPatientForm.value.gender === 'female' ? 2 : 3,
+      contacts: newPatientForm.value.phone_number ? [
+        {
+          type: 'phone',
+          value: newPatientForm.value.phone_number.replace(/\D/g, '')
+        }
+      ] : [],
+      identifiers: [],
+      encounter_type_id: 1,
+      department_id: 2,
+    };
+
+    const { data, error } = await patientService.createPatient(payload);
+
+    if (error?.value) {
+      const apiError = Array.isArray(error.value)
+        ? error.value[0]
+        : error.value?.message || error.value?.error || 'Failed to create patient';
+      throw new Error(typeof apiError === 'string' ? apiError : 'Failed to create patient');
+    }
+
+    const result = data?.value || {};
+    const patientData =
+      result?.payload?.patient ||
+      result?.payload?.data?.patient ||
+      result?.payload?.data ||
+      result?.dataPayload?.patient ||
+      result?.data?.patient ||
+      result?.patient ||
+      null;
+
+    if (patientData) {
+      selectedPatient.value = {
+        patient_id: patientData.patient_id,
+        mrn: patientData.mrn || '-',
+        title: patientData.title || newPatientForm.value.title,
+        firstName: patientData.first_name || firstName,
+        lastName: patientData.last_name || lastName,
+        dob: patientData.date_of_birth,
+        gender: patientData.gender,
+        phone: newPatientForm.value.phone_number || '-',
+        email: '-',
+        address: '-',
+        kinName: '-',
+        kinRelation: '-',
+        kinPhone: '-',
+        emergencyContact: '-',
+        nhif: '-',
+      };
+    }
+
+    isNewPatientMode.value = false;
+    const timestamp = new Date().toLocaleString();
+    encounterMessage.value = `Patient created via endpoint at ${timestamp}. (Patient ID: ${patientData?.patient_id || 'N/A'})`;
+    showToast('Patient created successfully', 'success');
+    await loadPatients();
+  } catch (e) {
+    console.error('Failed to create patient via endpoint:', e);
+    showToast(e?.message || 'Failed to create patient', 'warning');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+async function startEncounter() {
   if (!selectedPatient.value) return;
-  const timeStamp = new Date().toLocaleString();
-  encounterMessage.value = `New encounter opened for ${selectedPatient.value.firstName} ${selectedPatient.value.lastName} at ${timeStamp}. (Outpatient visit - Triage ready)`;
-  showToast(`Encounter started for ${selectedPatient.value.firstName} ${selectedPatient.value.lastName}`, 'info');
+
+  const toGenderCode = (g) => {
+    const v = String(g || '').trim().toLowerCase();
+    if (v === '1' || v === 'male' || v === 'm') return 1;
+    if (v === '2' || v === 'female' || v === 'f') return 2;
+    if (v === '3' || v === 'other') return 3;
+    return null;
+  };
+
+  isLoading.value = true;
+  try {
+    const payload = {
+      facility_id: 1,
+      first_name: selectedPatient.value.firstName || '',
+      last_name: selectedPatient.value.lastName || '',
+      date_of_birth: selectedPatient.value.dob || null,
+      gender: toGenderCode(selectedPatient.value.gender),
+      contacts: [
+        ...(selectedPatient.value.phone ? [{ type: 'phone', value: String(selectedPatient.value.phone) }] : []),
+        ...(selectedPatient.value.email && selectedPatient.value.email !== '-' ? [{ type: 'email', value: String(selectedPatient.value.email) }] : []),
+      ],
+      identifiers: [
+        ...(selectedPatient.value.mrn && selectedPatient.value.mrn !== '-' ? [{ type: 'MRN', value: String(selectedPatient.value.mrn) }] : []),
+        ...(selectedPatient.value.national_id ? [{ type: 'NATIONAL_ID', value: String(selectedPatient.value.national_id) }] : []),
+      ],
+      encounter_type_id: 1,
+      department_id: 2,
+    };
+
+    const { data, error } = await patientService.registerAndStartEncounter(payload);
+    if (error?.value) throw error.value;
+
+    const root = data.value?.dataPayload ?? data.value?.payload ?? data.value ?? {};
+    const payloadResp = root?.data ?? root;
+
+    if (payloadResp?.encounter) {
+      const encounter = payloadResp.encounter;
+      const timestamp = new Date().toLocaleString();
+      encounterMessage.value = `New encounter opened for ${selectedPatient.value.firstName} ${selectedPatient.value.lastName} at ${timestamp}. (Encounter ID: ${encounter?.encounter_id || 'N/A'})`;
+      showToast(`Encounter started for ${selectedPatient.value.firstName} ${selectedPatient.value.lastName}`, 'info');
+    } else {
+      showToast('Encounter started, but encounter details were not returned.', 'info');
+    }
+  } catch (e) {
+    console.error('Failed to start encounter:', e);
+    showToast('Failed to start encounter', 'warning');
+  } finally {
+    isLoading.value = false;
+  }
 }
 
 function viewHistory() {
-  showToast('Demo: Past encounters: Last visit 2025-02-10 (General checkup)', 'info');
+  showToast('Loading past encounters...', 'info');
 }
 
 function editPatient() {
-  showToast('Feature: edit mode - full demographic update available in full EMR', 'info');
+  showToast('Edit mode - full demographic update available in full EMR', 'info');
 }
+
+onMounted(() => {
+  loadPatients();
+  loadMeta();
+});
 </script>
 
 <template>
-  <div class="content reception-page">
+  <div class="content">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
       <div>
-        <h2 class="mb-1">Patient Reception Console</h2>
-        <div class="text-muted fs-sm">Main Module / Reception / Patient Access Hub</div>
+        <h2 class="h3 mb-1">Patient Reception</h2>
+        <div class="text-muted fs-sm">Main / Reception</div>
       </div>
-      <div class="badge-clinic">
-        <i class="fa fa-user-md me-2"></i>
-        Clinical EMR | Outpatient Ready
+
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-2 bg-body-light border rounded">
+        <i class="fa fa-user-md text-muted"></i>
+        <span class="fw-semibold fs-sm">Clinical EMR</span>
+        <span class="text-muted fs-sm">| Outpatient</span>
       </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-3">
+      <!-- Left: Search + results -->
       <div class="col-12 col-xxl-4 d-flex">
-        <BaseBlock class="w-100 border-0 shadow-sm block-rounded-4">
+        <BaseBlock class="w-100 mb-0" title="Find patient">
           <template #content>
-            <div class="block-content block-content-full p-4">
-              <div class="search-title mb-4">
-                <i class="fa fa-search text-success me-2"></i>
-                Find or create patient
-              </div>
-
+            <div class="block-content pb-4">
               <div class="vstack gap-3">
                 <div>
-                  <label class="form-label fw-semibold fs-sm">MRN / National ID</label>
-                  <div class="position-relative">
-                    <i class="fa fa-id-card field-icon"></i>
-                    <input v-model="searchMrn" type="text" class="form-control rounded-pill px-5" placeholder="e.g., MRN-1001, ID 34567890" />
+                  <label class="form-label">MRN / National ID</label>
+                  <div class="input-group">
+                    <span class="input-group-text">
+                      <i class="fa fa-id-card text-muted"></i>
+                    </span>
+                    <input
+                      v-model="searchMrn"
+                      type="text"
+                      class="form-control"
+                      placeholder="e.g., MRN-1001, ID 34567890"
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <label class="form-label fw-semibold fs-sm">Full name</label>
-                  <div class="position-relative">
-                    <i class="fa fa-user field-icon"></i>
-                    <input v-model="searchName" type="text" class="form-control rounded-pill px-5" placeholder="First or last name" />
+                  <label class="form-label">Full name</label>
+                  <div class="input-group">
+                    <span class="input-group-text">
+                      <i class="fa fa-user text-muted"></i>
+                    </span>
+                    <input
+                      v-model="searchName"
+                      type="text"
+                      class="form-control"
+                      placeholder="First or last name"
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <label class="form-label fw-semibold fs-sm">Phone / Email</label>
-                  <div class="position-relative">
-                    <i class="fa fa-phone field-icon"></i>
-                    <input v-model="searchContact" type="text" class="form-control rounded-pill px-5" placeholder="+254 7XX XXX XXX" />
+                  <label class="form-label">Phone / Email</label>
+                  <div class="input-group">
+                    <span class="input-group-text">
+                      <i class="fa fa-phone text-muted"></i>
+                    </span>
+                    <input
+                      v-model="searchContact"
+                      type="text"
+                      class="form-control"
+                      placeholder="+254 7XX XXX XXX"
+                    />
                   </div>
                 </div>
 
-                <div class="d-flex flex-wrap gap-2 pt-1">
-                  <button type="button" class="btn btn-success rounded-pill" @click="showToast('Search applied', 'info')">
+                <div class="d-flex flex-wrap gap-2 mb-1">
+                  <button type="button" class="btn btn-success" @click="searchPatients" :disabled="isSearching">
                     <i class="fa fa-search me-1"></i>
-                    Search
+                    {{ isSearching ? 'Searching...' : 'Search' }}
                   </button>
-                  <button type="button" class="btn btn-alt-secondary rounded-pill" @click="clearSearch">
+                  <button type="button" class="btn btn-alt-secondary" @click="clearSearch">
                     <i class="fa fa-eraser me-1"></i>
                     Clear
                   </button>
-                  <button type="button" class="btn btn-alt-primary rounded-pill" @click="openNewPatient">
+                  <button type="button" class="btn btn-alt-primary" @click="openNewPatient">
                     <i class="fa fa-user-plus me-1"></i>
                     New Patient
                   </button>
                 </div>
               </div>
+            </div>
 
-              <hr class="my-4" />
-
-              <div class="fw-semibold mb-3">
-                <i class="fa fa-users me-1"></i>
-                Patient records
+            <div class="block-content block-content-full bg-body-light border-top">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="fw-semibold">
+                  <i class="fa fa-users me-1"></i>
+                  Patient records
+                </div>
+                <span v-if="isLoading" class="text-muted">
+                  <i class="fa fa-spinner fa-spin"></i>
+                </span>
               </div>
+            </div>
 
-              <div class="patient-list">
-                <div
+            <div class="block-content pb-4" style="max-height: 520px; overflow-y: auto;">
+              <div class="list-group">
+                <button
                   v-for="patient in filteredPatients"
-                  :key="patient.id"
-                  class="patient-card"
-                  :class="{ active: selectedPatient && selectedPatient.id === patient.id }"
+                  :key="patient.patient_id"
+                  type="button"
+                  class="list-group-item list-group-item-action"
+                  :class="{ active: selectedPatient && selectedPatient.patient_id === patient.patient_id }"
                   @click="selectPatient(patient)"
                 >
                   <div class="d-flex align-items-center justify-content-between">
-                    <div class="fw-bold">{{ patient.firstName }} {{ patient.lastName }} ({{ patient.mrn }})</div>
-                    <i class="fa fa-chevron-right text-muted"></i>
+                    <div class="fw-semibold">
+                      {{ patient.name }}
+                      <span :class="selectedPatient && selectedPatient.patient_id === patient.patient_id ? 'text-white-75' : 'text-muted'">
+                        ({{ patient.mrn }})
+                      </span>
+                    </div>
+                    <i class="fa fa-chevron-right opacity-50"></i>
                   </div>
-                  <div class="patient-meta mt-2">
-                    <span><i class="fa fa-phone me-1"></i>{{ patient.phone }}</span>
-                    <span><i class="fa fa-calendar me-1"></i>DOB: {{ formatDate(patient.dob) }}</span>
-                    <span><i class="fa fa-id-card me-1"></i>NHIF: {{ patient.nhif || '-' }}</span>
+                  <div class="d-flex flex-wrap gap-3 mt-2 fs-sm">
+                    <span><i class="fa fa-phone me-1 opacity-75"></i>{{ patient.phone }}</span>
+                    <span><i class="fa fa-calendar me-1 opacity-75"></i>DOB: {{ formatDate(patient.dob) }}</span>
                   </div>
-                </div>
+                </button>
 
-                <div v-if="filteredPatients.length === 0" class="patient-card text-muted">
+                <div v-if="filteredPatients.length === 0 && !isLoading" class="list-group-item text-muted">
                   <i class="fa fa-exclamation-triangle me-1"></i>
                   No matching records. Use New Patient to register.
                 </div>
@@ -322,152 +574,194 @@ function editPatient() {
         </BaseBlock>
       </div>
 
+      <!-- Right: Details / actions -->
       <div class="col-12 col-xxl-8 d-flex">
-        <BaseBlock class="w-100 border-0 shadow-sm block-rounded-4">
+        <BaseBlock class="w-100 mb-0" title="Patient details">
           <template #content>
-            <div class="block-content block-content-full p-4">
+            <div class="block-content pb-4">
               <div v-if="!selectedPatient && !isNewPatientMode" class="text-center text-muted py-6">
                 <i class="fa fa-hand-point-left fs-1 opacity-50"></i>
                 <p class="mt-3 mb-0">Select a patient from the list or create a new one.</p>
-                <p>Demographics, NHIF details and encounter actions will appear here.</p>
+                <p class="mb-0">Demographics, NHIF details and encounter actions will appear here.</p>
               </div>
 
               <template v-if="selectedPatient && !isNewPatientMode">
-                <div class="section-card">
-                  <div class="section-title"><i class="fa fa-user-circle me-2"></i>Patient Identity</div>
-                  <div class="info-row"><div class="info-label">Full name</div><div class="info-value">{{ selectedPatient.title }} {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</div></div>
-                  <div class="info-row"><div class="info-label">MRN / Chart #</div><div class="info-value"><strong>{{ selectedPatient.mrn }}</strong> <span class="active-badge"><i class="fa fa-check-circle me-1"></i>Active</span></div></div>
-                  <div class="info-row"><div class="info-label">Date of Birth</div><div class="info-value">{{ formatDate(selectedPatient.dob) }} ({{ calculateAge(selectedPatient.dob) }} yrs)</div></div>
-                  <div class="info-row"><div class="info-label">Gender</div><div class="info-value">{{ selectedPatient.gender }}</div></div>
-                  <div class="info-row"><div class="info-label">Phone / Email</div><div class="info-value">{{ selectedPatient.phone }} / {{ selectedPatient.email || '-' }}</div></div>
-                  <div class="info-row"><div class="info-label">Address</div><div class="info-value">{{ selectedPatient.address || 'Not specified' }}</div></div>
-                </div>
-
-                <div class="section-card">
-                  <div class="section-title"><i class="fa fa-ambulance me-2"></i>Next of Kin and Emergency</div>
-                  <div class="info-row"><div class="info-label">Kin name</div><div class="info-value">{{ selectedPatient.kinName || '-' }} ({{ selectedPatient.kinRelation || '-' }})</div></div>
-                  <div class="info-row"><div class="info-label">Kin contact</div><div class="info-value">{{ selectedPatient.kinPhone || selectedPatient.nextOfKinContact || '-' }}</div></div>
-                  <div class="info-row"><div class="info-label">Emergency contact</div><div class="info-value">{{ selectedPatient.emergencyContact || selectedPatient.kinPhone || '-' }}</div></div>
-                </div>
-
-                <div class="section-card">
-                  <div class="section-title"><i class="fa fa-shield me-2"></i>NHIF / Insurance</div>
-                  <div class="nhif-detail">
-                    <div><i class="fa fa-id-card me-1"></i>NHIF Number: <strong>{{ selectedPatient.nhif || 'Not registered' }}</strong></div>
-                    <div class="small text-muted mt-2">Insurance scheme: National Hospital Insurance Fund | Status: <span class="text-success fw-semibold">Active</span></div>
+                <div class="block block-bordered mb-3">
+                  <div class="block-header block-header-default">
+                    <h3 class="block-title">
+                      <i class="fa fa-user-circle me-2 text-muted"></i>
+                      Patient Identity
+                    </h3>
+                  </div>
+                  <div class="block-content">
+                    <div class="row g-2 fs-sm">
+                      <div class="col-md-6"><span class="text-muted">Full name</span><div class="fw-semibold">{{ selectedPatient.title }} {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</div></div>
+                      <div class="col-md-6"><span class="text-muted">MRN / Chart #</span><div class="fw-semibold">{{ selectedPatient.mrn }}</div></div>
+                      <div class="col-md-6"><span class="text-muted">Date of Birth</span><div class="fw-semibold">{{ formatDate(selectedPatient.dob) }} ({{ calculateAge(selectedPatient.dob) }} yrs)</div></div>
+                      <div class="col-md-6"><span class="text-muted">Gender</span><div class="fw-semibold">{{ selectedPatient.gender }}</div></div>
+                      <div class="col-md-6"><span class="text-muted">Phone</span><div class="fw-semibold">{{ selectedPatient.phone }}</div></div>
+                      <div class="col-md-6"><span class="text-muted">Email</span><div class="fw-semibold">{{ selectedPatient.email || '-' }}</div></div>
+                      <div class="col-12"><span class="text-muted">Address</span><div class="fw-semibold">{{ selectedPatient.address }}</div></div>
+                    </div>
                   </div>
                 </div>
 
-                <div class="section-card mb-0">
-                  <div class="section-title"><i class="fa fa-stethoscope me-2"></i>Clinical Actions</div>
-                  <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-success rounded-pill" @click="startEncounter">
-                      <i class="fa fa-hospital me-1"></i>
-                      Start New Encounter
-                    </button>
-                    <button type="button" class="btn btn-alt-secondary rounded-pill" @click="viewHistory">
-                      <i class="fa fa-history me-1"></i>
-                      Past Encounters
-                    </button>
-                    <button type="button" class="btn btn-alt-secondary rounded-pill" @click="editPatient">
-                      <i class="fa fa-edit me-1"></i>
-                      Edit Demographics
-                    </button>
+                <div class="block block-bordered mb-3">
+                  <div class="block-header block-header-default">
+                    <h3 class="block-title">
+                      <i class="fa fa-ambulance me-2 text-muted"></i>
+                      Next of Kin & Emergency
+                    </h3>
                   </div>
-                  <div v-if="encounterMessage" class="mt-3 small text-success">
-                    <i class="fa fa-check-circle me-1"></i>
-                    {{ encounterMessage }}
+                  <div class="block-content">
+                    <div class="row g-2 fs-sm">
+                      <div class="col-md-6"><span class="text-muted">Kin name</span><div class="fw-semibold">{{ selectedPatient.kinName }} ({{ selectedPatient.kinRelation }})</div></div>
+                      <div class="col-md-6"><span class="text-muted">Kin contact</span><div class="fw-semibold">{{ selectedPatient.kinPhone }}</div></div>
+                      <div class="col-12"><span class="text-muted">Emergency contact</span><div class="fw-semibold">{{ selectedPatient.emergencyContact }}</div></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="block block-bordered mb-3">
+                  <div class="block-header block-header-default">
+                    <h3 class="block-title">
+                      <i class="fa fa-shield me-2 text-muted"></i>
+                      NHIF / Insurance
+                    </h3>
+                  </div>
+                  <div class="block-content">
+                    <div class="fs-sm">
+                      <div>
+                        <span class="text-muted">NHIF Number</span>
+                        <div class="fw-semibold">{{ selectedPatient.nhif }}</div>
+                      </div>
+                      <div class="text-muted mt-2">
+                        Insurance scheme: National Hospital Insurance Fund | Status:
+                        <span class="text-success fw-semibold">Active</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="block block-bordered mb-0">
+                  <div class="block-header block-header-default">
+                    <h3 class="block-title">
+                      <i class="fa fa-stethoscope me-2 text-muted"></i>
+                      Clinical Actions
+                    </h3>
+                  </div>
+                  <div class="block-content">
+                    <div class="d-flex flex-wrap gap-2">
+                      <button type="button" class="btn btn-success" @click="startEncounter" :disabled="isLoading">
+                        <i class="fa fa-hospital me-1"></i>
+                        Start New Encounter
+                      </button>
+                      <button type="button" class="btn btn-alt-secondary" @click="viewHistory">
+                        <i class="fa fa-history me-1"></i>
+                        Past Encounters
+                      </button>
+                      <button type="button" class="btn btn-alt-secondary" @click="editPatient">
+                        <i class="fa fa-edit me-1"></i>
+                        Edit Demographics
+                      </button>
+                    </div>
+                    <div v-if="encounterMessage" class="mt-3 fs-sm text-success">
+                      <i class="fa fa-check-circle me-1"></i>
+                      {{ encounterMessage }}
+                    </div>
                   </div>
                 </div>
               </template>
 
               <template v-if="isNewPatientMode">
-                <div class="section-card mb-0">
-                  <div class="section-title"><i class="fa fa-user-plus me-2"></i>Register New Patient (Reception)</div>
+                <div>
+                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <h3 class="h5 mb-0">
+                      <i class="fa fa-user-plus me-2 text-muted"></i>
+                      Register New Patient
+                    </h3>
+                    <span class="text-muted fs-sm">Reception</span>
+                  </div>
 
                   <div class="row g-3 mb-3">
                     <div class="col-md-4">
-                      <label class="form-label fw-semibold fs-sm">Title</label>
-                      <select v-model="newPatientForm.title" class="form-select rounded-pill">
-                        <option>Mr</option>
-                        <option>Mrs</option>
-                        <option>Ms</option>
-                        <option>Dr</option>
+                      <label class="form-label">Title</label>
+                      <select v-model="newPatientForm.title" class="form-select">
+                        <option value="Mr">Mr</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="Ms">Ms</option>
+                        <option value="Dr">Dr</option>
                       </select>
                     </div>
                     <div class="col-md-4">
-                      <label class="form-label fw-semibold fs-sm">First name *</label>
-                      <input v-model="newPatientForm.firstName" class="form-control rounded-pill" placeholder="First name" />
+                      <label class="form-label">First name *</label>
+                      <input v-model="newPatientForm.first_name" class="form-control" placeholder="First name" />
                     </div>
                     <div class="col-md-4">
-                      <label class="form-label fw-semibold fs-sm">Last name *</label>
-                      <input v-model="newPatientForm.lastName" class="form-control rounded-pill" placeholder="Last name" />
+                      <label class="form-label">Last name *</label>
+                      <input v-model="newPatientForm.last_name" class="form-control" placeholder="Last name" />
                     </div>
                   </div>
 
                   <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                      <label class="form-label fw-semibold fs-sm">Date of birth</label>
-                      <input v-model="newPatientForm.dob" type="date" class="form-control rounded-pill" />
+                      <label class="form-label">Date of birth</label>
+                      <BaseDatepicker v-model="newPatientForm.date_of_birth" :config="{ dateFormat: 'Y-m-d' }" class="form-control" />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fw-semibold fs-sm">Gender</label>
-                      <select v-model="newPatientForm.gender" class="form-select rounded-pill">
-                        <option>Male</option>
-                        <option>Female</option>
-                        <option>Other</option>
+                      <label class="form-label">Gender</label>
+                      <select v-model="newPatientForm.gender" class="form-select">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
                       </select>
                     </div>
                   </div>
 
                   <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                      <label class="form-label fw-semibold fs-sm">Phone number</label>
-                      <input v-model="newPatientForm.phone" class="form-control rounded-pill" placeholder="+254 xxx xxx" />
+                      <label class="form-label">Phone number</label>
+                      <input v-model="newPatientForm.phone_number" class="form-control" placeholder="+254 xxx xxx" />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fw-semibold fs-sm">Email</label>
-                      <input v-model="newPatientForm.email" class="form-control rounded-pill" placeholder="email@example.com" />
+                      <label class="form-label">Email</label>
+                      <input v-model="newPatientForm.email" type="email" class="form-control" placeholder="email@example.com" />
                     </div>
                   </div>
 
-                  <div class="row g-3 mb-4">
-                    <div class="col-12">
-                      <label class="form-label fw-semibold fs-sm">NHIF number (optional)</label>
-                      <input v-model="newPatientForm.nhif" class="form-control rounded-pill" placeholder="NHIF-XXXXXXXX" />
-                    </div>
-                  </div>
-
-                  <div class="section-title"><i class="fa fa-users me-2"></i>Next of Kin</div>
-
+                  <h4 class="h6 mb-2">Next of Kin</h4>
                   <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                      <label class="form-label fw-semibold fs-sm">Kin full name</label>
-                      <input v-model="newPatientForm.kinName" class="form-control rounded-pill" placeholder="Full name" />
+                      <label class="form-label">Kin full name</label>
+                      <input v-model="newPatientForm.kin_name" class="form-control" placeholder="Full name" />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fw-semibold fs-sm">Relationship</label>
-                      <input v-model="newPatientForm.kinRelation" class="form-control rounded-pill" placeholder="Spouse, Child..." />
+                      <label class="form-label">Relationship</label>
+                      <input v-model="newPatientForm.kin_relationship" class="form-control" placeholder="Spouse, Child..." />
                     </div>
                   </div>
 
                   <div class="row g-3">
                     <div class="col-md-6">
-                      <label class="form-label fw-semibold fs-sm">Kin phone</label>
-                      <input v-model="newPatientForm.kinPhone" class="form-control rounded-pill" placeholder="Contact" />
+                      <label class="form-label">Kin phone</label>
+                      <input v-model="newPatientForm.kin_phone" class="form-control" placeholder="Contact" />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label fw-semibold fs-sm">Emergency contact</label>
-                      <input v-model="newPatientForm.emergency" class="form-control rounded-pill" placeholder="Alternate number" />
+                      <label class="form-label">Emergency contact</label>
+                      <input v-model="newPatientForm.emergency_contact" class="form-control" placeholder="Alternate number" />
                     </div>
                   </div>
 
                   <div class="d-flex flex-wrap gap-2 mt-4">
-                    <button type="button" class="btn btn-success rounded-pill" @click="createPatient">
+                    <button type="button" class="btn btn-success" @click="createPatient" :disabled="isLoading">
                       <i class="fa fa-save me-1"></i>
-                      Create Patient and Continue
+                      {{ isLoading ? 'Processing...' : 'Create Patient and Continue' }}
                     </button>
-                    <button type="button" class="btn btn-alt-secondary rounded-pill" @click="cancelNewPatient">
+                    <button type="button" class="btn btn-info" @click="createPatientViaEndpoint" :disabled="isLoading">
+                      <i class="fa fa-plus-circle me-1"></i>
+                      {{ isLoading ? 'Processing...' : 'Create Patient' }}
+                    </button>
+                    <button type="button" class="btn btn-alt-secondary" @click="cancelNewPatient">
                       <i class="fa fa-times me-1"></i>
                       Cancel
                     </button>
@@ -481,173 +775,21 @@ function editPatient() {
     </div>
 
     <transition name="toast-fade">
-      <div v-if="toast.show" class="toast-msg" :class="`toast-${toast.type}`">
-        <i :class="`fa ${toast.type === 'success' ? 'fa-check-circle' : toast.type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle'}`"></i>
-        <span>{{ toast.message }}</span>
+      <div v-if="toast.show" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1030;">
+        <div
+          class="alert shadow mb-0 d-flex align-items-center gap-2"
+          :class="toast.type === 'success' ? 'alert-success' : toast.type === 'warning' ? 'alert-warning' : 'alert-info'"
+          role="alert"
+        >
+          <i :class="`fa ${toast.type === 'success' ? 'fa-check-circle' : toast.type === 'warning' ? 'fa-exclamation-circle' : 'fa-info-circle'}`"></i>
+          <span class="fw-semibold fs-sm">{{ toast.message }}</span>
+        </div>
       </div>
     </transition>
   </div>
 </template>
 
 <style scoped>
-.reception-page {
-  --rx-bg: #eef2f7;
-  --rx-primary: #1e8f5e;
-  --rx-primary-strong: #0f6e46;
-  --rx-muted: #5e7a93;
-  --rx-border: #cfdfed;
-  --rx-panel: #ffffff;
-  --rx-soft: #f9fbfd;
-}
-
-.reception-page {
-  background: radial-gradient(circle at 20% 10%, rgba(30, 143, 94, 0.08), transparent 40%),
-    radial-gradient(circle at 90% 5%, rgba(11, 94, 126, 0.08), transparent 30%),
-    var(--rx-bg);
-  min-height: calc(100vh - 92px);
-}
-
-.block-rounded-4 {
-  border-radius: 1.4rem;
-}
-
-.badge-clinic {
-  background: var(--rx-panel);
-  border: 1px solid var(--rx-border);
-  border-radius: 999px;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-.search-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  border-left: 4px solid var(--rx-primary);
-  padding-left: 0.75rem;
-}
-
-.field-icon {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 1rem;
-  color: #8aa0b5;
-  z-index: 2;
-}
-
-.patient-list {
-  max-height: 480px;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-}
-
-.patient-card {
-  background: var(--rx-soft);
-  border: 1px solid #e4edf4;
-  border-radius: 1rem;
-  padding: 0.9rem;
-  margin-bottom: 0.7rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.patient-card:hover {
-  background: #edf5fa;
-  border-color: #bfd9e8;
-}
-
-.patient-card.active {
-  border-color: #8bc3a6;
-  box-shadow: 0 0 0 2px rgba(30, 143, 94, 0.15);
-}
-
-.patient-meta {
-  font-size: 0.78rem;
-  color: #527a9b;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-}
-
-.section-card {
-  background: #f9fafc;
-  border: 1px solid #eef3f8;
-  border-radius: 1rem;
-  padding: 1rem 1.1rem;
-  margin-bottom: 1rem;
-}
-
-.section-title {
-  font-weight: 700;
-  font-size: 1rem;
-  margin-bottom: 0.85rem;
-  border-bottom: 2px solid #e0ebf3;
-  padding-bottom: 0.45rem;
-}
-
-.info-row {
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 0.55rem;
-  font-size: 0.9rem;
-}
-
-.info-label {
-  width: 140px;
-  font-weight: 600;
-  color: #2b5a7a;
-}
-
-.info-value {
-  flex: 1;
-  color: #1f3b4c;
-}
-
-.active-badge {
-  background: #e1f7ed;
-  color: #0e6e48;
-  border-radius: 999px;
-  padding: 0.15rem 0.65rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  margin-left: 0.5rem;
-}
-
-.nhif-detail {
-  background: #eef3fc;
-  border-radius: 0.9rem;
-  padding: 0.75rem;
-}
-
-.toast-msg {
-  position: fixed;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  border-radius: 999px;
-  padding: 0.6rem 1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: #fff;
-  z-index: 1030;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
-}
-
-.toast-info {
-  background: #1f3b4c;
-}
-
-.toast-success {
-  background: #0e6e48;
-}
-
-.toast-warning {
-  background: #a76812;
-}
-
 .toast-fade-enter-active,
 .toast-fade-leave-active {
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -657,16 +799,5 @@ function editPatient() {
 .toast-fade-leave-to {
   opacity: 0;
   transform: translateY(8px);
-}
-
-@media (max-width: 767.98px) {
-  .patient-list {
-    max-height: 360px;
-  }
-
-  .info-label {
-    width: 100%;
-    margin-bottom: 0.1rem;
-  }
 }
 </style>

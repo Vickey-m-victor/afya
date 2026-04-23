@@ -43,3 +43,7 @@ ADMIN ACCOUNT
 profile
 dashboard
 students, lecturers - actions
+
+
+
+remove faclity id in /outpatient/registration/search
