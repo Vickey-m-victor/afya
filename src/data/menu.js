@@ -11,10 +11,36 @@ export default {
       to: "dashboard",
       icon: "si si-speedometer",
     },
+    // {
+    //   name: "Patient Reception",
+    //   to: "main/reception",
+    //   icon: "fa fa-notes-medical",
+    // },
     {
-      name: "Patient Reception",
-      to: "main/reception",
-      icon: "fa fa-notes-medical",
+      name: "Outpatient",
+      heading: true,
+    },
+    {
+      name: "OPD Services",
+      icon: "fa-solid fa-stethoscope",
+      subActivePaths: "/outpatient",
+      sub: [
+        {
+          name: "Registration",
+          to: "outpatient/registration",
+          icon: "fa-solid fa-id-card",
+        },
+        {
+          name: "Triage",
+          to: "outpatient/triage/queue",
+          icon: "fa-solid fa-heart-pulse",
+        },
+        {
+          name: "Consultation",
+          to: "outpatient/consultation/queue",
+          icon: "fa-solid fa-user-doctor",
+        },
+      ],
     },
     {
       name: "IAM",
@@ -155,15 +181,15 @@ export default {
       to: "admin/settings/general",
       icon: "fa fa-cog",
     },
-    {
-      name: "Tests",
-      heading: true,
-    },
-    {
-      name: "Tests",
-      to: "admin/test/tests",
-      icon: "si si-settings",
-    },
+    // {
+    //   name: "Tests",
+    //   heading: true,
+    // },
+    // {
+    //   name: "Tests",
+    //   to: "admin/test/tests",
+    //   icon: "si si-settings",
+    // },
   
   ],
 
