@@ -1,5 +1,13 @@
 <script setup>
+import { reactive } from "vue";
 import { useModalStore } from '@/stores/modal';
+import BaseDatepicker from "@/components/BaseDatepicker.vue";
+
+const datepickerState = reactive({
+  dateDefault: null,
+  dateCustom: null,
+  configCustom: { dateFormat: "d-m-Y" },
+});
 
 // Example form component to show in modal
 const ExampleForm = {
@@ -91,6 +99,34 @@ function openViewModal() {
               The global modal system allows you to dynamically load any component 
               into a modal without duplicating modal markup.
             </p>
+          </div>
+
+          <div class="col-12">
+            <h4 class="mt-2">Datepicker Component</h4>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label" for="example-flatpickr-default"
+                  >Default format</label
+                >
+                <BaseDatepicker
+                  id="example-flatpickr-default"
+                  v-model="datepickerState.dateDefault"
+                  placeholder="Y-m-d"
+                />
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label" for="example-flatpickr-custom"
+                  >Custom format</label
+                >
+                <BaseDatepicker
+                  id="example-flatpickr-custom"
+                  v-model="datepickerState.dateCustom"
+                  placeholder="d-m-Y"
+                  :config="datepickerState.configCustom"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="col-md-4">

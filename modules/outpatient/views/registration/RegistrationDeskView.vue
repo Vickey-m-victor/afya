@@ -1,9 +1,14 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue';
-import { usePatientService } from '../services/patientService';
+import { useRegistrationService } from '../../services/registrationService';
+import { useOutpatientContextStore } from '../../stores/outpatientContext';
+import { unwrapData } from '../../services/models';
+import { useRouter } from 'vue-router';
 import BaseDatepicker from "@/components/BaseDatepicker.vue";
 
-const patientService = usePatientService();
+const patientService = useRegistrationService();
+const ctx = useOutpatientContextStore();
+const router = useRouter();
 
 const patientsDB = ref([]);
 const isLoading = ref(false);
@@ -24,14 +29,14 @@ const newPatientForm = ref({
   first_name: '',
   last_name: '',
   date_of_birth: '',
-  gender: 'male',
+  gender: 1,
   phone_number: '',
   email: '',
   kin_name: '',
   kin_relationship: '',
   kin_phone: '',
   emergency_contact: '',
-  facility_id: 1,
+  facility_id: ctx.facilityId,
 });
 
 const filteredPatients = computed(() => {
@@ -146,7 +151,7 @@ async function searchPatients() {
   
   isSearching.value = true;
   try {
-    const { data, error } = await patientService.searchPatients(query);
+    const { data, error } = await patientService.searchPatients({ facility_id: ctx.facilityId, q: query });
     if (error?.value) throw error.value;
     patientsDB.value = extractPatientsList(data.value);
   } catch (e) {
@@ -219,14 +224,14 @@ function openNewPatient() {
     first_name: '',
     last_name: '',
     date_of_birth: '',
-    gender: 'male',
+    gender: 1,
     phone_number: '',
     email: '',
     kin_name: '',
     kin_relationship: '',
     kin_phone: '',
     emergency_contact: '',
-    facility_id: 1,
+    facility_id: ctx.facilityId,
   };
 }
 
@@ -245,7 +250,7 @@ async function createPatient() {
 
   isLoading.value = true;
   try {
-    const { data, error } = await patientService.registerAndStartEncounter({
+    const { data, error } = await patientService.registerAndStartEncounter({ facility_id: ctx.facilityId, encounter_type_id: 1,
       first_name: firstName,
       last_name: lastName,
       title: newPatientForm.value.title,
@@ -312,7 +317,7 @@ async function createPatientViaEndpoint() {
       first_name: firstName,
       last_name: lastName,
       date_of_birth: newPatientForm.value.date_of_birth || null,
-      gender: newPatientForm.value.gender === 'male' ? 1 : newPatientForm.value.gender === 'female' ? 2 : 3,
+      gender: newPatientForm.value.gender,
       contacts: newPatientForm.value.phone_number ? [
         {
           type: 'phone',
@@ -324,7 +329,7 @@ async function createPatientViaEndpoint() {
       department_id: 2,
     };
 
-    const { data, error } = await patientService.createPatient(payload);
+    const { data, error } = await patientService.registerOnly({ ...payload, facility_id: ctx.facilityId });
 
     if (error?.value) {
       const apiError = Array.isArray(error.value)
@@ -380,17 +385,19 @@ async function startEncounter() {
   if (!selectedPatient.value) return;
 
   const toGenderCode = (g) => {
+    const n = Number(g);
+    if ([1, 2, 3, 4].includes(n)) return n;
     const v = String(g || '').trim().toLowerCase();
-    if (v === '1' || v === 'male' || v === 'm') return 1;
-    if (v === '2' || v === 'female' || v === 'f') return 2;
-    if (v === '3' || v === 'other') return 3;
-    return null;
+    if (v === 'male'    || v === 'm') return 1;
+    if (v === 'female'  || v === 'f') return 2;
+    if (v === 'other')               return 3;
+    return 4; // Unknown — always send a valid code
   };
 
   isLoading.value = true;
   try {
     const payload = {
-      facility_id: 1,
+      facility_id: ctx.facilityId,
       first_name: selectedPatient.value.firstName || '',
       last_name: selectedPatient.value.lastName || '',
       date_of_birth: selectedPatient.value.dob || null,
@@ -407,7 +414,7 @@ async function startEncounter() {
       department_id: 2,
     };
 
-    const { data, error } = await patientService.registerAndStartEncounter(payload);
+    const { data, error } = await patientService.registerAndStartEncounter({ ...payload, facility_id: ctx.facilityId, encounter_type_id: 1 });
     if (error?.value) throw error.value;
 
     const root = data.value?.dataPayload ?? data.value?.payload ?? data.value ?? {};
@@ -447,7 +454,7 @@ onMounted(() => {
   <div class="content">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
       <div>
-        <h2 class="h3 mb-1">Patient Reception</h2>
+        <h2 class="h3 mb-1">OPD Registration</h2>
         <div class="text-muted fs-sm">Main / Reception</div>
       </div>
 
@@ -710,10 +717,11 @@ onMounted(() => {
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">Gender</label>
-                      <select v-model="newPatientForm.gender" class="form-select">
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
+                      <select v-model.number="newPatientForm.gender" class="form-select">
+                        <option :value="1">Male</option>
+                        <option :value="2">Female</option>
+                        <option :value="3">Other</option>
+                        <option :value="4">Unknown</option>
                       </select>
                     </div>
                   </div>
@@ -800,4 +808,4 @@ onMounted(() => {
   opacity: 0;
   transform: translateY(8px);
 }
-</style>
+</style>                                                                                

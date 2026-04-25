@@ -19,7 +19,6 @@ import { useAlertStore } from '@/stores/alert';
 import { useAlert } from '@/composables/alerts';
 import { parseBackendError, stripCrudSystemFields, withId, handleResponseAlert } from '@/composables/useWarpHelpers';
 import Form from './form.vue';
-import QuickCreateEmployeeModal from './QuickCreateEmployeeModal.vue';
 
 const modalStore = useModalStore();
 const alertStore = useAlertStore();
@@ -149,9 +148,8 @@ function openFormModal(title, formData = {}, readonly = false) {
 
 function handleCreate() {
   modalStore.openModal({
-    component: QuickCreateEmployeeModal,
-    title: 'New Employee', size: 'xl', showFooter: false, scrollable: true,
-    props: { onCreated: async () => { await fetchRows(); } },
+    component: Form, title: 'New Employee', size: 'xl', showFooter: false, scrollable: true,
+    props: { formData: {}, error: '', fieldErrors: {}, isLoading: false, readonly: false, hideSubmit: false, compact: true, onSubmit: handleSubmit },
   });
 }
 

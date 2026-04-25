@@ -1,0 +1,483 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "outpatient Module",
+        "description": "API documentation for outpatient module",
+        "contact": {
+            "name": "Ananda Douglas",
+            "email": "douglasdaggs@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:9364/v2",
+            "description": "API Development Server"
+        },
+        {
+            "url": "https://afya365.com/v2",
+            "description": "API Staging Server"
+        }
+    ],
+    "paths": {
+        "/outpatient/registration/list": {
+            "get": {
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Recent patients (Reception quick list)",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recent patient list"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/meta": {
+            "get": {
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Registration metadata (dropdown values)",
+                "responses": {
+                    "200": {
+                        "description": "Metadata for registration forms"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/search": {
+            "get": {
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Quick search patients (Reception)",
+                "parameters": [
+                    {
+                        "name": "facility_id",
+                        "in": "query",
+                        "description": "Facility ID to scope patients",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search term (name, MRN, phone)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "John"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search results"
+                    },
+                    "400": {
+                        "description": "Missing facility_id"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/find-or-create": {
+            "post": {
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Find existing patient or create new one (Safe entry point)",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegistrationQuickRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Patient found or created"
+                    },
+                    "400": {
+                        "description": "Missing facility_id"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration": {
+            "post": {
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Register patient only (optional endpoint)",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegistrationQuickRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Patient created"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/start-encounter": {
+            "post": {
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Find/Create patient and start encounter (Reception Flow)",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegistrationQuickRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Patient + Encounter created and sent to triage"
+                    },
+                    "422": {
+                        "description": "Validation errors"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/{id}": {
+            "get": {
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "View patient (Reception)",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Patient details"
+                    },
+                    "404": {
+                        "description": "Patient not found"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "OpdReferral": {
+                "properties": {
+                    "facility_id": {
+                        "title": "Facility id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "encounter_id": {
+                        "title": "Encounter id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "referred_by": {
+                        "title": "Referred by",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "referral_type": {
+                        "title": "Referral type",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "to_department_id": {
+                        "title": "To department id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "to_doctor_id": {
+                        "title": "To doctor id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "to_facility_name": {
+                        "title": "To facility name",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "to_speciality": {
+                        "title": "To speciality",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "reason_icd10_id": {
+                        "title": "Reason icd10 id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "reason_text": {
+                        "title": "Reason text",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "urgency": {
+                        "title": "Urgency",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "status": {
+                        "title": "Status",
+                        "type": "integer",
+                        "example": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "PatientQueue": {
+                "properties": {
+                    "facility_id": {
+                        "title": "Facility id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "encounter_id": {
+                        "title": "Encounter id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "patient_id": {
+                        "title": "Patient id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "department_id": {
+                        "title": "Department id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "assigned_to": {
+                        "title": "Assigned to",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "station": {
+                        "title": "Station",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "token_number": {
+                        "title": "Token number",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "queue_number": {
+                        "title": "Queue number",
+                        "type": "string",
+                        "example": "integer"
+                    },
+                    "status": {
+                        "title": "Status",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "priority": {
+                        "title": "Priority",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "queued_at": {
+                        "title": "Queued at",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "called_at": {
+                        "title": "Called at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "started_at": {
+                        "title": "Started at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "completed_at": {
+                        "title": "Completed at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "wait_minutes": {
+                        "title": "Wait minutes",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "service_minutes": {
+                        "title": "Service minutes",
+                        "type": "int",
+                        "example": "int"
+                    }
+                },
+                "type": "object"
+            },
+            "TriageAssessment": {
+                "properties": {
+                    "encounter_id": {
+                        "title": "Encounter id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "triaged_by": {
+                        "title": "Triaged by",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "chief_complaint": {
+                        "title": "Chief complaint",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "history_of_complaint": {
+                        "title": "History of complaint",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "triage_category": {
+                        "title": "Triage category",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "waiting_area_id": {
+                        "title": "Waiting area id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "nursing_notes": {
+                        "title": "Nursing notes",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "mental_status": {
+                        "title": "Mental status",
+                        "type": "string",
+                        "example": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "RegistrationQuickRequest": {
+                "required": [
+                    "first_name",
+                    "last_name",
+                    "date_of_birth"
+                ],
+                "properties": {
+                    "facility_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "1990-01-01"
+                    },
+                    "gender": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "contacts": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "example": "phone"
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "example": "254700000000"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "identifiers": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "example": "NATIONAL_ID"
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "example": "12345678"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "encounter_type_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Patient",
+            "description": "Available endpoints for Patient model"
+        }
+    ]
+}

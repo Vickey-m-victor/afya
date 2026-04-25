@@ -6,12 +6,12 @@ import BaseLayout from "@/layouts/BaseLayout.vue";
 import BaseNavigation from "@/components/BaseNavigation.vue";
 
 // Grab example data
-// import notifications from "@/data/notifications";
+const notifications = [];
 
 // Grab menu navigation arrays
-// import menu from "@/data/menu";
+import menu from "@/data/menu";
 
-const navigation = menu.boxed;
+const navigation = menu.main;
 
 // Main store
 const store = useTemplateStore();
