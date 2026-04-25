@@ -451,7 +451,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="content">
+ <div class="content content-full" style="max-width: 1800px; margin: 0 auto;">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
       <div>
         <h2 class="h3 mb-1">OPD Registration</h2>

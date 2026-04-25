@@ -55,9 +55,7 @@ const {
 const tableColumns = [
   { attribute: "title_name", label: "Title Name" },
   { attribute: "title_code", label: "Title Code" },
-  { attribute: "title_description", label: "Description" },
   { attribute: "requires_license", label: "Requires License" },
-  { attribute: "license_type", label: "License Type" },
   { attribute: "is_clinical", label: "Is Clinical" },
   { attribute: "is_supervisory", label: "Is Supervisory" },
   { attribute: "status", label: "Status" },

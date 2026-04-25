@@ -74,6 +74,10 @@ async function emergencyBypass() {
   }
 }
 
+function emitQueueEvent(eventName) {
+  window.dispatchEvent(new globalThis.CustomEvent(eventName));
+}
+
 function onTriageComplete() {
   statusText.value = "Triage complete — patient queued for doctor";
   statusIcon.value = "fa-check-circle";
@@ -201,8 +205,7 @@ onMounted(refresh);
                   if ($refs.formPanel) {
                     $refs.formPanel.showOrdersPanel();
                   } else {
-                    const evt = new CustomEvent('triage-show-orders');
-                    window.dispatchEvent(evt);
+                    emitQueueEvent('triage-show-orders');
                   }
                 }"
               >
@@ -211,10 +214,7 @@ onMounted(refresh);
               <button
                 class="btn btn-danger btn-lg fs-sm fw-semibold text-start px-4 rounded-pill"
                 :disabled="!selectedPatient || !triageStarted || isLoading"
-                @click="() => {
-                  const evt = new CustomEvent('triage-complete-trigger');
-                  window.dispatchEvent(evt);
-                }"
+                @click="emitQueueEvent('triage-complete-trigger')"
               >
                 <i class="fa fa-check-circle me-2"></i> Complete Assessment
               </button>

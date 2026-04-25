@@ -55,12 +55,13 @@ const {
 const tableColumns = [
   { attribute: "group_name", label: "Group Name" },
   { attribute: "group_code", label: "Group Code" },
-  { attribute: "status", label: "Status" },
   { attribute: "group_description", label: "Group Description" },
   { attribute: "level", label: "Level" },
   { attribute: "min_salary", label: "Min Salary" },
   { attribute: "max_salary", label: "Max Salary" },
   { attribute: "default_salary", label: "Default Salary" },
+  { attribute: "status", label: "Status" },
+
   { class: "ActionColumn", actions: ["view", "edit", "delete"] },
 ];
 
