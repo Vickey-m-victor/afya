@@ -181,15 +181,20 @@ export default {
       to: "admin/settings/general",
       icon: "fa fa-cog",
     },
-    // {
-    //   name: "Tests",
-    //   heading: true,
-    // },
-    // {
-    //   name: "Tests",
-    //   to: "admin/test/tests",
-    //   icon: "si si-settings",
-    // },
+    {
+      name: "Tests",
+      heading: true,
+    },
+    {
+      name: "Tests",
+      to: "admin/test/tests",
+      icon: "si si-settings",
+    },
+    {
+      name: "Dynamic",
+      to: "admin/test/dynamic",
+      icon: "si si-settings",
+    },
   
   ],
 
