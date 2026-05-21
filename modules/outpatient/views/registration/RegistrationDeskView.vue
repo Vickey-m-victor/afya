@@ -25,17 +25,12 @@ const searchName = ref('');
 const searchContact = ref('');
 
 const newPatientForm = ref({
-  title: 'Mr',
   first_name: '',
   last_name: '',
   date_of_birth: '',
   gender: 1,
   phone_number: '',
   email: '',
-  kin_name: '',
-  kin_relationship: '',
-  kin_phone: '',
-  emergency_contact: '',
   facility_id: ctx.facilityId,
 });
 
@@ -220,17 +215,12 @@ function openNewPatient() {
   selectedPatient.value = null;
   encounterMessage.value = '';
   newPatientForm.value = {
-    title: 'Mr',
     first_name: '',
     last_name: '',
     date_of_birth: '',
     gender: 1,
     phone_number: '',
     email: '',
-    kin_name: '',
-    kin_relationship: '',
-    kin_phone: '',
-    emergency_contact: '',
     facility_id: ctx.facilityId,
   };
 }
@@ -250,19 +240,24 @@ async function createPatient() {
 
   isLoading.value = true;
   try {
-    const { data, error } = await patientService.registerAndStartEncounter({ facility_id: ctx.facilityId, encounter_type_id: 1,
+    const contacts = [];
+    if (newPatientForm.value.phone_number) {
+      contacts.push({ type: 'phone', value: newPatientForm.value.phone_number.replace(/\D/g, '') });
+    }
+    if (newPatientForm.value.email) {
+      contacts.push({ type: 'email', value: newPatientForm.value.email });
+    }
+
+    const { data, error } = await patientService.registerAndStartEncounter({ 
+      facility_id: ctx.facilityId, 
+      encounter_type_id: 1,
       first_name: firstName,
       last_name: lastName,
-      title: newPatientForm.value.title,
       date_of_birth: newPatientForm.value.date_of_birth || null,
       gender: newPatientForm.value.gender,
-      phone_number: newPatientForm.value.phone_number,
-      email: newPatientForm.value.email,
-      kin_name: newPatientForm.value.kin_name,
-      kin_relationship: newPatientForm.value.kin_relationship,
-      kin_phone: newPatientForm.value.kin_phone,
-      emergency_contact: newPatientForm.value.emergency_contact,
-      facility_id: newPatientForm.value.facility_id,
+      contacts: contacts,
+      identifiers: [],
+      department_id: 2
     });
 
     if (data.value?.payload) {
@@ -318,12 +313,10 @@ async function createPatientViaEndpoint() {
       last_name: lastName,
       date_of_birth: newPatientForm.value.date_of_birth || null,
       gender: newPatientForm.value.gender,
-      contacts: newPatientForm.value.phone_number ? [
-        {
-          type: 'phone',
-          value: newPatientForm.value.phone_number.replace(/\D/g, '')
-        }
-      ] : [],
+      contacts: [
+        ...(newPatientForm.value.phone_number ? [{ type: 'phone', value: newPatientForm.value.phone_number.replace(/\D/g, '') }] : []),
+        ...(newPatientForm.value.email ? [{ type: 'email', value: newPatientForm.value.email }] : [])
+      ],
       identifiers: [],
       encounter_type_id: 1,
       department_id: 2,
@@ -602,7 +595,7 @@ onMounted(() => {
                   </div>
                   <div class="block-content">
                     <div class="row g-2 fs-sm">
-                      <div class="col-md-6"><span class="text-muted">Full name</span><div class="fw-semibold">{{ selectedPatient.title }} {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</div></div>
+                      <div class="col-md-6"><span class="text-muted">Full name</span><div class="fw-semibold">{{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</div></div>
                       <div class="col-md-6"><span class="text-muted">MRN / Chart #</span><div class="fw-semibold">{{ selectedPatient.mrn }}</div></div>
                       <div class="col-md-6"><span class="text-muted">Date of Birth</span><div class="fw-semibold">{{ formatDate(selectedPatient.dob) }} ({{ calculateAge(selectedPatient.dob) }} yrs)</div></div>
                       <div class="col-md-6"><span class="text-muted">Gender</span><div class="fw-semibold">{{ selectedPatient.gender }}</div></div>
@@ -613,21 +606,7 @@ onMounted(() => {
                   </div>
                 </div>
 
-                <div class="block block-bordered mb-3">
-                  <div class="block-header block-header-default">
-                    <h3 class="block-title">
-                      <i class="fa fa-ambulance me-2 text-muted"></i>
-                      Next of Kin & Emergency
-                    </h3>
-                  </div>
-                  <div class="block-content">
-                    <div class="row g-2 fs-sm">
-                      <div class="col-md-6"><span class="text-muted">Kin name</span><div class="fw-semibold">{{ selectedPatient.kinName }} ({{ selectedPatient.kinRelation }})</div></div>
-                      <div class="col-md-6"><span class="text-muted">Kin contact</span><div class="fw-semibold">{{ selectedPatient.kinPhone }}</div></div>
-                      <div class="col-12"><span class="text-muted">Emergency contact</span><div class="fw-semibold">{{ selectedPatient.emergencyContact }}</div></div>
-                    </div>
-                  </div>
-                </div>
+
 
                 <div class="block block-bordered mb-3">
                   <div class="block-header block-header-default">
@@ -691,20 +670,11 @@ onMounted(() => {
                   </div>
 
                   <div class="row g-3 mb-3">
-                    <div class="col-md-4">
-                      <label class="form-label">Title</label>
-                      <select v-model="newPatientForm.title" class="form-select">
-                        <option value="Mr">Mr</option>
-                        <option value="Mrs">Mrs</option>
-                        <option value="Ms">Ms</option>
-                        <option value="Dr">Dr</option>
-                      </select>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                       <label class="form-label">First name *</label>
                       <input v-model="newPatientForm.first_name" class="form-control" placeholder="First name" />
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                       <label class="form-label">Last name *</label>
                       <input v-model="newPatientForm.last_name" class="form-control" placeholder="Last name" />
                     </div>
@@ -737,28 +707,7 @@ onMounted(() => {
                     </div>
                   </div>
 
-                  <h4 class="h6 mb-2">Next of Kin</h4>
-                  <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                      <label class="form-label">Kin full name</label>
-                      <input v-model="newPatientForm.kin_name" class="form-control" placeholder="Full name" />
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label">Relationship</label>
-                      <input v-model="newPatientForm.kin_relationship" class="form-control" placeholder="Spouse, Child..." />
-                    </div>
-                  </div>
 
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label class="form-label">Kin phone</label>
-                      <input v-model="newPatientForm.kin_phone" class="form-control" placeholder="Contact" />
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label">Emergency contact</label>
-                      <input v-model="newPatientForm.emergency_contact" class="form-control" placeholder="Alternate number" />
-                    </div>
-                  </div>
 
                   <div class="d-flex flex-wrap gap-2 mt-4">
                     <button type="button" class="btn btn-success" @click="createPatient" :disabled="isLoading">

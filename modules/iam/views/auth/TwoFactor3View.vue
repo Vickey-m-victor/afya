@@ -110,11 +110,10 @@ onMounted(() => {
               :to="{ name: 'dashboard' }"
               class="link-fx fw-semibold fs-2 text-white"
             >
-              One<span class="fw-normal">UI</span>
+              Afya<span class="fw-normal">365</span>
             </RouterLink>
             <p class="text-white-75 me-xl-8 mt-2">
-              Welcome to your amazing app. Feel free to login and start managing
-              your projects and clients.
+              Welcome to <strong>Afya365</strong>.
             </p>
           </div>
         </div>

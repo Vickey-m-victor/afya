@@ -58,8 +58,8 @@ onMounted(() => {
               <i class="fa fa-circle-notch text-primary"></i>
             </span>
             <span class="smini-hide fs-5 tracking-wider">
-              OneUI
-              <span class="fw-normal">Vue</span>
+              Afya
+              <span class="fw-normal">365</span>
             </span>
           </RouterLink>
           <!-- END Logo -->

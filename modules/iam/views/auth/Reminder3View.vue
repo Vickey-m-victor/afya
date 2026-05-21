@@ -107,10 +107,10 @@ async function onSubmit() {
               :to="{ name: 'dashboard' }"
               class="link-fx fw-semibold fs-2 text-white"
             >
-              One<span class="fw-normal">UI</span>
+              Afya<span class="fw-normal">365</span>
             </RouterLink>
             <p class="text-white-75 me-xl-8 mt-2">
-              Don’t worry, we’ve got your back. You’ll be soon back to your
+              Don’t worry, <strong>Afya365</strong> has got your back. You’ll be soon back to your
               favorite dashboard!
             </p>
           </div>
