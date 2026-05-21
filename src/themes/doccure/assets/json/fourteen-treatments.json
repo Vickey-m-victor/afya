@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "Image": "treatment-01.jpg",
+        "Title": "Emergency Care",
+        "Content": "Toothache can be caused by various problems. An examination can help to determine it."
+    },
+    {
+        "id": 2,
+        "Image": "treatment-02.jpg",
+        "Title": "Restorative Dentistry",
+        "Content": "We can restore your smile, as well as speaking & eating ability with advanced prosthetics."
+    },
+    {
+        "id": 3,
+        "Image": "treatment-03.jpg",
+        "Title": "Dental Cleanings",
+        "Content": "Professional dental cleanings help remove plaque and tartar buildup from your teeth and gums,"
+    },
+    {
+        "id": 4,
+        "Image": "treatment-04.jpg",
+        "Title": "Dental Implants",
+        "Content": "Dental implants are a permanent solution for replacing missing teeth, providing a strong."
+    },
+    {
+        "id": 5,
+        "Image": "treatment-05.jpg",
+        "Title": "Traditional Braces",
+        "Content": "We offer traditional metal braces to straighten misaligned teeth and correct bite issues."
+    }
+]

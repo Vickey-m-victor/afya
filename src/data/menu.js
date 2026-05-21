@@ -190,7 +190,20 @@ export default {
     //   to: "admin/test/tests",
     //   icon: "si si-settings",
     // },
-  
+    {
+      name: "Doccure Theme",
+      heading: true,
+    },
+    {
+      name: "Doccure Dashboard",
+      to: "DoctorDashboard",
+      icon: "fa fa-user-md",
+    },
+    {
+      name: "Doccure Test Page",
+      to: "DoctorTestPage",
+      icon: "fa fa-file-code",
+    },
   ],
 
 

@@ -1,0 +1,34 @@
+[
+    {
+        "Image" : "cardio-blog-01.jpg",
+        "Name" : "Dr. Pamila Certis",
+        "DoctorImage" : "doctors/doctor-thumb-01.jpg",
+        "Title" : "Prevention",
+        "Topic" : "How To Get Pregnant: Tips to Increase Fertility",
+        "Content" : "Embark on a fertility journey with expert advice on lifestyle changes, nutrition, and holistic..."
+    },
+    {
+        "Image" : "cardio-blog-02.jpg",
+        "Name" : "Dr. Ronald Jacobs",
+        "DoctorImage" : "doctors/doctor-thumb-02.jpg",
+        "Title" : "Diet",
+        "Topic" : "The prevalence of coronary artery disease in patients presenting ....",
+        "Content" : "Explore the rich culinary heritage of Central India with a flavourful recipe thought to be..."
+    },
+    {
+        "Image" : "cardio-blog-03.jpg",
+        "Name" : "Dr. Marie Wells",
+        "DoctorImage" : "doctors/doctor-thumb-07.jpg",
+        "Title" : "Medecine",
+        "Topic" : "Benefits of consulting with an Online Doctor",
+        "Content" : "Embark on a fertility journey with expert advice on lifestyle changes, nutrition, and holistic..."
+    },
+    {
+        "Image" : "cardio-blog-04.jpg",
+        "Name" : "Dr. Darcie Nixon",
+        "DoctorImage" : "doctor-profiles/doc-profile-01.jpg",
+        "Title" : "Symptoms",
+        "Topic" : "Understanding Heart Disease: Types, Symptoms, and Risk Factors",
+        "Content" : "Explore the various forms of heart disease, their symptoms, and the factors that ..."
+    }
+]

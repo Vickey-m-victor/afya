@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "Image": "client-13.jpg",
+        "Name": "Rio Hasslee",
+        "Location": "Newyork, USA",
+        "Content": "They're patient, gentle, and great at explaining things in a way that kids can understand. My children actually look forward to their dental appointments now."
+    },
+    {
+        "id": 2,
+        "Image": "client-11.jpg",
+        "Name": "Jenifer Robinson",
+        "Location": "Texas, USA",
+        "Content": "My journey towards parenthood became a seamless and informed experience. The comprehensive resources, expert advice, and supportive."
+    },
+    {
+        "id": 3,
+        "Image": "client-14.jpg",
+        "Name": "Brandy",
+        "Location": "illinios, USA",
+        "Content": "The staff are always friendly and professional, and the clinic is clean and modern. From routine cleanings to more extensive procedures, the dentists."
+    },
+    {
+        "id": 4,
+        "Image": "client-15.jpg",
+        "Name": "Dixon",
+        "Location": "Texas, USA",
+        "Content": "My journey towards parenthood became a seamless and informed experience. The comprehensive resources, expert advice, and supportive."
+    }
+]

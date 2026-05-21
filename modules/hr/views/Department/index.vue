@@ -143,7 +143,7 @@ function handlePerPageChange(value) {
 
 // ──────────────────── CRUD Actions ────────────────────
 
-function openFormModal(title, formData = {}, readonly = false) {
+function openFormModal(title, formData = {}, readonly = false, isLoading = false) {
   modalStore.openModal({
     component: Form,
     title,
@@ -153,7 +153,7 @@ function openFormModal(title, formData = {}, readonly = false) {
       formData: stripCrudSystemFields(formData),
       error: '',
       fieldErrors: {},
-      isLoading: false,
+      isLoading,
       readonly,
       hideSubmit: readonly,
       compact: true,
@@ -190,20 +190,31 @@ async function handleView(row) {
     return;
   }
 
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-    method: 'GET',
-    autoFetch: false,
-  });
+  // Open modal immediately with loading state
+  openFormModal('View Department', {}, true, true);
 
-  await request();
+  try {
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
+      method: 'GET',
+      autoFetch: false,
+    });
 
-  if (error.value) {
+    await request();
+
+    if (error.value) {
+      alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+      modalStore.closeModal();
+      return;
+    }
+
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    // Update modal props with fetched data and turn off loading
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+    modalStore.props.isLoading = false;
+  } catch (err) {
     alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    return;
+    modalStore.closeModal();
   }
-
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('View Department', payload.data || {}, true);
 }
 
 async function handleEdit(row) {
@@ -222,20 +233,31 @@ async function handleEdit(row) {
     return;
   }
 
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-    method: 'GET',
-    autoFetch: false,
-  });
+  // Open modal immediately with loading state
+  openFormModal('Edit Department', {}, false, true);
 
-  await request();
+  try {
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
+      method: 'GET',
+      autoFetch: false,
+    });
 
-  if (error.value) {
+    await request();
+
+    if (error.value) {
+      alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+      modalStore.closeModal();
+      return;
+    }
+
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    // Update modal props with fetched data and turn off loading
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+    modalStore.props.isLoading = false;
+  } catch (err) {
     alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    return;
+    modalStore.closeModal();
   }
-
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('Edit Department', payload.data || {}, false);
 }
 
 async function handleDelete(row) {

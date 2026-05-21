@@ -95,12 +95,20 @@ async function handleSubmit() {
     
 
 <template>
-    <form @submit.prevent="handleSubmit">
-        <div v-if="typeof error === 'string' && error" class="alert alert-danger mb-3">
-            {{ error }}
-        </div>
+  <form @submit.prevent="handleSubmit" class="department-form">
+    <div v-if="typeof error === 'string' && error" class="alert alert-danger mb-3">
+      {{ error }}
+    </div>
 
-        <div class="row g-3">
+    <!-- Loading overlay for initial data fetch -->
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="text-center">
+        <div class="spinner-border text-primary mb-2" role="status"></div>
+        <p class="text-muted small mb-0">Loading...</p>
+      </div>
+    </div>
+
+    <div class="row g-3" :class="{ 'opacity-50': isLoading }">
             
             <div class="col-md-6">
                 <label class="form-label" for="field-facility_id">Facility id</label>
@@ -187,4 +195,37 @@ async function handleSubmit() {
         </div>
     </form>
 </template>
+
+<script>
+// No additional script needed
+</script>
+
+<style scoped>
+.department-form {
+  position: relative;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 10;
+  border-radius: 0.25rem;
+}
+
+:global(html.dark) .loading-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.row.opacity-50 {
+  opacity: 0.5;
+  pointer-events: none;
+}
+</style>
     

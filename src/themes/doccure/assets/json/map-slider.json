@@ -1,0 +1,30 @@
+[
+    {
+        "Day" : "Mon",
+        "Date" : "Jan 16"
+    },
+    {
+        "Day" : "Tue",
+        "Date" : "Jan 17"
+    },
+    {
+        "Day" : "Wed",
+        "Date" : "Jan 18"
+    },
+    {
+        "Day" : "Thu",
+        "Date" : "Jan 19"
+    },
+    {
+        "Day" : "Fri",
+        "Date" : "Jan 20"
+    },
+    {
+        "Day" : "Sat",
+        "Date" : "Jan 21"
+    },
+    {
+        "Day" : "Sun",
+        "Date" : "Jan 22"
+    }
+]

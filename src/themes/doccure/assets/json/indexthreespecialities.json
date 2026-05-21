@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "Image": "1.png",
+        "Title": "Urology",
+        "Doctors": "21 Doctors"
+    },
+    {
+        "id": 2,
+        "Image": "2.png",
+        "Title": "Orthopedic",
+        "Doctors": "30 Doctors"
+    },
+    {
+        "id": 3,
+        "Image": "4.png",
+        "Title": "Cardiologist",
+        "Doctors": "15 Doctors"
+    },
+    {
+        "id": 4,
+        "Image": "3.png",
+        "Title": "Dentist",
+        "Doctors": "35 Doctors"
+    },
+    {
+        "id": 5,
+        "Image": "3.png",
+        "Title": "Neurology",
+        "Doctors": "25 Doctors"
+    },
+    {
+        "id":6,
+        "Image": "6.png",
+        "Title": "Pediatrist",
+        "Doctors": "10 Doctors"
+    },
+    {
+        "id":7,
+        "Image": "7.png",
+        "Title": "Veterinary",
+        "Doctors": "20 Doctors"
+    },
+    {
+        "id":8,
+        "Image": "8.png",
+        "Title": "Psychiatrist",
+        "Doctors": "12 Doctors"
+    }
+]

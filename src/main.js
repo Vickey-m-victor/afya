@@ -47,6 +47,10 @@ app.component("BaseBlock", BaseBlock);
 app.component("BaseBackground", BaseBackground);
 app.component("BasePageHeading", BasePageHeading);
 
+// Register Doccure global components
+import registerDoccureComponents from "@/themes/doccure/components.js";
+registerDoccureComponents(app);
+
 // Register global directives
 app.directive("click-ripple", clickRipple);
 

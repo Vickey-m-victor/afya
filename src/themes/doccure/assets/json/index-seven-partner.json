@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "Image": "slider-plugin-icon-01.svg"
+    },
+    {
+        "id": 2,
+        "Image": "slider-plugin-icon-02.svg"
+    },
+    {
+        "id": 3,
+        "Image": "slider-plugin-icon-03.svg"
+    },
+    {
+        "id": 4,
+        "Image": "slider-plugin-icon-04.svg"
+    },
+    {
+        "id": 5,
+        "Image": "slider-plugin-icon-05.svg"
+    },
+    {
+        "id": 6,
+        "Image": "slider-plugin-icon-06.svg"
+    }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "imageSrc": "feature-07.jpg",
+    "altText": "Diagnostic Testing",
+    "title": "Cardiologists use various diagnostic tests to assess heart health and function"
+  },
+  {
+    "imageSrc": "feature-08.jpg",
+    "altText": "Treatment of Heart Conditions",
+    "title": "Stent placement, bypass surgery, or valve repair/replacement."
+  },
+  {
+    "imageSrc": "feature-09.jpg",
+    "altText": "Preventive Care",
+    "title": "Cardiologists also provide preventive care to reduce the risk of heart disease."
+  },
+  {
+    "imageSrc": "feature-10.jpg",
+    "altText": "Non-Invasive Treatments",
+    "title": "Offers guidance on diet, exercise, and lifestyle to reduce cardiovascular risk factors."
+  }
+]

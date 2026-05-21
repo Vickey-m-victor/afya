@@ -1,0 +1,26 @@
+[
+  {
+    "icon": "injection.svg",
+    "alt": "injection-icon",
+    "title": "Vaccination",
+    "description": "Administration of vaccines to protect animals against common infectious diseases."
+  },
+  {
+    "icon": "bottel.svg",
+    "alt": "bottel-icon",
+    "title": "Parasite Control",
+    "description": "Prescription and administration of parasite prevention products to protect animals from fleas."
+  },
+  {
+    "icon": "bath-tub.svg",
+    "alt": "pet-grooming-icon",
+    "title": "Pet Grooming",
+    "description": "Dental examinations to assess oral health, teeth cleaning, and treatment of dental problems."
+  },
+  {
+    "icon": "pet-doctor.svg",
+    "alt": "stethoscope-icon",
+    "title": "Diagnostic Testing",
+    "description": "Laboratory tests including blood tests, urinalysis, fecal analysis, and imaging (X-rays, ultrasound)."
+  }
+]

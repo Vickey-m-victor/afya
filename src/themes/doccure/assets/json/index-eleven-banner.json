@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "Image": "cosmetic-banner-img.png"
+    },
+    {
+        "id": 2,
+        "Image": "cosmetic-banner-img1.png"
+    },
+    {
+        "id": 3,
+        "Image": "cosmetic-banner-img2.png"
+    },
+    {
+        "id": 4,
+        "Image": "cosmetic-banner-img3.png"
+    },
+    {
+        "id": 5,
+        "Image": "cosmetic-banner-img4.png"
+    }
+]

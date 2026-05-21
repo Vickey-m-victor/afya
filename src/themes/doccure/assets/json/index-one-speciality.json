@@ -1,0 +1,58 @@
+[
+    {
+        "id": "1",
+        "Image": "speciality-01.jpg",
+        "Icon": "speciality-icon-01.svg",
+        "Title": "Cardiology",
+        "Doctors": "254 Doctors"
+    },
+    {
+        "id": "2",
+        "Image": "speciality-02.jpg",
+        "Icon": "speciality-icon-02.svg",
+        "Title": "Orthopedics",
+        "Doctors": "151 Doctors"
+    },
+    {
+        "id": "3",
+        "Image": "speciality-03.jpg",
+        "Icon": "speciality-icon-03.svg",
+        "Title": "Neurology",
+        "Doctors": "176 Doctors"
+    },
+    {
+        "id": "4",
+        "Image": "speciality-04.jpg",
+        "Icon": "speciality-icon-04.svg",
+        "Title": "Pediatrics",
+        "Doctors": "124 Doctors"
+    },
+    {
+        "id": "5",
+        "Image": "speciality-05.jpg",
+        "Icon": "speciality-icon-05.svg",
+        "Title": "Psychiatry",
+        "Doctors": "112 Doctors"
+    },
+    {
+        "id": "6",
+        "Image": "speciality-06.jpg",
+        "Icon": "speciality-icon-06.svg",
+        "Title": "Endocrinology",
+        "Doctors": "104 Doctors"
+    },
+    {
+        "id": "7",
+        "Image": "speciality-07.jpg",
+        "Icon": "speciality-icon-07.svg",
+        "Title": "Pulmonology",
+        "Doctors": "41 Doctors"
+    },
+    {
+        "id": "8",
+        "Image": "speciality-08.jpg",
+        "Icon": "speciality-icon-08.svg",
+        "Title": "Urology",
+        "Doctors": "39 Doctors"
+    }
+]

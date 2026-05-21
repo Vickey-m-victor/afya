@@ -1,0 +1,52 @@
+[
+    {
+        "id": 1,
+        "Image": "blog-26.jpg",
+        "Doctor": "client-11.jpg",
+        "Name": "Ruby Perrin",
+        "Title": "Urology",
+        "Content": "Revolutionizing Healthcare: The Rise of Online Doctor Booking",
+        "ContentOne" : "Explore how online doctor booking is revolutionize access to healthcare efficiency.",
+        "Day": "03 Apr 2024"
+    },
+    {
+        "id": 2,
+        "Image": "blog-27.jpg",
+        "Doctor": "client-12.jpg",
+        "Name": "Lynette Williams",
+        "Title": "Neurology",
+        "Content": "Neurology and Technology: A New Frontier in Brain Health",
+        "ContentOne" : "Discover the intersection of technology and neurology, transforming treatments.",
+        "Day": "10 Apr 2024"
+    },
+    {
+        "id": 3,
+        "Image": "blog-28.jpg",
+        "Doctor": "client-03.jpg",
+        "Name": "Mathew Rulz",
+        "Title": "Orthopedic",
+        "Content": "Beating Strong: The Digital Revolution in Cardiac Care",
+        "ContentOne" : "Discover how digital advancements are transforming cardiac care, making heart health.",
+        "Day": "15 Apr 2024"
+    },
+    {
+        "id": 4,
+        "Image": "blog-29.jpg",
+        "Doctor": "client-09.jpg",
+        "Name": "Sofia Brient",
+        "Title": "Ophthalmology",
+        "Content": "Understanding and Preventing Glaucoma: A Detailed Guide",
+        "ContentOne" : "Glaucoma is a leading cause of blindness worldwide, yet many do not realize they have it.",
+        "Day": "18 Apr 2024"
+    },
+    {
+        "id": 5,
+        "Image": "blog-30.jpg",
+        "Doctor": "client-02.jpg",
+        "Name": "Olga Barlow",
+        "Title": "Dental Care",
+        "Content": "5 Essential Tips for Maintaining Optimal Oral Health",
+        "ContentOne" : "Learn the top five daily practices to keep your teeth and gums healthy.",
+        "Day": "18 Apr 2024"
+    }
+]

@@ -1,0 +1,38 @@
+[
+    {
+        "Title" : "Health and Safety",
+        "BadgeClass" : "badge badge-blue",
+        "Date" : "01 May 2023",
+        "Topic" : "Adapting Homes for Aging Gracefully: Design Tips for Old Age Comfort",
+       "Content" : "Explore practical design tips to make living spaces in old age homes adaptable and comfortable, enhancing the quality of life for seniors. Learn about accessibility, safety features, and creating a warm environment.",
+        "Views" : "1k views",
+        "Image" : "blog-18.jpg"
+    },
+    {
+        "Title" : "Caregiving",
+        "BadgeClass" : "badge badge-pink",
+        "Date" : "06 May 2023",
+        "Topic" : "Navigating the Transition: A Guide to Choosing the Right Old Age Home",
+       "Content" : "Explore factors to consider when selecting age home, ensuring a seamless transition for your loved ones. Gain insights into facility options, care services, and creating a supportive environment.",
+        "Views" : "850 views",
+        "Image" : "blog-19.jpg"
+    },
+    {
+        "Title" : "Physiotherapy",
+        "BadgeClass" : "badge badge-info",
+        "Date" : "10 May 2023",
+        "Topic" : "Empowering Aging Bodies: The Impact of Physiotherapy in Old Age Home Wellness",
+       "Content" : "Discover the transformative effects of physiotherapy in home care, focusing on tailored interventions that address mobility challenges, pain management, and overall physical health for elderly residents.",
+        "Views" : "4.5k views",
+        "Image" : "blog-20.jpg"
+    },
+    {
+        "Title" : "Health and Safety",
+        "BadgeClass" : "badge badge-pink",
+        "Date" : "01 May 2023",
+        "Topic" : "Adapting Homes for Aging Gracefully: Design Tips for Old Age Comfort",
+       "Content" : "xplore practical design tips to make living spaces in old age homes adaptable and comfortable, enhancing the quality of life for seniors. Learn about accessibility, safety features, and creating a warm environment.",
+        "Views" : "1k views",
+        "Image" : "blog-18.jpg"
+    }
+]

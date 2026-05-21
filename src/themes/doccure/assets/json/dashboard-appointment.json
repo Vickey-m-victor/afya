@@ -1,0 +1,44 @@
+[
+    {
+        "id" : 1,
+        "Number" : "19",
+        "Date" : "Sun",
+        "Class": ""
+    },
+    {
+        "id" : 2,
+        "Number" : "20",
+        "Date" : "Mon",
+        "Class": ""
+    },
+    {
+        "id" : 3,
+        "Number" : "21",
+        "Date" : "Tue",
+        "Class": "available-date"
+    },
+    {
+        "id" : 4,
+        "Number" : "22",
+        "Date" : "Wed",
+        "Class": "available-date"
+    },
+    {
+        "id" : 5,
+        "Number" : "23",
+        "Date" : "Thu",
+        "Class": ""
+    },
+    {
+        "id" : 6,
+        "Number" : "24",
+        "Date" : "Fri",
+        "Class": ""
+    },
+    {
+        "id" : 7,
+        "Number" : "25",
+        "Date" : "Sat",
+        "Class": ""
+    }
+]

@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1,
+    "name": "Madeleine Jennifer",
+    "location": "Chennai, Tamilnadu",
+    "imageSrc": "client-03.jpg",
+    "description": "The staff was friendly and attentive, and Doctor performed well"
+  },
+  {
+    "id": 2,
+    "name": "Madeleine Jennifer",
+    "location": "Chennai, Tamilnadu",
+    "imageSrc": "client-01.jpg",
+    "description": "The team's commitment to finding the best solutions impact on my life"
+  },
+  {
+    "id": 3,
+    "name": "Madeleine Jennifer",
+    "location": "Chennai, Tamilnadu",
+    "imageSrc": "client-01.jpg",
+    "description": "After struggling with chronic sinus problems, I found relief at Doccure.The ENT specialists here are not only highly skilled but also genuinely caring.They took the time to understand my concerns, provided a detailed diagnosis,and guided me through a treatment plan that has greatly improved my quality of life."
+  },
+  {
+    "id": 4,
+    "name": "Madeleine Jennifer",
+    "location": "Chennai, Tamilnadu",
+    "imageSrc": "client-02.jpg",
+    "description": "The staff was friendly and attentive, and Doctor performed well"
+  }
+
+]
