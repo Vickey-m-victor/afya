@@ -181,19 +181,20 @@ export default {
       to: "admin/settings/general",
       icon: "fa fa-cog",
     },
+
     {
-      name: "Tests",
+      name: "Doccure Theme",
       heading: true,
     },
     {
-      name: "Tests",
-      to: "admin/test/tests",
-      icon: "si si-settings",
+      name: "Doccure Dashboard",
+      to: "DoctorDashboard",
+      icon: "fa fa-user-md",
     },
     {
-      name: "Dynamic",
-      to: "admin/test/dynamic",
-      icon: "si si-settings",
+      name: "Doccure Test Page",
+      to: "DoctorTestPage",
+      icon: "fa fa-file-code",
     },
   
   ],
