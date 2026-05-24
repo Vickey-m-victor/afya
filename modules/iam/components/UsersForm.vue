@@ -154,26 +154,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
           </div>
         </div>
 
-        <!-- Status (edit / view only) -->
-        <div class="col-md-6" v-if="!isCreateMode">
-          <label class="form-label fw-medium" for="uf-status">Status</label>
-          <select
-            class="form-select"
-            :class="{ 'is-invalid': fieldErrors?.status }"
-            id="uf-status"
-            v-model="formData.status"
-            :disabled="readonly || isSubmitting"
-          >
-            <option value="" disabled>— select —</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="suspended">Suspended</option>
-            <option value="banned">Banned</option>
-          </select>
-          <div v-if="fieldErrors?.status" class="invalid-feedback">
-            {{ fieldErrors.status }}
-          </div>
-        </div>
 
       </div>
     </div>
@@ -247,8 +227,8 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
       </div>
     </div>
 
-    <!-- Password section (hidden when readonly) -->
-    <template v-if="!readonly">
+    <!-- Password section (hidden when readonly or in edit mode) -->
+    <template v-if="!readonly && isCreateMode">
       <hr class="my-4 opacity-10" />
 
       <div class="mb-1">

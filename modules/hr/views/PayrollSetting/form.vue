@@ -182,21 +182,6 @@ async function handleSubmit() {
                 <div v-if="fieldError('tax_calculation_method')" class="invalid-feedback">{{ fieldError('tax_calculation_method') }}</div>
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label" for="field-status">Status</label>
-                
-                <input
-                    id="field-status"
-                    v-model.number="formData.status"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('status') }"
-                    :disabled="readonly || busy"
-                />
-                
-                <div v-if="fieldError('status')" class="invalid-feedback">{{ fieldError('status') }}</div>
-            </div>
         </div>
 
         <div v-if="!hideSubmit" class="text-end mt-4">

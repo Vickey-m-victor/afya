@@ -26,6 +26,6 @@ export default defineConfig({
       },
 
     },
-    cors: false,
+    cors: true,
   },
 });

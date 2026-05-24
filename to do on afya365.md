@@ -8,24 +8,6 @@ to do on afya365.
 6.  grid view. - done
 7.  pjax.
 
-remove faclity id in /outpatient/registration/search
-
-@contextScopeItemMention I want us to use this triage assesment page as our base for design of the traige page, let it look as it is in the code only that the styling you use as the oneui_latest as the styles and cards here is what is happening, the triage queue is fetched from this endpoint: /outpatient/triage/queue: when a patient in t he queue is clicked, this endpoint is hit :/outpatient/triage/patient/{id}/summary and the
-Triage Assessment
-
-Complete clinical evaluation tab and
-Patient Clinical Summary
-
-Historical data to inform triage decision tab are filled with data but you cannot edit, you can also call patient using the button, and it will hit this endpoint: /outpatient/triage/{id}/call: and when they are in you can start a triage sesion with this endpoint: outpatient/triage/{id}/start, thats when you can edit the tab: Triage Assessment
-
-Complete clinical evaluation: /outpatient/triage/capture:
-For emergency bypass:
-/outpatient/triage/{id}/emergency-emergency:
-and for bypass orders is: /outpatient/triage/orders:
-
-TO get what those endpoints data they need hit this endpoint using curl: http://localhost:9364/v2/docs/openapi-resource.json?mod=outpatient
-
-When a patient is called in for triaging they should remain in queue until the triage session is started, the status of the patient should be updated from "waiting" to "in_triage" and when the triage session is ended the status should be updated from "in_triage" to "ready_for_consultation"
 
 25/04
 CHANGES SUGGESTED.
@@ -124,3 +106,9 @@ goods - with a delivery note
 update stock
 goods received note - grn
 generate payment voucher  to pay the supplier
+
+
+
+Endpoints to add
+Edit user details
+The endpoint to view which group the user belongs to.

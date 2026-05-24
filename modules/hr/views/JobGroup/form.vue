@@ -149,21 +149,6 @@ async function handleSubmit() {
                 <div v-if="fieldError('group_code')" class="invalid-feedback">{{ fieldError('group_code') }}</div>
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label" for="field-status">Status</label>
-                
-                <input
-                    id="field-status"
-                    v-model.number="formData.status"
-                    type="number"
-                    
-                    class="form-control"
-                    :class="{ 'is-invalid': fieldError('status') }"
-                    :disabled="readonly || busy"
-                />
-                
-                <div v-if="fieldError('status')" class="invalid-feedback">{{ fieldError('status') }}</div>
-            </div>
 
             <div class="col-12">
                 <label class="form-label" for="field-group_description">Group description</label>
