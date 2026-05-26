@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Afya365 EMR | Triage Assessment Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e8f0f5 0%, #dce6ef 100%);
+            font-family: 'Inter', sans-serif;
+            color: #1a2c3e;
+            padding: 20px 28px;
+            min-height: 100vh;
+        }
+
+        .triage-dashboard {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .logo-area h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #0b5e7e, #1b8c5e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .badge-triage {
+            background: white;
+            padding: 8px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid #cfdfed;
+        }
+        .badge-triage i { color: #e67e22; margin-right: 8px; }
+
+        /* FOUR Column Layout */
+        .triage-layout {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* LEFT PANEL - Queue */
+        .queue-panel {
+            flex: 1;
+            min-width: 280px;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #1e8f5e, #166b48);
+            color: white;
+        }
+        .panel-header h2 { font-size: 1.3rem; font-weight: 600; }
+        .panel-header p { font-size: 0.8rem; opacity: 0.9; margin-top: 4px; }
+        .queue-list {
+            flex: 1;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        .queue-item {
+            background: #f9fbfd;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e4edf4;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .queue-item:hover {
+            background: #edf5fa;
+            transform: translateX(4px);
+        }
+        .queue-item.active {
+            border: 2px solid #1e8f5e;
+            background: #f0f9f4;
+        }
+        .queue-token {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #1e8f5e;
+        }
+        .queue-patient { font-weight: 600; margin-top: 4px; }
+        .queue-meta { font-size: 0.75rem; color: #7a8e9e; margin-top: 8px; display: flex; gap: 16px; flex-wrap: wrap; }
+        .priority-badge {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .priority-high { background: #fee2e2; color: #dc2626; }
+        .priority-urgent { background: #fef3c7; color: #d97706; }
+        .priority-normal { background: #e0f2fe; color: #0284c7; }
+
+        /* CENTER PANEL - Triage Form */
+        .triage-panel {
+            flex: 1.8;
+            min-width: 450px;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .triage-form {
+            padding: 24px;
+            max-height: 650px;
+            overflow-y: auto;
+        }
+        .section {
+            background: #f9fafc;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #eef3f8;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1e8f5e;
+            border-bottom: 2px solid #e0ebf3;
+            padding-bottom: 8px;
+        }
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .vital-card {
+            background: white;
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e2edf5;
+        }
+        .vital-label { font-size: 0.7rem; color: #7a8e9e; text-transform: uppercase; }
+        .vital-value input {
+            width: 100%;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+            padding: 8px;
+        }
+        .vital-unit { font-size: 0.7rem; color: #94a3b8; }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #2c4c6e;
+        }
+        select, textarea, input {
+            padding: 10px 14px;
+            border: 1px solid #cbdde9;
+            border-radius: 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+        select:focus, textarea:focus, input:focus {
+            outline: none;
+            border-color: #1e8f5e;
+            box-shadow: 0 0 0 3px rgba(30,143,94,0.1);
+        }
+
+        /* RIGHT PANEL - Patient Summary */
+        .summary-panel {
+            flex: 1.2;
+            min-width: 320px;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .summary-header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #2c3e66, #1a2c4e);
+            color: white;
+        }
+        .summary-header h3 { font-size: 1.1rem; font-weight: 600; }
+        .summary-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 650px;
+        }
+        .history-group {
+            margin-bottom: 24px;
+        }
+        .history-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #1e8f5e;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 3px solid #1e8f5e;
+            padding-left: 12px;
+        }
+        .history-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border: 1px solid #eef3f8;
+            transition: all 0.2s;
+        }
+        .history-card:hover {
+            background: #f1f5f9;
+            transform: translateX(3px);
+        }
+        .history-date {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+        .history-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1f3b4c;
+        }
+        .history-note {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 6px;
+        }
+        .abnormal-value {
+            color: #dc2626;
+            font-weight: 700;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 40px;
+        }
+        .toggle-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            border-radius: 32px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            background: #1e8f5e;
+            color: white;
+        }
+
+        /* ACTIONS PANEL */
+        .actions-panel {
+            flex: 0.7;
+            min-width: 240px;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .btn {
+            padding: 14px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-primary { background: #1e8f5e; color: white; }
+        .btn-primary:hover { background: #166b48; transform: translateY(-2px); }
+        .btn-success { background: #10b981; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-secondary { background: #f0f4f9; color: #475569; border: 1px solid #cbdde9; }
+        .btn-secondary:hover { background: #e6edf4; }
+
+        .status-card {
+            background: #f0fdf4;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            margin-top: 16px;
+        }
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1f3b4c;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            z-index: 1000;
+        }
+
+        @media (max-width: 1400px) {
+            .vitals-grid { grid-template-columns: repeat(2, 1fr); }
+            .triage-layout { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="triage-dashboard">
+    <div class="header-bar">
+        <div class="logo-area">
+            <h1><i class="fas fa-clinic-medical"></i> Afya365 · Triage Console</h1>
+        </div>
+        <div class="badge-triage"><i class="fas fa-stethoscope"></i> Outpatient Triage | Nurse Station</div>
+    </div>
+
+    <div class="triage-layout">
+        <!-- LEFT: Queue -->
+        <div class="queue-panel">
+            <div class="panel-header">
+                <h2><i class="fas fa-list-ol"></i> Triage Queue</h2>
+                <p>Waiting for assessment</p>
+            </div>
+            <div class="queue-list" id="queueList"></div>
+        </div>
+
+        <!-- CENTER: Triage Form -->
+        <div class="triage-panel">
+            <div class="panel-header" style="background: linear-gradient(135deg, #2c3e66, #1a2c4e);">
+                <h2><i class="fas fa-notes-medical"></i> Triage Assessment</h2>
+                <p>Complete clinical evaluation</p>
+            </div>
+            <div class="triage-form" id="triageForm">
+                <div style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                    <i class="fas fa-hand-point-left" style="font-size: 48px; opacity: 0.5;"></i>
+                    <p style="margin-top: 16px;">Select a patient from the queue to begin triage</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Patient Summary Panel -->
+        <div class="summary-panel">
+            <div class="summary-header">
+                <h3><i class="fas fa-chart-line"></i> Patient Clinical Summary</h3>
+                <p style="font-size: 0.7rem; opacity: 0.8; margin-top: 4px;">Historical data to inform triage decision</p>
+            </div>
+            <div class="summary-content" id="summaryContent">
+                <div class="no-data">
+                    <i class="fas fa-user-circle" style="font-size: 48px; opacity: 0.3;"></i>
+                    <p style="margin-top: 12px;">Select a patient to view medical history</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAR RIGHT: Actions -->
+        <div class="actions-panel">
+            <h3 style="margin-bottom: 20px;"><i class="fas fa-bolt"></i> Quick Actions</h3>
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="callPatientBtn" disabled><i class="fas fa-bell"></i> Call Patient</button>
+                <button class="btn btn-success" id="startTriageBtn" disabled><i class="fas fa-play"></i> Start Triage</button>
+                <button class="btn btn-warning" id="emergencyBypassBtn" disabled><i class="fas fa-ambulance"></i> Emergency Bypass</button>
+                <button class="btn btn-primary" id="initiateOrdersBtn" disabled><i class="fas fa-file-prescription"></i> Initiate Orders</button>
+                <button class="btn btn-danger" id="completeTriageBtn" disabled><i class="fas fa-check-circle"></i> Complete Assessment</button>
+            </div>
+            <div class="status-card" id="statusCard">
+                <i class="fas fa-info-circle"></i> Ready to triage
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== HARDCODED QUEUE DATA ====================
+    let queueData = [
+        { queue_id: 101, token_number: "T-1042", patient_name: "James Mwangi", priority: "high", status: "waiting", queued_at: "2025-01-15T09:15:00", wait_minutes: 12, called: false, in_service: false },
+        { queue_id: 102, token_number: "T-1043", patient_name: "Aisha Hassan", priority: "normal", status: "waiting", queued_at: "2025-01-15T09:22:00", wait_minutes: 8, called: false, in_service: false },
+        { queue_id: 103, token_number: "T-1044", patient_name: "Michael Otieno", priority: "urgent", status: "waiting", queued_at: "2025-01-15T09:30:00", wait_minutes: 15, called: false, in_service: false },
+        { queue_id: 104, token_number: "T-1045", patient_name: "Alice Wanjiku", priority: "normal", status: "waiting", queued_at: "2025-01-15T09:35:00", wait_minutes: 18, called: false, in_service: false },
+        { queue_id: 105, token_number: "T-1046", patient_name: "Peter Mwangi", priority: "high", status: "waiting", queued_at: "2025-01-15T09:42:00", wait_minutes: 22, called: false, in_service: false }
+    ];
+
+    let selectedQueueId = null;
+    let triageStarted = false;
+    let triageCompleted = false;
+    let summaryView = "vitals"; // vitals, diagnoses, medications
+
+    // ==================== ENHANCED PATIENT HISTORICAL DATA ====================
+    // Past encounters with vitals, diagnoses, and medications
+    const patientHistory = {
+        101: {
+            patient_id: 101,
+            name: "James Mwangi",
+            past_vitals: [
+                { date: "2024-12-10", temp: 37.2, bp: "128/82", hr: 78, o2: 98, notes: "Routine checkup" },
+                { date: "2024-10-05", temp: 38.1, bp: "135/88", hr: 92, o2: 96, notes: "Fever, prescribed antibiotics" },
+                { date: "2024-08-15", temp: 36.8, bp: "118/76", hr: 72, o2: 99, notes: "Normal annual exam" }
+            ],
+            diagnoses: [
+                { date: "2024-10-05", code: "I10", name: "Essential Hypertension", notes: "Started on Lisinopril" },
+                { date: "2024-08-15", code: "E78.5", name: "Hyperlipidemia", notes: "Dietary management" }
+            ],
+            medications: [
+                { name: "Lisinopril 10mg", dose: "Once daily", started: "2024-10-05" },
+                { name: "Atorvastatin 20mg", dose: "Once nightly", started: "2024-08-15" }
+            ],
+            alerts: ["Hypertension - monitor BP", "High cholesterol"]
+        },
+        102: {
+            patient_id: 102,
+            name: "Aisha Hassan",
+            past_vitals: [
+                { date: "2024-11-20", temp: 36.9, bp: "110/70", hr: 82, o2: 99, notes: "Asthma follow-up" },
+                { date: "2024-09-12", temp: 37.5, bp: "115/75", hr: 88, o2: 97, notes: "Wheezing, rescue inhaler given" }
+            ],
+            diagnoses: [
+                { date: "2024-11-20", code: "J45", name: "Asthma", notes: "Well-controlled on maintenance" },
+                { date: "2024-09-12", code: "J45.901", name: "Asthma exacerbation", notes: "Rescue inhaler prescribed" }
+            ],
+            medications: [
+                { name: "Albuterol HFA", dose: "2 puffs PRN", started: "2024-09-12" },
+                { name: "Fluticasone 110mcg", dose: "2 puffs BID", started: "2024-11-20" }
+            ],
+            alerts: ["Penicillin Allergy", "Asthma - keep rescue inhaler accessible"]
+        },
+        103: {
+            patient_id: 103,
+            name: "Michael Otieno",
+            past_vitals: [
+                { date: "2024-12-01", temp: 37.0, bp: "145/90", hr: 76, o2: 97, notes: "Diabetes follow-up" },
+                { date: "2024-10-20", temp: 36.8, bp: "142/88", hr: 74, o2: 98, notes: "Routine check" }
+            ],
+            diagnoses: [
+                { date: "2024-12-01", code: "E11.9", name: "Type 2 Diabetes Mellitus", notes: "On Metformin" },
+                { date: "2024-10-20", code: "I10", name: "Hypertension", notes: "Monitor closely" }
+            ],
+            medications: [
+                { name: "Metformin 1000mg", dose: "Twice daily", started: "2024-12-01" },
+                { name: "Amlodipine 5mg", dose: "Once daily", started: "2024-10-20" }
+            ],
+            alerts: ["Diabetic - check blood sugar", "Hypertensive - monitor BP"]
+        },
+        104: {
+            patient_id: 104,
+            name: "Alice Wanjiku",
+            past_vitals: [
+                { date: "2024-11-05", temp: 36.7, bp: "118/72", hr: 70, o2: 100, notes: "Healthy checkup" }
+            ],
+            diagnoses: [],
+            medications: [],
+            alerts: ["Sulfa Allergy - avoid sulfa drugs"]
+        },
+        105: {
+            patient_id: 105,
+            name: "Peter Mwangi",
+            past_vitals: [
+                { date: "2024-12-15", temp: 36.9, bp: "155/95", hr: 85, o2: 96, notes: "Elevated BP" },
+                { date: "2024-10-08", temp: 37.1, bp: "148/90", hr: 82, o2: 97, notes: "Follow-up" }
+            ],
+            diagnoses: [
+                { date: "2024-12-15", code: "I10", name: "Hypertension", notes: "Started on medication" },
+                { date: "2024-10-08", code: "E78.5", name: "Hyperlipidemia", notes: "Diet modification" }
+            ],
+            medications: [
+                { name: "Hydrochlorothiazide 25mg", dose: "Once daily", started: "2024-12-15" }
+            ],
+            alerts: ["Latex Allergy", "Heart Disease - family history", "High BP - monitor regularly"]
+        }
+    };
+
+    function renderQueue() {
+        const container = document.getElementById('queueList');
+        container.innerHTML = queueData.map(q => `
+            <div class="queue-item ${selectedQueueId === q.queue_id ? 'active' : ''}" data-id="${q.queue_id}">
+                <div class="queue-token">${q.token_number}</div>
+                <div class="queue-patient">${q.patient_name}</div>
+                <div class="queue-meta">
+                    <span class="priority-badge priority-${q.priority}">${q.priority.toUpperCase()}</span>
+                    <span><i class="fas fa-clock"></i> ${q.wait_minutes} min</span>
+                    ${q.called ? '<span class="priority-badge priority-normal"><i class="fas fa-bell"></i> Called</span>' : ''}
+                    ${q.in_service ? '<span class="priority-badge priority-urgent"><i class="fas fa-stethoscope"></i> In Progress</span>' : ''}
+                </div>
+            </div>
+        `).join('');
+
+        document.querySelectorAll('.queue-item').forEach(el => {
+            el.addEventListener('click', () => {
+                const id = parseInt(el.dataset.id);
+                selectPatient(id);
+            });
+        });
+    }
+
+    function selectPatient(queueId) {
+        selectedQueueId = queueId;
+        triageStarted = false;
+        triageCompleted = false;
+        renderQueue();
+        renderTriageForm();
+        renderPatientSummary();
+        updateButtons();
+        showToast(`Selected: ${queueData.find(q => q.queue_id === queueId)?.patient_name}`, "info");
+    }
+
+    function renderPatientSummary() {
+        const container = document.getElementById('summaryContent');
+        const patient = queueData.find(q => q.queue_id === selectedQueueId);
+        
+        if (!patient) {
+            container.innerHTML = `<div class="no-data">
+                <i class="fas fa-user-circle" style="font-size: 48px; opacity: 0.3;"></i>
+                <p style="margin-top: 12px;">Select a patient to view medical history</p>
+            </div>`;
+            return;
+        }
+
+        const history = patientHistory[selectedQueueId];
+        if (!history) {
+            container.innerHTML = `<div class="no-data">
+                <i class="fas fa-notes-medical" style="font-size: 48px; opacity: 0.3;"></i>
+                <p style="margin-top: 12px;">No historical data available for this patient</p>
+            </div>`;
+            return;
+        }
+
+        // Build alerts section if any
+        let alertsHtml = '';
+        if (history.alerts && history.alerts.length > 0) {
+            alertsHtml = `
+                <div class="history-group">
+                    <div class="history-title"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> Clinical Alerts</div>
+                    ${history.alerts.map(alert => `
+                        <div class="history-card" style="border-left-color: #ef4444; background: #fef2f2;">
+                            <div class="history-value" style="color:#dc2626;"><i class="fas fa-bell"></i> ${alert}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Build vitals section
+        let vitalsHtml = '';
+        if (history.past_vitals && history.past_vitals.length > 0) {
+            vitalsHtml = `
+                <div class="history-group">
+                    <div class="history-title"><i class="fas fa-heartbeat"></i> Recent Vital Signs</div>
+                    ${history.past_vitals.slice(0, 3).map(v => `
+                        <div class="history-card">
+                            <div class="history-date"><i class="far fa-calendar-alt"></i> ${v.date}</div>
+                            <div class="history-value">🌡️ Temp: ${v.temp}°C | 💓 HR: ${v.hr} | 🩸 BP: ${v.bp} | 💨 O2: ${v.o2}%</div>
+                            ${v.notes ? `<div class="history-note">📝 ${v.notes}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Build diagnoses section
+        let diagnosesHtml = '';
+        if (history.diagnoses && history.diagnoses.length > 0) {
+            diagnosesHtml = `
+                <div class="history-group">
+                    <div class="history-title"><i class="fas fa-stethoscope"></i> Active Diagnoses</div>
+                    ${history.diagnoses.map(d => `
+                        <div class="history-card">
+                            <div class="history-date">${d.date} | ${d.code}</div>
+                            <div class="history-value">${d.name}</div>
+                            ${d.notes ? `<div class="history-note">📝 ${d.notes}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Build medications section
+        let medicationsHtml = '';
+        if (history.medications && history.medications.length > 0) {
+            medicationsHtml = `
+                <div class="history-group">
+                    <div class="history-title"><i class="fas fa-pills"></i> Current Medications</div>
+                    ${history.medications.map(m => `
+                        <div class="history-card">
+                            <div class="history-value">💊 ${m.name}</div>
+                            <div class="history-note">${m.dose} | Since ${m.started}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        container.innerHTML = `
+            <div class="history-group">
+                <div class="history-title"><i class="fas fa-user-md"></i> Patient Overview</div>
+                <div class="history-card">
+                    <div class="history-value">${history.name}</div>
+                    <div class="history-note"><i class="fas fa-chart-line"></i> ${history.past_vitals?.length || 0} past visits recorded</div>
+                </div>
+            </div>
+            ${alertsHtml}
+            ${vitalsHtml}
+            ${diagnosesHtml}
+            ${medicationsHtml}
+            <div class="history-group">
+                <div class="history-title"><i class="fas fa-info-circle"></i> Clinical Notes</div>
+                <div class="history-card">
+                    <div class="history-note">💡 Review patient history before triage. Pay attention to alerts and active conditions.</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderTriageForm() {
+        const container = document.getElementById('triageForm');
+        const patient = queueData.find(q => q.queue_id === selectedQueueId);
+        const history = patientHistory[selectedQueueId];
+
+        if (!patient) {
+            container.innerHTML = `<div style="text-align: center; padding: 60px 20px;"><i class="fas fa-hand-point-left" style="font-size: 48px;"></i><p>Select a patient from the queue</p></div>`;
+            return;
+        }
+
+        // Get allergies from history
+        const allergies = history?.alerts?.filter(a => a.includes('Allergy')).join(', ') || 'None reported';
+
+        container.innerHTML = `
+            <!-- Patient Info -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-user-circle"></i> Patient Information</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Patient Name</label><input type="text" value="${patient.patient_name}" readonly style="background:#f1f5f9;"></div>
+                    <div class="form-group"><label>MRN / Token</label><input type="text" value="${history?.mrn || 'N/A'} | ${patient.token_number}" readonly style="background:#f1f5f9;"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Allergies</label><input type="text" value="${allergies}" readonly style="background:#fef2f2; color:#dc2626; font-weight:500;"></div>
+                </div>
+                <div class="form-group"><label>Medical History Summary</label><textarea rows="2" readonly style="background:#f1f5f9;">${history?.diagnoses?.map(d => d.name).join(', ') || 'No significant history'}</textarea></div>
+            </div>
+
+            <!-- Chief Complaint -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-comment-dots"></i> Chief Complaint</div>
+                <div class="form-group">
+                    <textarea id="chiefComplaint" rows="3" placeholder="Describe patient's main symptoms..." ${triageStarted ? '' : 'disabled'}></textarea>
+                </div>
+            </div>
+
+            <!-- Vital Signs -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-heartbeat"></i> Vital Signs</div>
+                <div class="vitals-grid">
+                    <div class="vital-card"><div class="vital-label">Temperature</div><div class="vital-value"><input type="number" id="temp" step="0.1" placeholder="°C" ${triageStarted ? '' : 'disabled'}></div><div class="vital-unit">°C</div></div>
+                    <div class="vital-card"><div class="vital-label">Heart Rate</div><div class="vital-value"><input type="number" id="hr" placeholder="BPM" ${triageStarted ? '' : 'disabled'}></div><div class="vital-unit">BPM</div></div>
+                    <div class="vital-card"><div class="vital-label">Blood Pressure</div><div class="vital-value"><input type="text" id="bp" placeholder="120/80" ${triageStarted ? '' : 'disabled'}></div><div class="vital-unit">mmHg</div></div>
+                    <div class="vital-card"><div class="vital-label">Respiratory Rate</div><div class="vital-value"><input type="number" id="rr" placeholder="/min" ${triageStarted ? '' : 'disabled'}></div><div class="vital-unit">/min</div></div>
+                    <div class="vital-card"><div class="vital-label">O2 Saturation</div><div class="vital-value"><input type="number" id="o2" placeholder="%" ${triageStarted ? '' : 'disabled'}></div><div class="vital-unit">%</div></div>
+                    <div class="vital-card"><div class="vital-label">Pain Score</div><div class="vital-value"><input type="range" id="pain" min="0" max="10" ${triageStarted ? '' : 'disabled'}><span id="painValue" style="display:block;">0</span></div></div>
+                </div>
+            </div>
+
+            <!-- Triage Assessment -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-chart-line"></i> Triage Assessment</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Triage Category</label>
+                        <select id="triageCategory" ${triageStarted ? '' : 'disabled'}>
+                            <option value="">Select</option>
+                            <option value="resuscitation">Resuscitation (Red) - Immediate</option>
+                            <option value="emergency">Emergency (Orange) - <10 min</option>
+                            <option value="urgent">Urgent (Yellow) - <30 min</option>
+                            <option value="semi-urgent">Semi-Urgent (Green) - <60 min</option>
+                            <option value="non-urgent">Non-Urgent (Blue) - >60 min</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Mental Status</label>
+                        <select id="mentalStatus" ${triageStarted ? '' : 'disabled'}>
+                            <option value="">Select</option>
+                            <option value="alert">Alert & Oriented</option>
+                            <option value="lethargic">Lethargic</option>
+                            <option value="confused">Confused</option>
+                            <option value="unresponsive">Unresponsive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group"><label>Nursing Notes</label><textarea id="nursingNotes" rows="2" placeholder="Additional observations..." ${triageStarted ? '' : 'disabled'}></textarea></div>
+            </div>
+        `;
+
+        const painSlider = document.getElementById('pain');
+        if (painSlider) {
+            painSlider.addEventListener('input', (e) => {
+                document.getElementById('painValue').innerText = e.target.value;
+            });
+        }
+    }
+
+    function callPatient() {
+        const patient = queueData.find(q => q.queue_id === selectedQueueId);
+        if (!patient) return;
+        patient.called = true;
+        patient.status = "called";
+        renderQueue();
+        showToast(`🔔 Called ${patient.patient_name} (${patient.token_number}) to triage room`, "success");
+        document.getElementById('statusCard').innerHTML = `<i class="fas fa-bell"></i> Patient called - awaiting arrival`;
+        updateButtons();
+    }
+
+    function startTriage() {
+        const patient = queueData.find(q => q.queue_id === selectedQueueId);
+        if (!patient) return;
+        triageStarted = true;
+        patient.in_service = true;
+        patient.status = "in_service";
+        renderQueue();
+        renderTriageForm();
+        updateButtons();
+        showToast(`Started triage for ${patient.patient_name}`, "success");
+        document.getElementById('statusCard').innerHTML = `<i class="fas fa-stethoscope"></i> Triage in progress - complete assessment`;
+    }
+
+    function emergencyBypass() {
+        const patient = queueData.find(q => q.queue_id === selectedQueueId);
+        if (!patient) return;
+        queueData = queueData.filter(q => q.queue_id !== selectedQueueId);
+        selectedQueueId = null;
+        triageStarted = false;
+        renderQueue();
+        renderTriageForm();
+        renderPatientSummary();
+        updateButtons();
+        showToast(`🚨 EMERGENCY BYPASS: ${patient.patient_name} sent to Emergency Department`, "warning");
+        document.getElementById('statusCard').innerHTML = `<i class="fas fa-ambulance"></i> Emergency bypass activated`;
+    }
+
+    function initiateOrders() {
+        showToast(`📋 Pre-consultation orders initiated for lab work and radiology`, "success");
+        document.getElementById('statusCard').innerHTML = `<i class="fas fa-file-prescription"></i> Orders initiated - lab & radiology notified`;
+    }
+
+    function completeTriage() {
+        const patient = queueData.find(q => q.queue_id === selectedQueueId);
+        if (!patient) return;
+
+        const chief = document.getElementById('chiefComplaint')?.value;
+        if (!chief) {
+            showToast("Please enter chief complaint", "error");
+            return;
+        }
+
+        triageCompleted = true;
+        queueData = queueData.filter(q => q.queue_id !== selectedQueueId);
+        selectedQueueId = null;
+        triageStarted = false;
+        renderQueue();
+        renderTriageForm();
+        renderPatientSummary();
+        updateButtons();
+        showToast(`✅ Triage completed for ${patient.patient_name}. Moved to doctor queue.`, "success");
+        document.getElementById('statusCard').innerHTML = `<i class="fas fa-check-circle"></i> Triage complete - patient queued for doctor`;
+    }
+
+    function updateButtons() {
+        const hasSelected = !!selectedQueueId;
+        const patient = queueData.find(q => q.queue_id === selectedQueueId);
+        const isCalled = patient?.called;
+        const isInService = patient?.in_service;
+
+        document.getElementById('callPatientBtn').disabled = !hasSelected || isCalled || isInService || triageCompleted;
+        document.getElementById('startTriageBtn').disabled = !hasSelected || !isCalled || isInService || triageCompleted;
+        document.getElementById('emergencyBypassBtn').disabled = !hasSelected || triageCompleted;
+        document.getElementById('initiateOrdersBtn').disabled = !hasSelected || !isInService || triageCompleted;
+        document.getElementById('completeTriageBtn').disabled = !hasSelected || !isInService || triageCompleted;
+    }
+
+    function showToast(msg, type = "info") {
+        let toast = document.querySelector('.toast-msg');
+        if (toast) toast.remove();
+        const div = document.createElement('div');
+        div.className = 'toast-msg';
+        div.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i> ${msg}`;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+
+    document.getElementById('callPatientBtn').addEventListener('click', callPatient);
+    document.getElementById('startTriageBtn').addEventListener('click', startTriage);
+    document.getElementById('emergencyBypassBtn').addEventListener('click', emergencyBypass);
+    document.getElementById('initiateOrdersBtn').addEventListener('click', initiateOrders);
+    document.getElementById('completeTriageBtn').addEventListener('click', completeTriage);
+
+    renderQueue();
+    updateButtons();
+</script>
+</body>
+</html>

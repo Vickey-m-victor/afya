@@ -1,4 +1,3 @@
-// src/utils/alert.js
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 import Swal from "sweetalert2";
@@ -9,18 +8,16 @@ const defaultIziOptions = {
   timeout: 5000,
 };
 
-// Utility object containing the library-specific implementations
+// Utility object containing library-specific implementations
 const alertUtil = {
-  // --- iziToast Implementations ---
+  // iziToast implementations
   toast: {
-    success: (options) =>
-      iziToast.success({ ...defaultIziOptions, ...options }),
+    success: (options) => iziToast.success({ ...defaultIziOptions, ...options }),
     error: (options) => iziToast.error({ ...defaultIziOptions, ...options }),
-    warning: (options) =>
-      iziToast.warning({ ...defaultIziOptions, ...options }),
+    warning: (options) => iziToast.warning({ ...defaultIziOptions, ...options }),
   },
 
-  // --- SweetAlert2 Implementations ---
+  // SweetAlert2 implementations
   dialog: {
     fire: (options) => Swal.fire(options),
     confirm: (title, text) =>
@@ -37,9 +34,6 @@ const alertUtil = {
         buttonsStyling: false,
       }),
   },
-
-  // Example: If you add another plugin later, you just add it here:
-  // otherPlugin: { ... }
 };
 
 export default alertUtil;

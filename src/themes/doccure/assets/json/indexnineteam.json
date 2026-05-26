@@ -1,0 +1,62 @@
+[
+    {
+        "Name": "Dr. Marie Wells",
+        "Image": "fertility-doc-01.jpg",
+        "Specialty": "Pregnancy Specialist",
+        "Rating": "(60)",
+        "StarClass": "fas fa-star filled me-1",
+        "StarClassOne": "fas fa-star me-1",
+        "Location": "0.7 min - Baltimore, MD",
+        "Price": "$500"
+    },
+    {
+        "Name": "Dr. Rebekah",
+        "Image": "fertility-doc-02.jpg",
+        "Specialty": "Obstetric Specialist",
+        "Rating": "3.0",
+        "StarClass": "fas fa-star me-1",
+        "StarClassOne": "fas fa-star me-1",
+        "Location": "0.9 min - East Syracuse, NY",
+        "Price": "$350"
+    },
+    {
+        "Name": "Dr. Johnson",
+        "Image": "fertility-doc-03.jpg",
+        "Specialty": "Pregnancy Specialist",
+        "Rating": "(29)",
+        "StarClass": "fas fa-star filled me-1",
+        "StarClassOne": "fas fa-star me-1",
+        "Location": "10 min - Athens, AL",
+        "Price": "$200"
+    },
+    {
+        "Name": "Dr. Packard",
+        "Image": "fertility-doc-04.jpg",
+        "Specialty": "Pregnancy Specialist",
+        "Rating": "4.0",
+        "StarClass": "fas fa-star filled me-1",
+        "StarClassOne": "fas fa-star filled me-1",
+        "Location": "15 min - Santa Cruz, CA",
+        "Price": "$100"
+    },
+    {
+        "Name": "Dr. Richard",
+        "Image": "fertility-doc-05.jpg",
+        "Specialty": "Pregnancy Specialist",
+        "Rating": "(29)",
+        "StarClass": "fas fa-star filled me-1",
+        "StarClassOne": "fas fa-star me-1",
+        "Location": "15 min - 29 Webster St, NH",
+        "Price": "$180"
+    },
+    {
+        "Name": "Dr. Angel",
+        "Image": "fertility-doc-06.jpg",
+        "Specialty": "Pregnancy Specialist",
+        "Rating": "(29)",
+        "StarClass": "fas fa-star filled me-1",
+        "StarClassOne": "fas fa-star me-1",
+        "Location": "10 min - 48 Oak Lane, MO",
+        "Price": "$210"
+    }
+]

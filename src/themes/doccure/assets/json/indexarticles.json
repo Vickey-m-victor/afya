@@ -1,0 +1,34 @@
+[
+    {
+        "id": 1,
+        "Image": "blog-11.jpg",
+        "Name": "John Doe",
+        "Day": "13 Mar, 2023",
+        "Title": "Navigating Telehealth: A Guide to Virtual Healthcare Visits",
+        "Content": "Explore the benefits & challenges of virtual healthcare appointments, along with tips for making good health."
+    },
+    {
+        "id": 2,
+        "Image": "blog-24.jpg",
+        "Name": "Darren Elder",
+        "Day": "10 Sep, 2023",
+        "Title": "Work-Life Harmony: Balancing Career and Personal Wellness",
+        "Content": "Uncover strategies to achieve a harmonious balance between professional commitments and personal well-being."
+    },
+    {
+        "id": 3,
+        "Image": "blog-25.jpg",
+        "Name": "Ruby Perrin",
+        "Day": "30 Oct, 2023",
+        "Title": "Sleep Solutions: Unveiling the Secrets to a Restful Night",
+        "Content": "Explore importance of quality sleep & learn tips to improve your sleep, ensuring you wake up refreshed & ready to face the day."
+    },
+    {
+        "id": 4,
+        "Image": "blog-12.jpg",
+        "Name": "Sofia Brient",
+        "Day": "08 Nov, 2023",
+        "Title": "Mental Wellness in a Digital Age: Strategies for a Healthy Mind Online",
+        "Content": "Delve into the impact of digital life on mental health & discover practical strategies to maintain mental well-being."
+    }
+]

@@ -9,13 +9,13 @@ const { toastSuccess, toastError } = useAlert();
 // Main stores and Router
 const store = useTemplateStore();
 const router = useRouter();
-const authStore = useAuthStore(); // Changed variable name for clarity
+const authStore = useAuthStore();
 
 // State variables
 const username = ref("");
 const password = ref("");
 const errors = ref({});
-const isLoading = ref(false); // Must be a ref to use in template
+const isLoading = ref(false);
 
 async function onSubmit() {
   errors.value = {}; 
@@ -29,24 +29,29 @@ async function onSubmit() {
 
     // Save user state
     authStore.setUser({
-      username: response.dataPayload?.data?.username || username.value,
+      username: response?.dataPayload?.data?.username || username.value,
     });
     localStorage.setItem("username", username.value);
 
     // Dynamic Success Message
-    const successMsg = response.message;
-    toastSuccess("Success", successMsg);
+    const successMessage = response?.dataPayload?.alertify?.message || response?.message || "Welcome back!";
+    toastSuccess("Success", successMessage);
     
-    // Redirect to the dashboard (Ensure the name matches router/index.js precisely)
+    // Redirect to the dashboard
     router.push({ name: "dashboard" }); 
     
   } catch (error) {
-    if (error?.response?.data?.errorPayload?.errors) {
-      errors.value = error.response.data.errorPayload.errors;
+    // Handle validation errors (Checking both nested and direct errorPayload structures)
+    const validationErrors = error?.errorPayload?.errors || error?.response?.data?.errorPayload?.errors;
+    
+    if (validationErrors) {
+      errors.value = validationErrors;
     } else {
       // Safely extract the backend error message, fallback to default
-      const backendError = error?.response?.data?.message || "Invalid Credentials";
-      toastError("Login Failed", backendError);
+      const backendMessage = error?.errorPayload?.message || error?.response?.data?.message || error?.message;
+      const fallbackMessage = "Login failed. Please try again.";
+      
+      toastError("Login Failed", backendMessage || fallbackMessage);
     }
   } finally {
     isLoading.value = false;
@@ -66,11 +71,10 @@ async function onSubmit() {
               :to="{ name: 'dashboard' }"
               class="link-fx fw-semibold fs-2 text-white"
             >
-              One<span class="fw-normal">UI</span>
+              Afya<span class="fw-normal">365</span>
             </RouterLink>
             <p class="text-white-75 me-xl-8 mt-2">
-              Welcome to your amazing app. Feel free to login and start managing
-              your projects and clients.
+              Welcome to <strong>Afya365</strong>.
             </p>
           </div>
         </div>
@@ -142,7 +146,7 @@ async function onSubmit() {
                     class="d-flex justify-content-between align-items-center mb-4"
                   >
                     <RouterLink
-                      :to="{ name: 'auth-reminder3' }"
+                      :to="{ name: 'iam/auth/reminder' }"
                       class="text-muted fs-sm fw-medium"
                     >
                       Forgot Password?

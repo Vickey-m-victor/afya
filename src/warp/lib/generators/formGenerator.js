@@ -1,0 +1,30 @@
+import { createFile } from '../utils/fileUtils.js';
+import formTemplate from '../templates/form.js';
+import { fetchSwaggerJson } from '../utils/apiUtils.js';
+
+export async function generateForm(name, module, route, savePath) {
+  try {
+    const schema = await fetchSwaggerJson(module, route);
+
+    if (schema.error) {
+      console.log(`⚠️ ${schema.error}`);
+      return false; 
+    }
+
+    if (!schema.properties) {
+      console.log('⚠️ No properties found in schema.');
+      return false;
+    }
+
+    const formComponent = formTemplate(name, schema.properties);
+
+    createFile(name, savePath, formComponent);
+
+    console.log('✅ Form component created successfully!');
+    return true;
+
+  } catch (error) {
+    console.error('❌ Error generating form:', error);
+    return false;
+  }
+}

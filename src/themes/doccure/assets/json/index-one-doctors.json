@@ -1,0 +1,47 @@
+[
+    {
+        "id": "1",
+        "Image": "doctor-grid-01.jpg",
+        "Rating": "5.0",
+        "Speciality": "Psychologist",
+        "Name": "Dr. Michael Brown",
+        "Location": "Minneapolis, MN",
+        "Fees": "$650"
+    },
+    {
+        "id": "2",
+        "Image": "doctor-grid-02.jpg",
+        "Rating": "4.6",
+        "Speciality": "Pediatrician",
+        "Name": "Dr. Nicholas Tello",
+        "Location": "Ogden, IA",
+        "Fees": "$400"
+    },
+    {
+        "id": "3",
+        "Image": "doctor-grid-03.jpg",
+        "Rating": "4.8",
+        "Speciality": "Neurologist",
+        "Name": "Dr. Harold Bryant",
+        "Location": "Winona, MS",
+        "Fees": "$500"
+    },
+    {
+        "id": "4",
+        "Image": "doctor-grid-04.jpg",
+        "Rating": "4.8",
+        "Speciality": "Cardiologist",
+        "Name": "Dr. Sandra Jones",
+        "Location": "Beckley, WV",
+        "Fees": "$550"
+    },
+    {
+        "id": "5",
+        "Image": "doctor-grid-05.jpg",
+        "Rating": "4.2",
+        "Speciality": "Neurologist",
+        "Name": "Dr. Charles Scott",
+        "Location": "Hamshire, TX",
+        "Fees": "$600"
+    }
+]

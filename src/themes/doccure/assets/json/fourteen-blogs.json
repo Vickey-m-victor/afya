@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "Image": "dentist-blog-01.jpg",
+        "AppointmentDate": "15 Feb 2024",
+        "Avatar": "doctor-thumb-01.jpg",
+        "Name": "Dr. Pamila Certis",
+        "Title": "Must know best dog food Best teeth strength Food in India",
+        "Content": "In the diverse landscape of India, teeth options have variety of dietary needs.."
+    },
+    {
+        "id": 2,
+        "Image": "dentist-blog-02.jpg",
+        "AppointmentDate": "18 Jan 2024",
+        "Avatar": "doctor-thumb-02.jpg",
+        "Name": "Dr. Ronald Jacobs",
+        "Title": "How to Care for teeth in the Cavit",
+        "Content": "During winter, it's crucial to provide proper care for teeth by ensuring they have a warm..."
+    },
+    {
+        "id": 3,
+        "Image": "dentist-blog-03.jpg",
+        "AppointmentDate": "25 Jan 2024",
+        "Avatar": "doctor-thumb-03.jpg",
+        "Name": "Dr. Marie Wells",
+        "Title": "Why do teeth aches while winter?",
+        "Content": "During winter, it's crucial to provide proper care for rabbits by ensuring they have a warm..."
+    },
+    {
+        "id": 4,
+        "Image": "dentist-blog-02.jpg",
+        "AppointmentDate": "18 Feb 2024",
+        "Avatar": "doctor-thumb-01.jpg",
+        "Name": "Dr. Pamila Certis",
+        "Title": "Must know best dog food Best teeth strength Food in India",
+        "Content": "In the diverse landscape of India, teeth options have variety of dietary needs.."
+    }
+]

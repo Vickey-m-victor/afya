@@ -1,0 +1,54 @@
+[
+    {
+        "id": 1,
+        "Image": "doctor-01.jpg",
+        "Price": "$20 - $50",
+        "Rateing": "3.5",
+        "StarClass" : "fas fa-star filled me-1",
+        "StarClass1" : "fas fa-star-half filled me-1",
+        "StarClass2" : "fas fa-star me-1",
+        "Name": "Dr. Ruby Perrin",
+        "Title": "BDS, MDS - Oral & Maxillofacial Surgery",
+        "Location": "Georgia, USA",
+        "Consult": "450 Consultations"
+    },
+    {
+        "id": 2,
+        "Image": "doctor-04.jpg",
+        "Price": "$20 - $50",
+        "Rateing": "3.0",
+        "StarClass" : "fas fa-star filled me-1",
+        "StarClass1" : "fas fa-star me-1",
+        "StarClass2" : "fas fa-star me-1",
+        "Name": "Dr. Lisa Graham",
+        "Title": "MBBS, MD - General Medicine, DNB",
+        "Location": "San Diego, USA",
+        "Consult": "120 Consultations"
+    },
+    {
+        "id": 3,
+        "Image": "doctor-03.jpg",
+        "Price": "$20 - $50",
+        "Rateing": "3.0",
+        "StarClass" : "fas fa-star filled me-1",
+        "StarClass1" : "fas fa-star me-1",
+        "StarClass2" : "fas fa-star me-1",
+        "Name": "Dr. Carrie Soderberg",
+        "Title": "MBBS, DNB - Neurology",
+        "Location": "Dallas, USA",
+        "Consult": "300 Consultations"
+    },
+    {
+        "id": 4,
+        "Image": "doctor-02.jpg",
+        "Price": "$20 - $50",
+        "Rateing": "4.0",
+        "StarClass" : "fas fa-star filled me-1",
+        "StarClass1" : "fas fa-star filled me-1",
+        "StarClass2" : "fas fa-star me-1",
+        "Name": "Dr. Matthew Ruiz",
+        "Title": "BDS, MDS - Oral & Maxillofacial Surgery",
+        "Location": "Georgia, USA",
+        "Consult": "450 Consultations"
+    }
+]

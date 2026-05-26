@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "Image": "dentist-01.jpg",
+        "Title": "Experienced dentists",
+        "Content": "The goal of our clinic is to provide friendly, caring dentistry."
+    },
+    {
+        "id": 2,
+        "Image": "dentist-02.jpg",
+        "Title": "Friendly atmosphere",
+        "Content": "The goal of our clinic is to provide friendly, caring dentistry."
+    },
+    {
+        "id": 3,
+        "Image": "dentist-03.jpg",
+        "Title": "Best latest technology",
+        "Content": "The goal of our clinic is to provide friendly, caring dentistry."
+    },
+    {
+        "id": 4,
+        "Image": "dentist-04.jpg",
+        "Title": "Affordable prices",
+        "Content": "The goal of our clinic is to provide friendly, caring dentistry."
+    }
+]

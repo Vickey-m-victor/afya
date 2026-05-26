@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "Image": "eye-blog-01.jpg",
+        "Badge": "Orthoptics",
+        "Title": "Clear Vision: Understanding the Importance of  Eye Exams"
+    },
+    {
+        "id": 2,
+        "Image": "eye-blog-02.jpg",
+        "Badge": "Glaucoma",
+        "Title": "Foods for Healthy Vision and Age Degeneration Prevention"
+    },
+    {
+        "id": 3,
+        "Image": "eye-blog-03.jpg",
+        "Badge": "Corneal Ulcer",
+        "Title": "Tips for Protecting Your Eyes in the Digital Age"
+    },
+    {
+        "id": 4,
+        "Image": "eye-blog-04.jpg",
+        "Badge": "Keratoconus",
+        "Title": "The ABCs of LASIK Surgery: What to Expect and Consider"
+    },
+    {
+        "id": 5,
+        "Image": "eye-blog-04.jpg",
+        "Badge": "Orthoptics",
+        "Title": "There are many variations of passages"
+    }
+]

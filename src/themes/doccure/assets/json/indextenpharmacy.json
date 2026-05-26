@@ -1,0 +1,34 @@
+[
+    {
+      "Id": 1,
+      "ProductName": "Otogesic Ear Drops",
+      "SoldBy": "Sold by: ERIS LIFESCIENCES LTD",
+      "Price": "$150",
+      "ImageSrc": "pharmacy-1.png",
+      "Discount": "10% Off"
+    },
+    {
+      "Id": 2,
+      "ProductName": "Himalaya Bresol-NS",
+      "SoldBy": "Sold by: THE HIMALAYA",
+      "Price": "$120",
+      "ImageSrc": "pharmacy-2.png",
+      "Discount": "15% Off"
+    },
+    {
+      "Id": 3,
+      "ProductName": "Otogesic Ear Drops",
+      "SoldBy": "Sold by: BOIRON",
+      "Price": "$130",
+      "ImageSrc": "pharmacy-3.png",
+      "Discount": "10% Off"
+    },
+    {
+      "Id": 4,
+      "ProductName": "Otogesic Ear Drops",
+      "SoldBy": "Sold by: ERIS LIFESCIENCES LTD",
+      "Price": "$150",
+      "ImageSrc": "pharmacy-1.png",
+      "Discount": "10% Off"
+    }
+  ]

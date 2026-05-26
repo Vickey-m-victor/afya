@@ -2,34 +2,84 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
-import { useAuthStore } from "~/iam/stores/auth"; // Import the auth store
+import { useAuthStore } from "@/stores/auth";
+import { useModalStore } from "@/stores/modal";
+import ChangePasswordModal from "~/iam/components/ChangePasswordModal.vue";
 
 // Grab example data
 // import notifications from "@/data/notifications";
 
 // Main store and Router
 const store = useTemplateStore();
+const authStore = useAuthStore();
+const modalStore = useModalStore();
 const router = useRouter();
 
+// Reactive variables
+const baseSearchTerm = ref("");
+const changePasswordSubmit = ref(null);
 
-// Main stores and Router
-const authStore = useAuthStore(); // Initialize auth store
+// On form search submit functionality
+function onSubmitSearch() {
+  router.push("/backend/pages/generic/search?" + baseSearchTerm.value);
+}
 
-// Define the logout function
-const logOut = async () => {
-  try {
-    await authStore.logout(); // Triggers API call and state cleanup
-    // The store's logout action already redirects to /signin3
-  } catch (error) {
-    console.error("Logout failed:", error);
+async function onLogout() {
+  await authStore.logout();
+}
+
+function onLockAccount() {
+  if (authStore.user?.username) {
+    sessionStorage.setItem("lock.username", authStore.user.username);
   }
-};
-// COMPUTED: Extract dynamic user data from the store
-const currentUser = computed(() => authStore.user || {});
+  router.push({ name: "iam/auth/lock" });
+}
 
-const userDisplayName = computed(() => {
-  return currentUser.value.username || localStorage.getItem("username") || "User";
-});
+function openChangePasswordModal() {
+  changePasswordSubmit.value = null;
+  modalStore.openModal({
+    component: ChangePasswordModal,
+    title: "Change Password",
+    size: "md",
+    showFooter: true,
+    closeOnBackdrop: false,
+    closeOnEsc: true,
+    confirmText: "Change Password",
+    cancelText: "Cancel",
+    initialFocus: "#current-password",
+    props: {
+      registerSubmit: (submitFn) => {
+        changePasswordSubmit.value = submitFn;
+      },
+    },
+    onConfirm: async () => {
+      if (!changePasswordSubmit.value) {
+        return false;
+      }
+
+      const result = await changePasswordSubmit.value();
+      if (result?.forceLogout) {
+        modalStore.closeModal(true);
+        authStore.logOut({
+          callApi: false,
+          redirect: { name: "iam/auth/signin" },
+        });
+        return false;
+      }
+
+      return result;
+    },
+  });
+}
+
+// When ESCAPE key is hit close the header search section
+function eventHeaderSearch(event) {
+  if (event.which === 27) {
+    event.preventDefault();
+    store.headerSearch({ mode: "off" });
+  }
+}
+
 // Attach ESCAPE key event listener
 onMounted(() => {
   // document.addEventListener("keydown", eventHeaderSearch);
@@ -60,6 +110,17 @@ onUnmounted(() => {
                 <i class="fa fa-fw fa-bars"></i>
               </button>
               <!-- END Toggle Sidebar -->
+
+              <!-- Toggle Sidebar Mini (desktop) -->
+              <button
+                type="button"
+                class="btn btn-sm border-0 bg-transparent shadow-none me-2 d-none d-lg-inline-flex align-items-center"
+                @click="store.sidebarMiniToggle()"
+                :title="store.settings.sidebarMini ? 'Expand Sidebar' : 'Collapse Sidebar'"
+              >
+                <i class="fa fa-fw" :class="store.settings.sidebarMini ? 'fa-indent' : 'fa-outdent'"></i>
+              </button>
+              <!-- END Toggle Sidebar Mini (desktop) -->
 
               <!-- Open Search Section (visible on smaller screens) -->
               <!-- <button
@@ -109,12 +170,20 @@ onUnmounted(() => {
                   aria-expanded="false"
                 >
                   <img
+                    v-if="authStore.user.profile?.avatar_url"
+                    class="rounded-circle"
+                    :src="authStore.user.profile.avatar_url"
+                    alt="Header Avatar"
+                    style="width: 21px"
+                  />
+                  <img
+                    v-else
                     class="rounded-circle"
                     src="/assets/media/avatars/avatar10.jpg"
                     alt="Header Avatar"
                     style="width: 21px"
                   />
-                  <span class="d-none d-sm-inline-block ms-2">{{ userDisplayName  }}</span>
+                  <span class="d-none d-sm-inline-block ms-2">{{ authStore.user.profile?.first_name || authStore.user.username || 'User' }}</span>
                   <i
                     class="fa fa-fw fa-angle-down d-none d-sm-inline-block opacity-50 ms-1 mt-1"
                   ></i>
@@ -127,12 +196,19 @@ onUnmounted(() => {
                     class="p-3 text-center bg-body-light border-bottom rounded-top"
                   >
                     <img
+                      v-if="authStore.user.profile?.avatar_url"
+                      class="img-avatar img-avatar48 img-avatar-thumb"
+                      :src="authStore.user.profile.avatar_url"
+                      alt="Header Avatar"
+                    />
+                    <img
+                      v-else
                       class="img-avatar img-avatar48 img-avatar-thumb"
                       src="/assets/media/avatars/avatar10.jpg"
                       alt="Header Avatar"
                     />
-                    <p class="mt-2 mb-0 fw-medium">{{ userDisplayName  }}</p>
-                    <p class="mb-0 text-muted fs-sm fw-medium">Web Developer</p>
+                    <p class="mt-2 mb-0 fw-medium">{{ authStore.user.profile ? [authStore.user.profile.first_name, authStore.user.profile.last_name].filter(Boolean).join(' ') : (authStore.user.username || 'User') }}</p>
+                    <p class="mb-0 text-muted fs-sm fw-medium">@{{ authStore.user.username || 'user' }}</p>
                   </div>
                   <div class="p-2">
                     <a
@@ -143,31 +219,35 @@ onUnmounted(() => {
                       <span class="badge rounded-pill bg-primary ms-2">3</span>
                     </a>
                     <RouterLink
-                      :to="{ name: 'dashboard' }"
+                      :to="{ name: 'admin/profile' }"
                       class="dropdown-item d-flex align-items-center justify-content-between"
                     >
                       <span class="fs-sm fw-medium">Profile</span>
                       <span class="badge rounded-pill bg-primary ms-2">1</span>
                     </RouterLink>
                     <a
+                      href="#"
                       class="dropdown-item d-flex align-items-center justify-content-between"
-                      href="javascript:void(0)"
+                      @click.prevent="openChangePasswordModal"
                     >
-                      <span class="fs-sm fw-medium">Settings</span>
+                      <span class="fs-sm fw-medium">Change Password</span>
                     </a>
+
                   </div>
                   <div role="separator" class="dropdown-divider m-0"></div>
                   <div class="p-2">
-                    <RouterLink
-                      :to="{ name: 'auth-lock3' }"
+                    <a
+                      href="#"
                       class="dropdown-item d-flex align-items-center justify-content-between"
+                      @click.prevent="onLockAccount"
                     >
                       <span class="fs-sm fw-medium">Lock Account</span>
-                    </RouterLink>
+                    </a>
                     <a
-
+                      href="#"
                       class="dropdown-item d-flex align-items-center justify-content-between"
-                      @click.prevent="logOut"                    >
+                      @click.prevent="onLogout"
+                    >
                       <span class="fs-sm fw-medium">Log Out</span>
                     </a>
                   </div>
@@ -233,4 +313,5 @@ onUnmounted(() => {
     </slot>
   </header>
   <!-- END Header -->
+
 </template>

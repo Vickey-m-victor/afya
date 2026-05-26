@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "SpanNo": "1",
+        "SpanClass": "",
+        "Title": "Experienced & Trained Staff",
+        "Content": "Ongoing training, professional development, and a commitment to excellence are key components of a successful veterinary practice."
+    },
+    {
+        "id": 2,
+        "SpanNo": "2",
+        "SpanClass": "active",
+        "Title": "Competent Medical Pet Care",
+        "Content": "Ongoing training, professional development, and a commitment to excellence are key components of a successful veterinary practice."
+    },
+    {
+        "id": 3,
+        "SpanNo": "3",
+        "SpanClass": "",
+        "Title": "Thoughtful Guidance & Advice",
+        "Content": "Ongoing training, professional development, and a commitment to excellence are key components of a successful veterinary practice."
+    },
+    {
+        "id": 4,
+        "SpanNo": "4",
+        "SpanClass": "",
+        "Title": "On-Site Pharmacy And Shop",
+        "Content": "Ongoing training, professional development, and a commitment to excellence are key components of a successful veterinary practice."
+    }
+]

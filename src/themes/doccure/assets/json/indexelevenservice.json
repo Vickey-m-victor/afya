@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "Image": "discover-5.svg",
+        "Title": "Body",
+        "Content": "Tailored Body Surgery Solutions for Timeless Beauty"
+    },    
+    {
+        "id": 2,
+        "Image": "discover-4.svg",
+        "Title": "Nose",
+        "Content": "Elevate Confidence with Precision Nose Surgery"
+    },    
+    {
+        "id": 3,
+        "Image": "discover-3.svg",
+        "Title": "Breast",
+        "Content": "Customized Breast Surgery for Timeless Elegance."
+    },    
+    {
+        "id": 4,
+        "Image": "discover-2.svg",
+        "Title": "Face",
+        "Content": "Face Surgery Tailored to Your Unique Beauty."
+    },    
+    {
+        "id": 5,
+        "Image": "discover-1.svg",
+        "Title": "Fillers",
+        "Content": "Expertly Crafted Fillers  Surgery for Natural Radiance"
+    }
+]

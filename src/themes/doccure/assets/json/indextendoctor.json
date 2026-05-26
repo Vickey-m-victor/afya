@@ -1,0 +1,58 @@
+[
+  {
+    "Id": 1,
+    "DoctorName": "Dr. Brandon Nicholas",
+    "Specialization": "MBBS, MS - ENT",
+    "YearsExperience": "15+ Years Experience",
+    "ImageSrc": "doctor-28.jpg",
+    "Mon": "Mo",
+    "Tue": "Tu",
+    "Wed": "Wed",
+    "Thu": "Th",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Rating": 4.9
+  },
+  {
+    "Id": 2,
+    "DoctorName": "Dr. Katherine Victoria",
+    "Specialization": "MBBS, MS - ENT",
+    "YearsExperience": "5+ Years Experience",
+    "ImageSrc": "doctor-29.jpg",
+    "Mon": "Mo",
+    "Tue": "Tu",
+    "Wed": "Wed",
+    "Thu": "Th",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Rating": 4.6
+  },
+  {
+    "Id": 3,
+    "DoctorName": "Dr. Lisa Madeleine",
+    "Specialization": "MBBS, MS - ENT",
+    "YearsExperience": "7+ Years Experience",
+    "ImageSrc": "doctor-11.jpg",
+    "Mon": "Mo",
+    "Tue": "Tu",
+    "Wed": "Wed",
+    "Thu": "Th",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Rating": 4.8
+  },
+  {
+    "Id": 4,
+    "DoctorName": "Dr. Lisa Madeleine",
+    "Specialization": "MBBS, MS - ENT",
+    "YearsExperience": "15+ Years Experience",
+    "ImageSrc": "doctor-09.jpg",
+    "Mon": "Mo",
+    "Tue": "Tu",
+    "Wed": "Wed",
+    "Thu": "Th",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Rating": 4.8
+  }
+]

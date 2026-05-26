@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "Image": "veterinary-blog-01.jpg",
+        "Avatar": "doctor-thumb-18.jpg",
+        "Name": "Dr. Pamila Certis",
+        "Title": "Must know best dog food Best Dog Food in India",
+        "Content": "In the diverse landscape of India, dog food options have variety of dietary needs.."
+    },
+    {
+        "id": 2,
+        "Image": "veterinary-blog-02.jpg",
+        "Avatar": "doctor-thumb-17.jpg",
+        "Name": "Dr. Ronald Jacobs",
+        "Title": "How to Care for Rabbits in the Winter",
+        "Content": "During winter, it's crucial to provide proper care for rabbits by ensuring they have a warm..."
+    },
+    {
+        "id": 3,
+        "Image": "veterinary-blog-03.jpg",
+        "Avatar": "doctor-thumb-16.jpg",
+        "Name": "Dr. Marie Wells",
+        "Title": "Why do cat scratches while winter?",
+        "Content": "During winter, it's crucial to provide proper care for rabbits by ensuring they have a warm..."
+    }
+]

@@ -1,0 +1,30 @@
+[
+    {
+        "Image" : "client-07.jpg",
+        "Name" : "Andrew",
+        "Location" : "Newyork, USA",
+        "Title" : "“ Awesome Impact ”",
+        "Content" : "After suffering from a heart condition for a number of years I was very happy to meet Doccure, from the first consultation where he believed there was a solution..."
+    },
+    {
+        "Image" : "client-08.jpg",
+        "Name" : "James Anderson",
+        "Location" : "Newyork, USA",
+        "Title" : "“ I am very grateful ”",
+        "Content" : "A Doctors explains everything clearly and helps you to understand even the most complex medical term consultation"
+    },
+    {
+        "Image" : "client-09.jpg",
+        "Name" : "Christina Louis",
+        "Location" : "Newyork, USA",
+        "Title" : "“ Excellent Clinician ”",
+        "Content" : "Excellent clinician. Endlessly patient and reassuring.Also a very efficient back up team. He was prepared to spend as long as I needed to understand what he was saying."
+    },
+    {
+        "Image" : "client-10.jpg",
+        "Name" : "Sofia Nick",
+        "Location" : "Newyork, USA",
+        "Title" : "“ Excellent Work ”",
+        "Content" : "Doctors explains everything clearly and helps you to understand even the most complex medical terms"
+    }
+]

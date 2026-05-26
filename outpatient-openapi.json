@@ -1,0 +1,1913 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "outpatient Module",
+        "description": "API documentation for outpatient module",
+        "contact": {
+            "name": "Ananda Douglas",
+            "email": "douglasdaggs@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:9364/v2",
+            "description": "API Development Server"
+        },
+        {
+            "url": "https://afya365.com/v2",
+            "description": "API Staging Server"
+        }
+    ],
+    "paths": {
+        "/outpatient/consultation/queue": {
+            "get": {
+                "tags": [
+                    "Consultation Workflow"
+                ],
+                "summary": "Doctor's Waiting List",
+                "description": "Returns patients specifically waiting for a doctor at a given facility.",
+                "parameters": [
+                    {
+                        "name": "facility_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Queue list with triage context",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "queue_id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "token_number": {
+                                                                "type": "string"
+                                                            },
+                                                            "priority_label": {
+                                                                "type": "string",
+                                                                "example": "Urgent"
+                                                            },
+                                                            "triage_category": {
+                                                                "type": "string",
+                                                                "example": "Yellow"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "current_patient": {
+                                                    "description": "If the doctor has an active session",
+                                                    "type": "object",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/consultation/next": {
+            "post": {
+                "tags": [
+                    "Consultation Workflow"
+                ],
+                "summary": "Auto-Assign Next Patient",
+                "description": "The 'Next Patient' button logic. Automatically pulls the highest priority patient from the waiting list.",
+                "parameters": [
+                    {
+                        "name": "facility_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Patient assigned"
+                    },
+                    "409": {
+                        "description": "Doctor already has an active consultation"
+                    }
+                }
+            }
+        },
+        "/outpatient/consultation/start/{id}": {
+            "post": {
+                "tags": [
+                    "Consultation Workflow"
+                ],
+                "summary": "Start/Open Consultation",
+                "description": "Transitions the encounter to 'IN_PROGRESS'. If no ID is provided, it attempts auto-assignment.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Queue ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Clinical session initialized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "encounter_id": {
+                                                    "type": "integer"
+                                                },
+                                                "patient": {
+                                                    "type": "object"
+                                                },
+                                                "triage": {
+                                                    "$ref": "#/components/schemas/TriageAssessment"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/consultation/patient-summary/{id}": {
+            "get": {
+                "tags": [
+                    "Consultation Workflow"
+                ],
+                "summary": "Clinical Sidebar Summary",
+                "description": "Deep-dive into patient history: Past Vitals, Active Meds, and ICD10 History.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "DTO Formatted Clinical Snapshot"
+                    }
+                }
+            }
+        },
+        "/outpatient/consultation/complete/{queueId}": {
+            "post": {
+                "tags": [
+                    "Consultation Workflow"
+                ],
+                "summary": "Finalize Consultation (The Decision Engine)",
+                "description": "Saves SOAP notes and executes the final clinical decision (Discharge, Admit, Refer, etc.)",
+                "parameters": [
+                    {
+                        "name": "queueId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConsultationCompleteRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Consultation finalized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "decision": {
+                                                    "type": "string"
+                                                },
+                                                "next_step": {
+                                                    "type": "string",
+                                                    "example": "Guide patient to Laboratory"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/consultation/refer": {
+            "post": {
+                "tags": [
+                    "Consultation Workflow"
+                ],
+                "summary": "Direct Specialist Referral",
+                "description": "Bypass the main decision engine to send a patient to another department immediately.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "queue_id",
+                                    "to_department_id"
+                                ],
+                                "properties": {
+                                    "queue_id": {
+                                        "type": "integer"
+                                    },
+                                    "to_department_id": {
+                                        "type": "integer"
+                                    },
+                                    "reason": {
+                                        "type": "string"
+                                    },
+                                    "priority": {
+                                        "type": "string",
+                                        "enum": [
+                                            "normal",
+                                            "urgent"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Patient moved to specialist queue"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/list": {
+            "get": {
+                "tags": [
+                    "Patient Registration/lookup"
+                ],
+                "summary": "Recent patients (Reception quick list)",
+                "description": "Returns a simplified list of the most recently registered patients for the reception dashboard.",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recent patient list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "patient_id": {
+                                                                "type": "integer",
+                                                                "example": 101
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "John Doe"
+                                                            },
+                                                            "mrn": {
+                                                                "type": "string",
+                                                                "example": "MRN-2026-00042"
+                                                            },
+                                                            "phone": {
+                                                                "type": "string",
+                                                                "example": "254712345678"
+                                                            },
+                                                            "dob": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "1992-05-15"
+                                                            },
+                                                            "age": {
+                                                                "type": "string",
+                                                                "example": "33Y 11M"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "count": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/meta": {
+            "get": {
+                "tags": [
+                    "Patient Registration/lookup"
+                ],
+                "summary": "Registration metadata (dropdown values)",
+                "description": "Fetches standard system lists like Genders and Marital Statuses for building registration forms.",
+                "responses": {
+                    "200": {
+                        "description": "Metadata for registration forms",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "gender": {
+                                                            "type": "object",
+                                                            "example": {
+                                                                "1": "Male",
+                                                                "2": "Female"
+                                                            }
+                                                        },
+                                                        "marital_status": {
+                                                            "type": "object",
+                                                            "example": {
+                                                                "1": "Single",
+                                                                "2": "Married"
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/search": {
+            "get": {
+                "tags": [
+                    "Patient Registration/lookup"
+                ],
+                "summary": "Quick search patients (Reception)",
+                "description": "Search for patients using Name, MRN, or Phone Number scoped by Facility.",
+                "parameters": [
+                    {
+                        "name": "facility_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "John"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Search results",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Patient"
+                                                    }
+                                                },
+                                                "count": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "facility_id is required"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/find-or-create": {
+            "post": {
+                "tags": [
+                    "Patient Registration/lookup"
+                ],
+                "summary": "Find existing patient or create new one",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegistrationQuickRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Patient processed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "patient": {
+                                                            "$ref": "#/components/schemas/Patient"
+                                                        },
+                                                        "is_new": {
+                                                            "type": "boolean"
+                                                        },
+                                                        "duplicate": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "alertify": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "New patient created"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Possible duplicates found"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration": {
+            "post": {
+                "tags": [
+                    "Patient Registration/lookup"
+                ],
+                "summary": "Register patient only (optional endpoint)",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegistrationQuickRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Patient registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/Patient"
+                                                },
+                                                "alertify": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Patient registered successfully"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/start-encounter": {
+            "post": {
+                "tags": [
+                    "Patient Registration/lookup"
+                ],
+                "summary": "Find/Create patient and start encounter (Reception Flow)",
+                "description": "The primary entry point for reception. It deduplicates the patient and puts them directly into the Triage queue.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegistrationQuickRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Patient + Encounter created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "patient": {
+                                                            "$ref": "#/components/schemas/Patient"
+                                                        },
+                                                        "encounter": {
+                                                            "$ref": "#/components/schemas/Encounter"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "alertify": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "New patient registered and sent to triage"
+                                                        },
+                                                        "theme": {
+                                                            "type": "string",
+                                                            "example": "success"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation errors",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "type": "object",
+                                                    "example": {
+                                                        "first_name": "First Name is required"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/{patient_id}/start-encounter": {
+            "post": {
+                "tags": [
+                    "Patient Registration/lookup"
+                ],
+                "summary": "Start encounter for existing patient",
+                "parameters": [
+                    {
+                        "name": "patient_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "facility_id"
+                                ],
+                                "properties": {
+                                    "facility_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "encounter_type_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "department_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Encounter started",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "patient": {
+                                                            "$ref": "#/components/schemas/Patient"
+                                                        },
+                                                        "encounter": {
+                                                            "$ref": "#/components/schemas/Encounter"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "alertify": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Encounter started successfully"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Patient already has an active encounter"
+                    }
+                }
+            }
+        },
+        "/outpatient/registration/{id}": {
+            "get": {
+                "tags": [
+                    "Patient Registration/lookup"
+                ],
+                "summary": "View patient detailed profile",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detailed patient details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "patient": {
+                                                            "$ref": "#/components/schemas/Patient"
+                                                        },
+                                                        "contacts": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "identifiers": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "address": {
+                                                            "type": "object",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Patient not found"
+                    }
+                }
+            }
+        },
+        "/outpatient/triage/queue": {
+            "get": {
+                "tags": [
+                    "Triage Workflow"
+                ],
+                "summary": "Get Triage Queue",
+                "description": "Returns a paginated list of patients waiting in the Triage station.",
+                "parameters": [
+                    {
+                        "name": "facility_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 25
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Triage Queue Data Payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/PatientQueue"
+                                                    }
+                                                },
+                                                "countOnPage": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "totalCount": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                },
+                                                "perPage": {
+                                                    "type": "integer",
+                                                    "example": 25
+                                                },
+                                                "totalPages": {
+                                                    "type": "integer",
+                                                    "example": 4
+                                                },
+                                                "currentPage": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "paginationLinks": {
+                                                    "properties": {
+                                                        "self": {
+                                                            "type": "string",
+                                                            "example": "/outpatient/triage/queue?page=1"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/triage/patient/{id}/summary": {
+            "get": {
+                "tags": [
+                    "Triage Workflow"
+                ],
+                "summary": "Get Patient Longitudinal Clinical Summary",
+                "description": "Aggregated view of alerts, past vitals, active diagnoses, and medications for clinical decision support.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The Unique Patient ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 500
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Structured Clinical Summary",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "overview": {
+                                                    "properties": {
+                                                        "full_name": {
+                                                            "type": "string"
+                                                        },
+                                                        "age": {
+                                                            "type": "integer"
+                                                        },
+                                                        "visit_count": {
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "alerts": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "past_vitals": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string"
+                                                            },
+                                                            "bp": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "diagnoses": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "medications": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "clinical_note": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/triage/{id}/call": {
+            "post": {
+                "tags": [
+                    "Triage Workflow"
+                ],
+                "summary": "Call Patient to Triage",
+                "description": "Updates the queue status to 'CALLED' and assigns the current staff member to the patient. This action triggers the notification for the patient to proceed to the triage room.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The Unique Queue ID (PatientQueue patient_id)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 101
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Patient successfully called",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/PatientQueue"
+                                                },
+                                                "alertify": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Patient called to triage. Please proceed."
+                                                        },
+                                                        "theme": {
+                                                            "type": "string",
+                                                            "example": "success"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Queue item not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Queue item not found"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict - Patient already being served",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Patient is already being handled by another staff member."
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/triage/{id}/start": {
+            "post": {
+                "tags": [
+                    "Triage Workflow"
+                ],
+                "summary": "Start Triage Session",
+                "description": "Marks the patient as 'In Service'. This timestamp is used to calculate the 'Call-to-Entry' time (walking time from bench to desk).",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The Queue ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Triage session started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "queue_id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "status": {
+                                                            "type": "integer"
+                                                        },
+                                                        "status_label": {
+                                                            "type": "string"
+                                                        },
+                                                        "started_at": {
+                                                            "type": "integer"
+                                                        },
+                                                        "call_to_entry_seconds": {
+                                                            "description": "Time in seconds from Call to Start",
+                                                            "type": "integer"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "alertify": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string"
+                                                        },
+                                                        "theme": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/triage/capture": {
+            "post": {
+                "tags": [
+                    "Triage Workflow"
+                ],
+                "summary": "Perform Triage Assessment",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TriageCaptureRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Triage completed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "assessment": {
+                                                            "$ref": "#/components/schemas/TriageAssessment"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "alertify": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Triage completed. Patient moved to doctor queue."
+                                                        },
+                                                        "theme": {
+                                                            "type": "string",
+                                                            "example": "success"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errorPayload": {
+                                            "properties": {
+                                                "errors": {
+                                                    "type": "object",
+                                                    "example": {
+                                                        "chief_complaint": "Chief Complaint cannot be blank."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/outpatient/triage/{id}/emergency": {
+            "post": {
+                "tags": [
+                    "Triage Workflow"
+                ],
+                "summary": "Emergency Bypass to Doctor",
+                "description": "Used when a patient's condition deteriorates in the waiting area. Teleports the patient from Triage queue to the very top of the Doctor's queue with an EMERGENCY priority flag.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The Unique Queue ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 105
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bypass successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Emergency bypass successful. Patient at top of doctor queue."
+                                                },
+                                                "alertify": {
+                                                    "properties": {
+                                                        "message": {
+                                                            "type": "string",
+                                                            "example": "Patient sent to emergency immediately"
+                                                        },
+                                                        "theme": {
+                                                            "type": "string",
+                                                            "example": "success"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Queue item not found"
+                    }
+                }
+            }
+        },
+        "/outpatient/triage/orders": {
+            "post": {
+                "tags": [
+                    "Triage Workflow"
+                ],
+                "summary": "Initiate Standing Orders from Triage",
+                "description": "Allows nurses to initiate lab/rad orders before doctor consultation.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "encounter_id": {
+                                        "type": "integer",
+                                        "example": 101
+                                    },
+                                    "orders": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "order_type_id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "catalog_id": {
+                                                    "type": "integer",
+                                                    "example": 505
+                                                },
+                                                "catalog_type": {
+                                                    "type": "string",
+                                                    "example": "lab_catalog"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Malaria Rapid Test"
+                                                },
+                                                "instructions": {
+                                                    "type": "string",
+                                                    "example": "STAT"
+                                                },
+                                                "priority": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Orders created and routed to department worklists"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "OpdReferral": {
+                "properties": {
+                    "facility_id": {
+                        "title": "Facility id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "encounter_id": {
+                        "title": "Encounter id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "referred_by": {
+                        "title": "Referred by",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "referral_type": {
+                        "title": "Referral type",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "to_department_id": {
+                        "title": "To department id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "to_doctor_id": {
+                        "title": "To doctor id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "to_facility_name": {
+                        "title": "To facility name",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "to_speciality": {
+                        "title": "To speciality",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "reason_icd10_id": {
+                        "title": "Reason icd10 id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "reason_text": {
+                        "title": "Reason text",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "urgency": {
+                        "title": "Urgency",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "status": {
+                        "title": "Status",
+                        "type": "integer",
+                        "example": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "PatientQueue": {
+                "properties": {
+                    "facility_id": {
+                        "title": "Facility id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "encounter_id": {
+                        "title": "Encounter id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "patient_id": {
+                        "title": "Patient id",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "department_id": {
+                        "title": "Department id",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "assigned_to": {
+                        "title": "Assigned to",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "station": {
+                        "title": "Station",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "token_number": {
+                        "title": "Token number",
+                        "type": "string",
+                        "example": "string"
+                    },
+                    "queue_number": {
+                        "title": "Queue number",
+                        "type": "string",
+                        "example": "integer"
+                    },
+                    "status": {
+                        "title": "Status",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "priority": {
+                        "title": "Priority",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "queued_at": {
+                        "title": "Queued at",
+                        "type": "integer",
+                        "example": "integer"
+                    },
+                    "called_at": {
+                        "title": "Called at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "started_at": {
+                        "title": "Started at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "completed_at": {
+                        "title": "Completed at",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "wait_minutes": {
+                        "title": "Wait minutes",
+                        "type": "int",
+                        "example": "int"
+                    },
+                    "service_minutes": {
+                        "title": "Service minutes",
+                        "type": "int",
+                        "example": "int"
+                    }
+                },
+                "type": "object"
+            },
+            "TriageAssessment": {
+                "properties": {
+                    "encounter_id": {
+                        "title": "Encounter ID",
+                        "type": "integer"
+                    },
+                    "triaged_by": {
+                        "title": "Triaged By Staff ID",
+                        "type": "integer"
+                    },
+                    "chief_complaint": {
+                        "title": "Chief Complaint",
+                        "type": "string"
+                    },
+                    "history_of_complaint": {
+                        "title": "History of Complaint",
+                        "type": "string"
+                    },
+                    "triage_category": {
+                        "title": "ESI Category (1-5)",
+                        "type": "integer"
+                    },
+                    "pain_score": {
+                        "title": "Pain Scale (0-10)",
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "is_re_triage": {
+                        "title": "Is this a re-assessment?",
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "last_meal_time": {
+                        "title": "Last Meal (Unix Timestamp)",
+                        "type": "integer",
+                        "example": 1713556800
+                    },
+                    "waiting_area_id": {
+                        "title": "Physical Waiting Zone",
+                        "type": "integer"
+                    },
+                    "nursing_notes": {
+                        "title": "JSON or String Notes",
+                        "type": "string"
+                    },
+                    "mental_status": {
+                        "title": "GCS/AVPU Status",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ConsultationCompleteRequest": {
+                "required": [
+                    "decision",
+                    "subjective",
+                    "assessment"
+                ],
+                "properties": {
+                    "subjective": {
+                        "type": "string",
+                        "example": "Patient reports persistent headache for 3 days."
+                    },
+                    "objective": {
+                        "type": "string",
+                        "example": "BP 140/90, pupils reactive."
+                    },
+                    "assessment": {
+                        "type": "string",
+                        "example": "Likely tension headache, rule out malaria."
+                    },
+                    "plan": {
+                        "type": "string",
+                        "example": "Start analgesics and review labs."
+                    },
+                    "diagnoses": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "icd10_id"
+                            ],
+                            "properties": {
+                                "icd10_id": {
+                                    "type": "integer",
+                                    "example": 450
+                                },
+                                "type": {
+                                    "description": "1=Working, 2=Final",
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "certainty": {
+                                    "description": "1=Confirmed, 2=Provisional",
+                                    "type": "integer",
+                                    "example": 2
+                                },
+                                "notes": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "decision": {
+                        "required": [
+                            "type"
+                        ],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "orders",
+                                    "admit",
+                                    "refer",
+                                    "discharge",
+                                    "follow_up"
+                                ]
+                            },
+                            "orders": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object"
+                                }
+                            },
+                            "referral": {
+                                "description": "Required if type is refer",
+                                "type": "object"
+                            },
+                            "admission": {
+                                "description": "Required if type is admit",
+                                "type": "object"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "RegistrationQuickRequest": {
+                "required": [
+                    "first_name",
+                    "last_name",
+                    "date_of_birth"
+                ],
+                "properties": {
+                    "facility_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "1990-01-01"
+                    },
+                    "gender": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "contacts": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "example": "phone"
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "example": "254700000000"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "identifiers": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "example": "NATIONAL_ID"
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "example": "12345678"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "encounter_type_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "department_id": {
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "Patient": {
+                "properties": {
+                    "patient_id": {
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "facility_id": {
+                        "title": "Facility Id",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "first_name": {
+                        "title": "First Name",
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "middle_name": {
+                        "title": "Middle Name",
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "last_name": {
+                        "title": "Last Name",
+                        "type": "string",
+                        "example": "Smith"
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "1990-01-01"
+                    },
+                    "gender": {
+                        "title": "Gender",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nationality": {
+                        "title": "Nationality",
+                        "type": "string",
+                        "example": "Kenyan"
+                    },
+                    "marital_status": {
+                        "title": "Marital Status",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "is_deceased": {
+                        "title": "Is Deceased",
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_vip": {
+                        "title": "Is VIP",
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "photo_path": {
+                        "title": "Photo Path",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Encounter": {
+                "properties": {
+                    "encounter_id": {
+                        "type": "integer",
+                        "example": 5001
+                    },
+                    "patient_id": {
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "encounter_type_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "active"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-20 14:00:00"
+                    }
+                },
+                "type": "object"
+            },
+            "TriageCaptureRequest": {
+                "required": [
+                    "encounter_id",
+                    "chief_complaint"
+                ],
+                "properties": {
+                    "encounter_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "chief_complaint": {
+                        "type": "string",
+                        "example": "Persistent dry cough and chest pain"
+                    },
+                    "triage_category": {
+                        "description": "1-Red to 5-Blue",
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "pain_score": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "mental_status": {
+                        "type": "string",
+                        "example": "Alert"
+                    },
+                    "last_meal_time": {
+                        "description": "Accepts Y-m-d H:i:s or Unix Timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-21 08:30:00"
+                    },
+                    "vitals": {
+                        "description": "Vital signs. Use 'BP' as 'SYS/DIA' string; others use database codes.",
+                        "type": "object",
+                        "example": {
+                            "TEMP": 37.2,
+                            "BP": "120/80",
+                            "HR": 72,
+                            "RR": 18,
+                            "SPO2": 98,
+                            "WEIGHT": 70.5,
+                            "MUAC": 13.5,
+                            "RBS": 5.4
+                        }
+                    },
+                    "allergies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "Sulfa Drugs"
+                        }
+                    },
+                    "nursing_notes": {
+                        "type": "string",
+                        "example": "Patient stable."
+                    },
+                    "history": {
+                        "type": "string",
+                        "example": "No respiratory history."
+                    },
+                    "department_id": {
+                        "description": "Optional: Nurse override for destination clinic (e.g., Dental, ENT)",
+                        "type": "integer",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Consultation",
+            "description": "Endpoints for Doctor Consultation & Workflow"
+        },
+        {
+            "name": "OutPatient",
+            "description": "Available endpoints for Patient model"
+        },
+        {
+            "name": "TriageAssessment",
+            "description": "Available endpoints for TriageAssessment workflow"
+        }
+    ]
+}

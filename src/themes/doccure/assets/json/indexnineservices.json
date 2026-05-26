@@ -1,0 +1,34 @@
+[
+    {
+        "id": 1,
+        "Image": "fertility-01.jpg",
+        "CareImage" : "care-01.svg",
+        "CareBigImage" : "care-big-01.svg",
+        "Title": "Pregnancy Care",
+        "Content": "Regular medical check-ups during pregnancy to monitor the health of the mother and the developing baby."
+    },
+    {
+        "id": 2,
+        "Image": "fertility-02.jpg",
+        "CareImage" : "care-02.svg",
+        "CareBigImage" : "care-big-02.svg",
+        "Title": "Obstetric care",
+        "Content": "Medical care provided by obstetricians or midwives throughout pregnancy, labor, and delivery."
+    },
+    {
+        "id": 3,
+        "Image": "fertility-03.jpg",
+        "CareImage" : "care-03.svg",
+        "CareBigImage" : "care-big-03.svg",
+        "Title": "Ultrasound imaging",
+        "Content": "Using sound waves to create images of the fetus in the womb, which helps monitor fetal development and detect any potential issues."
+    },
+    {
+        "id": 4,
+        "Image": "fertility-04.jpg",
+        "CareImage" : "care-04.svg",
+        "CareBigImage" : "care-big-04.svg",
+        "Title": "Counseling & Education",
+        "Content": "Providing information and support regarding pregnancy, childbirth, parenting, breastfeeding, and other related topics."
+    }
+]

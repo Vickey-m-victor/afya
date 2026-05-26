@@ -1,0 +1,34 @@
+[
+    {
+        "id": "1",
+        "Image": "company-01.svg"
+    },
+    {
+        "id": "2",
+        "Image": "company-02.svg"
+    },
+    {
+        "id": "3",
+        "Image": "company-03.svg"
+    },
+    {
+        "id": "4",
+        "Image": "company-04.svg"
+    },
+    {
+        "id": "5",
+        "Image": "company-05.svg"
+    },
+    {
+        "id": "6",
+        "Image": "company-06.svg"
+    },
+    {
+        "id": "7",
+        "Image": "company-07.svg"
+    },
+    {
+        "id": "8",
+        "Image": "company-08.svg"
+    }
+]

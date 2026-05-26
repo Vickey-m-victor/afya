@@ -1,7 +1,26 @@
-<script setup></script>
+<script setup>
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+import { layouts } from "@/layouts/layouts.js";
+import GlobalModal from "@/components/GlobalModal.vue";
+import GlobalOffcanvas from "@/components/GlobalOffcanvas.vue";
+
+const route = useRoute();
+
+const layoutComponent = computed(() => {
+  const layoutName = route.meta?.layout;
+  return layouts[layoutName] || layouts.LayoutSimple || null;
+});
+</script>
 
 <template>
-  <RouterView />
+  <component :is="layoutComponent" v-if="layoutComponent" />
+  <RouterView v-else />
+  
+  <!-- Global modal container -->
+  <GlobalModal />
+  <!-- Global offcanvas container -->
+  <GlobalOffcanvas />
 </template>
 
 <style lang="scss">

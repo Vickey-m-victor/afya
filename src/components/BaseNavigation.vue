@@ -116,7 +116,7 @@ function linkClicked(e, submenu) {
         'nav-main-heading': node.heading,
         'nav-main-item': !node.heading,
         open:
-          node.sub && node.subActivePaths
+          node.sub && node.subActivePaths && !props.horizontal
             ? subIsActive(node.subActivePaths)
             : false,
       }"

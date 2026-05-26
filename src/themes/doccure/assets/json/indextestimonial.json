@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "Image": "client-01.jpg",
+        "Content": "Doccure exceeded my expectations in healthcare. The seamless booking process, coupled with the expertise of the doctors, made my experience exceptional. Their commitment to quality care and convenience truly sets them apart. I highly recommend Doccure for anyone seeking reliable and accessible healthcare services.",
+        "Name": "John Doe",
+        "Location": "New York"
+    },
+    {
+        "id": 2,
+        "Image": "client-03.jpg",
+        "Content": "As a busy professional, I don't have time to wait on hold or play phone tag to schedule doctor appointments. Thanks to Doccure, booking appointments has never been easier! The user-friendly interface allows me to quickly find available appointment slots that fit my schedule and book them with just a few clicks. It's a game-changer for anyone looking to streamline their healthcare management.",
+        "Name": "Amanda Warren",
+        "Location": "Florida"
+    },
+    {
+        "id": 3,
+        "Image": "client-11.jpg",
+        "Content": "As a parent, coordinating doctor appointments for my family can be overwhelming. Doccure has simplified the process and made scheduling appointments a breeze! I love being able to see all available appointment times in one place and book appointments for multiple family members with ease. Plus, the automatic reminders ensure we never miss an appointment. I highly recommend Doccure to other busy parents!",
+        "Name": "Betty Carlson",
+        "Location": "Georgia"
+    }
+]

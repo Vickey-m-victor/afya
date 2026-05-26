@@ -1,0 +1,47 @@
+[
+    {
+        "id": 1,
+        "Image": "fertility-doc-01.jpg",
+        "Name": "Dr. Marie Wells",
+        "Title": "Pregnancy Specialist",
+        "Star": "(60)",
+        "Location": "0.7 min - Baltimore, MD",
+        "Amount" : "$500"
+    },
+    {
+        "id": 2,
+        "Image": "fertility-doc-02.jpg",
+        "Name": "Dr. Rebekah",
+        "Title": "Obstetric Specialist",
+        "Star": "3.0",
+        "Location": "0.9 min - East Syracuse, NY",
+        "Amount" : "$350"
+    },
+    {
+        "id": 3,
+        "Image": "fertility-doc-03.jpg",
+        "Name": "Dr. Johnson",
+        "Title": "Pregnancy Specialist",
+        "Star": "(29)",
+        "Location": "10 min - Athens, AL",
+        "Amount" : "$200"
+    },
+    {
+        "id": 4,
+        "Image": "fertility-doc-04.jpg",
+        "Name": "Dr. Packard",
+        "Title": "Pregnancy Specialist",
+        "Star": "4.0",
+        "Location": "15 min - Santa Cruz, CA",
+        "Amount" : "$100"
+    },
+    {
+        "id": 5,
+        "Image": "fertility-doc-03.jpg",
+        "Name": "Dr. Johnson",
+        "Title": "Pregnancy Specialist",
+        "Star": "(29)",
+        "Location": "10 min - Athens, AL",
+        "Amount" : "$200"
+    }
+]

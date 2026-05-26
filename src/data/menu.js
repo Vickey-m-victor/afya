@@ -12,167 +12,191 @@ export default {
       icon: "si si-speedometer",
     },
     // {
-    //   name: "Tests",
-    //   to: "tests",
-    //   icon: "si si-settings",
-    // },
-    // {
-    //   name: "Components",
-    //   to: "components",
-    //   icon: "si si-settings",
+    //   name: "Patient Reception",
+    //   to: "main/reception",
+    //   icon: "fa fa-notes-medical",
     // },
     {
-      name: "Hr",
+      name: "Outpatient",
+      heading: true,
+    },
+    {
+      name: "OPD Services",
+      icon: "fa-solid fa-stethoscope",
+      subActivePaths: "/outpatient",
+      sub: [
+        {
+          name: "Registration",
+          to: "outpatient/registration",
+          icon: "fa-solid fa-id-card",
+        },
+        {
+          name: "Triage",
+          to: "outpatient/triage/queue",
+          icon: "fa-solid fa-heart-pulse",
+        },
+        {
+          name: "Consultation",
+          to: "outpatient/consultation/queue",
+          icon: "fa-solid fa-user-doctor",
+        },
+      ],
+    },
+    {
+      name: "IAM",
       heading: true,
     },
 
     {
-      name: "Human Resource",
-      icon:  "si si-people",
-      subActivePaths: "/hr/",
+      name: "RBAC",
+      icon: "fa fa-shield-halved",
+      subActivePaths: "/iam",
       sub: [
-    {
-      name: "Departments",
-      to: "hr-departments",
-      icon: "si si-layers",
-    },
-    {
-      name: "Job Titles",
-      to: "hr-job-titles",
-      icon: "si si-briefcase",
-    },
-    {
-      name: "Job Groups",
-      to: "hr-job-groups",
-      icon: "si si-briefcase",
-    },
-    {
-      name: "Leave Types",
-      to: "hr-leave-types",
-      icon: "si si-calendar",
-    },
-    {
-      name: "Payroll",
-      to: "hr-payroll-settings",
-      icon: "si si-wallet",
-    },
-    {
-      name: "Public Holidays",
-      to: "hr-public-holidays",
-      icon: "si si-globe",
-    },
-    {
-      name: "Statutory Rates",
-      to: "hr-statutory-rates",
-      icon: "si si-calculator",
-    },
-    {name: "Work Shifts",
-     to: "hr-work-shifts",
-     icon: "si si-clock",
-    },
-    {
-      name: "Worker Union",
-      to: "hr-worker-unions",
-      icon: "si si-users",
-
-    },
-  ],
-},
-
-    {
-      name: "IAM & Admin",
-      heading: true,
-    },
-
-    {
-      name: "Access Control",
-      icon:  "si si-lock",
-      subActivePaths: "/iam/accesscontrol",
-      sub: [
-    {
-      name: "Groups",
-      to: "iam-groups",
-      icon: "si si-users",
-    },
-    {
-      name: "Permissions",
-      to: "iam-permissions",
-      icon: "si si-lock",
-    },
-    {
-      name: "Roles",
-      to: "iam-roles",
-      icon: "si si-briefcase",
-    },
-    // {
-    //   name: "Rules",
-    //   to: "iam-rules",
-    //   icon: "si si-shield",
-    // },
-    {
+        {
       name: "Users",
-      to: "iam-users",
-      icon: "si si-user", 
-
-    },
-      ],
-    },
-    
-    {
-      name: "Log Management",
-      icon: "si si-docs",
-      subActivePaths: "/iam/logmanagement",
-      sub: [
-    {
-      name: "Access Logs",
-      to: "admin-access-logs",
-      icon: "si si-notebook",
-    },
-    {
-      name: "Audit Trails",
-      to: "admin-audit-trails",
-      icon: "si si-docs",
-    },
-    {
-      name: "Error Logs",
-      to: "admin-error-logs",
-      icon: "si si-wrench",
-    },
+      to: "iam/users",
+      icon: "fa fa-users",
+        },
+        {
+          name: "Roles",
+          to: "iam/rbac/roles",
+          icon: "fa fa-user-shield",
+        },
+        {
+          name: "Permissions",
+          to: "iam/rbac/permissions",
+          icon: "fa fa-key",
+        },
+        {
+          name: "Groups",
+          to: "iam/rbac/groups",
+          icon: "fa fa-user-group",
+        },
+        {
+          name: "Rules",
+          to: "iam/rbac/rules",
+          icon: "fa fa-gavel",
+        },
       ],
     },
     {
-      name: "Settings",
-      icon: "si si-settings",
-      subActivePaths: "/admin/settings",
+      name: "HR",
+      heading: true,
+    },
+    {
+      name: "Human Resources",
+      icon: "fa fa-people-group",
+      subActivePaths: "/hr",
       sub: [
-    {
-      name: "General",
-      to: "admin-settings-generals",
-      icon: "si si-settings",
+        {
+          name: "Dashboard",
+          to: "hr",
+          icon: "fa fa-tachometer-alt",
+        },
+        {
+          name: "Employees",
+          to: "hr/employee",
+          icon: "fa fa-users",
+        },
+        {
+          name: "Departments",
+          to: "hr/department",
+          icon: "fa fa-building",
+        },
+        {
+          name: "Job Groups",
+          to: "hr/job-group",
+          icon: "fa fa-layer-group",
+        },
+        {
+          name: "Job Titles",
+          to: "hr/job-title",
+          icon: "fa fa-id-badge",
+        },
+        {
+          name: "Leave Types",
+          to: "hr/leave-type",
+          icon: "fa fa-calendar-xmark",
+        },
+        {
+          name: "Payroll Settings",
+          to: "hr/payroll-setting",
+          icon: "fa fa-money-check-dollar",
+        },
+        {
+          name: "Public Holidays",
+          to: "hr/public-holiday",
+          icon: "fa fa-calendar-day",
+        },
+        {
+          name: "Statutory Rates",
+          to: "hr/statutory-rate",
+          icon: "fa fa-percent",
+        },
+        {
+          name: "Work Shifts",
+          to: "hr/work-shift",
+          icon: "fa fa-clock",
+        },
+        {
+          name: "Worker Unions",
+          to: "hr/worker-union",
+          icon: "fa fa-handshake",
+        },
+      ],
     },
     {
-      name: "Mailer",
-      to: "admin-settings-mailers",
-      icon: "si si-envelope-letter",
+      name: "Admin",
+      heading: true,
     },
     {
-      name: "Security",
-      to: "admin-settings-securitys",
-      icon: "si si-shield",
-    },
-    {
-      name: "Theme",
-      to: "admin-settings-themes",
-      icon: "si si-magic-wand",
-    },
-  
+      name: "Logs Management",
+      icon: "fa fa-file-lines",
+      subActivePaths: "/admin/logs",
+      sub: [
+        {
+          name: "Access Logs",
+          to: "admin/logs/access",
+          icon: "fa fa-door-open",
+        },
+        {
+          name: "Audit Trail",
+          to: "admin/logs/audit",
+          icon: "fa fa-clipboard-list",
+        },
+        {
+          name: "Error Logs",
+          to: "admin/logs/errors",
+          icon: "fa fa-circle-exclamation",
+        },
       ],
     },
     {
       name: "Task Manager",
-      to: "admin-task-managers",
-      icon: "si si-rocket",
-    }   
+      to: "admin/task-manager",
+      icon: "fa fa-clock",
+    },
+    {
+      name: "Settings",
+      to: "admin/settings/general",
+      icon: "fa fa-cog",
+    },
+
+    {
+      name: "Doccure Theme",
+      heading: true,
+    },
+    {
+      name: "Doccure Dashboard",
+      to: "DoctorDashboard",
+      icon: "fa fa-user-md",
+    },
+    {
+      name: "Doccure Test Page",
+      to: "DoctorTestPage",
+      icon: "fa fa-file-code",
+    },
+  
   ],
 
 
