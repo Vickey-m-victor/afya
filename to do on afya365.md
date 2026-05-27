@@ -47,7 +47,7 @@ CHANGES SUGGESTED.
     * remove the national id 
     * remove title when registering a patient.
     * middle name should be there
-    * Age should be calculated  / reversible - if you select date, calculate age, if you select age, choose calculate year.
+    * Age should be calculated  / reversible - if you select date, calculate age, if you select age, choose calculate year.s
     * Next of kin/GUardian - dynamic eg if a child both parents. 
     * create patient and continue to triage
     * dropdown for create , create and continue to triage, create and start.

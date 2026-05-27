@@ -9,13 +9,13 @@ const { toastSuccess, toastError } = useAlert();
 // Main stores and Router
 const store = useTemplateStore();
 const router = useRouter();
-const authStore = useAuthStore(); // Changed variable name for clarity
+const authStore = useAuthStore();
 
 // State variables
 const username = ref("");
 const password = ref("");
 const errors = ref({});
-const isLoading = ref(false); // Must be a ref to use in template
+const isLoading = ref(false);
 
 async function onSubmit() {
   errors.value = {}; 
@@ -27,45 +27,31 @@ async function onSubmit() {
       password: password.value,
     });
 
-<<<<<<<< HEAD:modules/iam/views/SignIn3View.vue
     // Save user state
-    authStore.setUser({
-      username: response.dataPayload?.data?.username || username.value,
+    authStore.setUserData({
+      username: response?.dataPayload?.data?.username || username.value,
     });
     localStorage.setItem("username", username.value);
 
     // Dynamic Success Message
-    const successMsg = response.message;
-    toastSuccess("Success", successMsg);
+    const successMessage = response?.dataPayload?.alertify?.message || response?.message || "Welcome back!";
+    toastSuccess("Success", successMessage);
     
-    // Redirect to the dashboard (Ensure the name matches router/index.js precisely)
+    // Redirect to the dashboard
     router.push({ name: "dashboard" }); 
     
   } catch (error) {
-    if (error?.response?.data?.errorPayload?.errors) {
-      errors.value = error.response.data.errorPayload.errors;
+    // Handle validation errors (Checking both nested and direct errorPayload structures)
+    const validationErrors = error?.errorPayload?.errors || error?.response?.data?.errorPayload?.errors;
+    
+    if (validationErrors) {
+      errors.value = validationErrors;
     } else {
       // Safely extract the backend error message, fallback to default
-      const backendError = error?.response?.data?.message || "Invalid Credentials";
-      toastError("Login Failed", backendError);
-========
-    const successMessage =
-      response?.dataPayload?.alertify?.message || "Welcome back!";
-
-    toastSuccess("Success", successMessage);
-    router.push({ name: "dashboard" });
-  } catch (error) {
-    // Handle useApi error structure (errorPayload directly, not nested in response.data)
-    if (error?.errorPayload?.errors) {
-      errors.value = error.errorPayload.errors;
-    } else {
-      const backendMessage =
-        error?.errorPayload?.message ||
-        error?.message;
-      const fallbackMessage =
-        "Login failed. Please try again.";
-      toastError("Login failed", backendMessage || fallbackMessage);
->>>>>>>> 8ef1bd55e2da2a6b80793e9551781586cf9176be:modules/iam/views/auth/SignIn3View.vue
+      const backendMessage = error?.errorPayload?.message || error?.response?.data?.message || error?.message;
+      const fallbackMessage = "Login failed. Please try again.";
+      
+      toastError("Login Failed", backendMessage || fallbackMessage);
     }
   } finally {
     isLoading.value = false;

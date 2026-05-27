@@ -7,7 +7,7 @@ import doccureRoutes from '@/themes/doccure/routes.js';
 
 export default [
   ...adminRoutes,
-  ...hrRoutes,
+  ...hrRoutes, 
   ...iamRoutes,
   ...mainRoutes,
   ...outpatientRoutes,

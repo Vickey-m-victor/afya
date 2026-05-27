@@ -1,5 +1,6 @@
 import { fileURLToPath, URL } from "url";
-import { defineConfig, loadEnv } from "vite";
+
+import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import dotenv from "dotenv";
 
@@ -25,5 +26,15 @@ export default defineConfig({
       },
 
     },
-  };
+    cors: false,
+  },
+  build: {
+    rollupOptions: {
+      // This tells Vite to process this SCSS file as a separate output
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        doccureCSS: fileURLToPath(new URL('./src/themes/doccure/assets/scss/main.scss', import.meta.url))
+      }
+    }
+  }
 });

@@ -18,9 +18,9 @@ const store = useTemplateStore();
                 <i class="fa fa-heart text-danger"></i> by
                 <a
                   class="fw-semibold"
-                  href="https://pixelcave.com"
+                  href="https://crackit.co.ke"
                   target="_blank"
-                  >pixelcave</a
+                  >CrackIT Technologies</a
                 >
               </slot>
             </div>
@@ -28,7 +28,7 @@ const store = useTemplateStore();
               <slot name="content-left">
                 <a
                   class="fw-semibold"
-                  href="https://pixelcave.com/products/oneui-vue-edition"
+                  href="https://crackit.co.ke/"
                   >{{ store.app.name + " " + store.app.version }}</a
                 >
                 &copy; {{ store.app.copyright }}

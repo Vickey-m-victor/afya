@@ -6,7 +6,7 @@ import App from "./App.vue";
 import router from "@/router.js";
 
 // Auth store for initialization
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "~/iam/stores/auth.js";
 
 // Template components
 import BaseBlock from "@/components/BaseBlock.vue";

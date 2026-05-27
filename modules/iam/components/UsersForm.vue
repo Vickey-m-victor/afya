@@ -1,103 +1,4 @@
 <script setup>
-<<<<<<< HEAD
-import BaseButton from "@/components/BaseButton.vue";
-
-const props = defineProps({
-  modelValue: { type: Object, required: true },
-  submitLabel: { type: String, default: "Save" }
-});
-
-const emit = defineEmits(["submit", "update:modelValue"]);
-
-// This function tells the parent View to update formData whenever a user types
-const updateField = (name, value) => {
-  emit("update:modelValue", { ...props.modelValue, [name]: value });
-};
-</script>
-
-<template>
-  <form @submit.prevent="emit('submit')">
-    <div class="row g-3 mb-4">
-      <div class="col-4">
-        <label class="form-label">First Name</label>
-        <input 
-          type="text" 
-          class="form-control" 
-          :value="modelValue.first_name"
-          @input="updateField('first_name', $event.target.value)"
-        />
-      </div>
-      <div class="col-4">
-        <label class="form-label">Middle Name</label>
-        <input 
-          type="text" 
-          class="form-control" 
-          :value="modelValue.middle_name"
-          @input="updateField('middle_name', $event.target.value)"
-        />
-      </div>
-      <div class="col-4">
-        <label class="form-label">Last Name</label>
-        <input 
-          type="text" 
-          class="form-control" 
-          :value="modelValue.last_name"
-          @input="updateField('last_name', $event.target.value)"
-        />
-      </div>
-      <div class="col-4">
-        <label class="form-label">Mobile Number</label>
-        <input 
-          type="text" 
-          class="form-control" 
-          :value="modelValue.mobile_number"
-          @input="updateField('mobile_number', $event.target.value)"
-        />
-      </div>
-      <div class="col-8">
-        <label class="form-label">Email Address</label>
-        <input 
-          type="email" 
-          class="form-control" 
-          :value="modelValue.email_address"
-          @input="updateField('email_address', $event.target.value)"
-        />
-      </div>
-      <div class="col-5">
-        <label class="form-label">Username</label>
-        <input 
-          type="text" 
-          class="form-control" 
-          :value="modelValue.username"
-          @input="updateField('username', $event.target.value)"
-        />
-      </div>
-      <div class="col-4">
-        <label class="form-label">Password</label>
-        <input 
-          type="password" 
-          class="form-control" 
-          :value="modelValue.password"
-          @input="updateField('password', $event.target.value)"
-        />
-      </div>
-      <div class="col-3">
-        <label class="form-label">Confirm Password</label>
-        <input 
-          type="password" 
-          class="form-control" 
-          :value="modelValue.confirm_password"
-          @input="updateField('confirm_password', $event.target.value)"
-        />
-      </div>
-    </div>
-    
-    <div class="text-end">
-      <BaseButton :label="submitLabel" variant="primary" type="submit" />
-    </div>
-  </form>
-</template>
-=======
 import { ref, computed } from "vue";
 
 const props = defineProps({
@@ -162,7 +63,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
 <template>
   <form @submit.prevent="onSubmit" class="user-form">
 
-    <!-- Error banner -->
     <div
       v-if="error?.message || (typeof error === 'string' && error)"
       class="alert alert-danger d-flex align-items-center gap-2 mb-4 py-2 px-3"
@@ -172,14 +72,12 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
       <span class="fs-sm">{{ typeof error === "string" ? error : error.message }}</span>
     </div>
 
-    <!-- Account section -->
     <div class="mb-1">
       <p class="fs-xs fw-semibold text-muted text-uppercase tracking-wider mb-3">
         <i class="fa fa-user-circle me-1"></i> Account
       </p>
       <div class="row g-3">
 
-        <!-- Username -->
         <div class="col-md-6">
           <label class="form-label fw-medium" for="uf-username">
             Username <span v-if="!readonly" class="text-danger">*</span>
@@ -204,7 +102,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
           </div>
         </div>
 
-        <!-- Email Address -->
         <div class="col-md-6">
           <label class="form-label fw-medium" for="uf-email">
             Email Address <span v-if="!readonly" class="text-danger">*</span>
@@ -229,7 +126,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
           </div>
         </div>
 
-        <!-- Mobile Number -->
         <div class="col-md-6">
           <label class="form-label fw-medium" for="uf-mobile">
             Mobile <span v-if="!readonly" class="text-danger">*</span>
@@ -259,14 +155,12 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
 
     <hr class="my-4 opacity-10" />
 
-    <!-- Personal info section -->
     <div class="mb-1">
       <p class="fs-xs fw-semibold text-muted text-uppercase tracking-wider mb-3">
         <i class="fa fa-id-card me-1"></i> Personal Info
       </p>
       <div class="row g-3">
 
-        <!-- First Name -->
         <div class="col-md-4">
           <label class="form-label fw-medium" for="uf-firstname">
             First Name <span v-if="!readonly" class="text-danger">*</span>
@@ -285,7 +179,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
           </div>
         </div>
 
-        <!-- Middle Name -->
         <div class="col-md-4">
           <label class="form-label fw-medium" for="uf-middlename">
             Middle Name <span class="text-muted fw-normal fs-xs">(optional)</span>
@@ -304,7 +197,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
           </div>
         </div>
 
-        <!-- Last Name -->
         <div class="col-md-4">
           <label class="form-label fw-medium" for="uf-lastname">
             Last Name <span v-if="!readonly" class="text-danger">*</span>
@@ -326,7 +218,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
       </div>
     </div>
 
-    <!-- Password section (hidden when readonly or in edit mode) -->
     <template v-if="!readonly && isCreateMode">
       <hr class="my-4 opacity-10" />
 
@@ -336,7 +227,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
         </p>
         <div class="row g-3">
 
-          <!-- Password -->
           <div class="col-md-6">
             <label class="form-label fw-medium" for="uf-password">
               Password <span v-if="isCreateMode" class="text-danger">*</span>
@@ -369,7 +259,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
             </div>
           </div>
 
-          <!-- Confirm Password (create mode only) -->
           <div class="col-md-6" v-if="isCreateMode">
             <label class="form-label fw-medium" for="uf-confirm-password">
               Confirm Password <span class="text-danger">*</span>
@@ -403,7 +292,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
       </div>
     </template>
 
-    <!-- Submit -->
     <div v-if="!hideSubmit" class="d-flex justify-content-end mt-4 pt-2 border-top">
       <button type="submit" class="btn btn-primary px-4" :disabled="isSubmitting">
         <i class="fa me-2" :class="isSubmitting ? 'fa-circle-notch fa-spin' : 'fa-check'"></i>
@@ -413,4 +301,3 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
 
   </form>
 </template>
->>>>>>> 8ef1bd55e2da2a6b80793e9551781586cf9176be
