@@ -127,7 +127,15 @@ async function handleView(log) {
     showConfirm: false,
     showCancel: false,
   });
+  modalStore.setLoading(true); // Turn on spinner globally
+  try {
+     const { data } = await request();
+     modalStore.props.formData = data;
+  } finally {
+     modalStore.setLoading(false); // Turn off spinner globally
+  }
 }
+
 
 onMounted(() => {
   fetchAccessLogs();

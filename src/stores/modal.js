@@ -1,26 +1,27 @@
-import { defineStore } from 'pinia';
-import { ref, markRaw } from 'vue';
+import { defineStore } from "pinia";
+import { ref, markRaw } from "vue";
 
 let modalIdCounter = 0;
 
-export const useModalStore = defineStore('modal', () => {
+export const useModalStore = defineStore("modal", () => {
   // State
   const isOpen = ref(false);
+  const isLoading = ref(false); // Global loading state
   const component = ref(null);
   const props = ref({});
-  const title = ref('');
-  const modalSize = ref('md');
-  const position = ref('center');
+  const title = ref("");
+  const modalSize = ref("md");
+  const position = ref("center");
   const showFooter = ref(false);
   const centered = ref(true);
   const scrollable = ref(false);
   const fullscreen = ref(false);
   const closeOnBackdrop = ref(true);
   const closeOnEsc = ref(true);
-  const bodyClass = ref('');
+  const bodyClass = ref("");
 
-  const confirmText = ref('Save');
-  const cancelText = ref('Cancel');
+  const confirmText = ref("Save");
+  const cancelText = ref("Cancel");
   const showConfirm = ref(true);
   const showCancel = ref(true);
   const onConfirm = ref(null);
@@ -29,10 +30,10 @@ export const useModalStore = defineStore('modal', () => {
   const disableCloseWhileSubmitting = ref(true);
   const closeOnConfirm = ref(true);
   const closeOnCancel = ref(true);
-  const initialFocus = ref('first');
+  const initialFocus = ref("first");
   const restoreFocus = ref(true);
-  const titleId = ref('');
-  const bodyId = ref('');
+  const titleId = ref("");
+  const bodyId = ref("");
 
   // Toggle between modal/page mode for CRUD operations
   const useModal = ref(true);
@@ -45,8 +46,8 @@ export const useModalStore = defineStore('modal', () => {
     const {
       component: modalComponent = null,
       props: modalProps = {},
-      title: modalTitle = 'Modal',
-      size = 'md',
+      title: modalTitle = "Modal",
+      size = "md",
       position: positionOption,
       footer = false,
       showFooter: showFooterOption,
@@ -55,35 +56,39 @@ export const useModalStore = defineStore('modal', () => {
       fullscreen: fullscreenOption = false,
       closeOnBackdrop: closeOnBackdropOption = true,
       closeOnEsc: closeOnEscOption = true,
-      bodyClass: bodyClassOption = '',
+      bodyClass: bodyClassOption = "",
       onConfirm: onConfirmOption = null,
       onCancel: onCancelOption = null,
-      confirmText: confirmTextOption = 'Save',
-      cancelText: cancelTextOption = 'Cancel',
+      confirmText: confirmTextOption = "Save",
+      cancelText: cancelTextOption = "Cancel",
       showConfirm: showConfirmOption = true,
       showCancel: showCancelOption = true,
       disableCloseWhileSubmitting: disableCloseWhileSubmittingOption = true,
       closeOnConfirm: closeOnConfirmOption = true,
       closeOnCancel: closeOnCancelOption = true,
-      initialFocus: initialFocusOption = 'first',
+      initialFocus: initialFocusOption = "first",
       restoreFocus: restoreFocusOption = true,
     } = options;
 
+    isLoading.value = options.isLoading || false; // Allow manual set on open
+    isOpen.value = true;
     component.value = modalComponent ? markRaw(modalComponent) : null;
     props.value = modalProps;
     title.value = modalTitle;
     isOpen.value = true;
     showFooter.value = showFooterOption ?? footer ?? false;
 
-    const allowedSizes = ['sm', 'md', 'lg', 'xl'];
-    modalSize.value = allowedSizes.includes(size) ? size : 'md';
+    const allowedSizes = ["sm", "md", "lg", "xl"];
+    modalSize.value = allowedSizes.includes(size) ? size : "md";
 
-    const normalizedPosition = ['center', 'top'].includes(positionOption)
+    const normalizedPosition = ["center", "top"].includes(positionOption)
       ? positionOption
-      : (centeredOption ? 'center' : 'top');
+      : centeredOption
+        ? "center"
+        : "top";
 
     position.value = normalizedPosition;
-    centered.value = normalizedPosition === 'center';
+    centered.value = normalizedPosition === "center";
     scrollable.value = scrollableOption;
     fullscreen.value = fullscreenOption;
     closeOnBackdrop.value = closeOnBackdropOption;
@@ -119,13 +124,13 @@ export const useModalStore = defineStore('modal', () => {
     isOpen.value = false;
     component.value = null;
     props.value = {};
-    title.value = '';
+    title.value = "";
     showFooter.value = false;
-    position.value = 'center';
+    position.value = "center";
     centered.value = true;
-    bodyClass.value = '';
-    confirmText.value = 'Save';
-    cancelText.value = 'Cancel';
+    bodyClass.value = "";
+    confirmText.value = "Save";
+    cancelText.value = "Cancel";
     showConfirm.value = true;
     showCancel.value = true;
     onConfirm.value = null;
@@ -133,8 +138,8 @@ export const useModalStore = defineStore('modal', () => {
     isSubmitting.value = false;
     closeOnConfirm.value = true;
     closeOnCancel.value = true;
-    titleId.value = '';
-    bodyId.value = '';
+    titleId.value = "";
+    bodyId.value = "";
   }
 
   function setSubmitting(value) {
@@ -148,10 +153,13 @@ export const useModalStore = defineStore('modal', () => {
   function toggleModalUsage(value) {
     useModal.value = value;
   }
-
+  function setLoading(val) {
+    isLoading.value = val; // Global toggle
+  }
   return {
     // State
     isOpen,
+    isLoading,
     component,
     props,
     title,
