@@ -177,86 +177,50 @@ function handleCreate() {
 async function handleView(row) {
   modalMode.value = 'view';
   modalStore.toggleModalUsage(true);
-
   const id = rowId(row);
 
-  if (!modalStore.useModal) {
-    router.push({ name: 'hr/department/view', params: { id } });
-    return;
-  }
+  if (!modalStore.useModal) return router.push({ name: 'hr/department/view', params: { id } });
+  if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
 
-  if (!id) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
-    return;
-  }
-
-  // Open modal immediately with loading state
-  openFormModal('View Department', {}, true, true);
+  openFormModal('View Department', {}, true);
+  modalStore.setLoading(true);
 
   try {
-    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-      method: 'GET',
-      autoFetch: false,
-    });
-
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
     await request();
-
     if (error.value) {
-      alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
       modalStore.closeModal();
-      return;
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
     }
-
     const payload = responseData.value?.dataPayload || responseData.value || {};
-    // Update modal props with fetched data and turn off loading
     modalStore.props.formData = stripCrudSystemFields(payload.data || {});
-    modalStore.props.isLoading = false;
-  } catch (err) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    modalStore.closeModal();
+  } finally {
+    modalStore.setLoading(false);
   }
 }
 
 async function handleEdit(row) {
   modalMode.value = 'edit';
   modalStore.toggleModalUsage(true);
-
   const id = rowId(row);
 
-  if (!modalStore.useModal) {
-    router.push({ name: 'hr/department/update', params: { id } });
-    return;
-  }
+  if (!modalStore.useModal) return router.push({ name: 'hr/department/update', params: { id } });
+  if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
 
-  if (!id) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
-    return;
-  }
-
-  // Open modal immediately with loading state
-  openFormModal('Edit Department', {}, false, true);
+  openFormModal('Edit Department', {}, false);
+  modalStore.setLoading(true);
 
   try {
-    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-      method: 'GET',
-      autoFetch: false,
-    });
-
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
     await request();
-
     if (error.value) {
-      alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
       modalStore.closeModal();
-      return;
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
     }
-
     const payload = responseData.value?.dataPayload || responseData.value || {};
-    // Update modal props with fetched data and turn off loading
     modalStore.props.formData = stripCrudSystemFields(payload.data || {});
-    modalStore.props.isLoading = false;
-  } catch (err) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    modalStore.closeModal();
+  } finally {
+    modalStore.setLoading(false);
   }
 }
 

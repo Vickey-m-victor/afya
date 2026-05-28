@@ -34,7 +34,6 @@ const {
   initialSortDir: 'desc',
 });
 
-// Converted column definitions
 const tableColumns = [
   { attribute: "name", label: "Name" },
   { attribute: "default_days", label: "Default Days" },
@@ -108,38 +107,64 @@ function handleCreate() {
 }
 
 async function handleView(row) {
-  modalMode.value = 'view'; modalStore.toggleModalUsage(true);
+  modalMode.value = 'view';
+  modalStore.toggleModalUsage(true);
   const id = rowId(row);
+
   if (!modalStore.useModal) return router.push({ name: 'hr/leave-type/view', params: { id } });
   if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
 
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
-  await request();
-  if (error.value) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-  
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('View LeaveType', payload.data || {}, true);
+  openFormModal('View LeaveType', {}, true);
+  modalStore.setLoading(true);
+
+  try {
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false);
+  }
 }
 
 async function handleEdit(row) {
-  modalMode.value = 'edit'; modalStore.toggleModalUsage(true);
+  modalMode.value = 'edit';
+  modalStore.toggleModalUsage(true);
   const id = rowId(row);
+
   if (!modalStore.useModal) return router.push({ name: 'hr/leave-type/update', params: { id } });
   if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
 
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
-  await request();
-  if (error.value) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+  openFormModal('Edit LeaveType', {}, false);
+  modalStore.setLoading(true);
 
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('Edit LeaveType', payload.data || {}, false);
+  try {
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false);
+  }
 }
 
 async function handleDelete(row) {
   const id = rowId(row);
   if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
 
-  const isRestore = row.is_deleted === 1 || row.is_deleted === true; // BUG FIXED
+  const isRestore = row.is_deleted === 1 || row.is_deleted === true;
   const result = await confirmAction(
     isRestore ? 'Restore this record?' : 'Delete this record?',
     isRestore ? 'The record will be restored.' : 'This action cannot be undone.'
@@ -238,7 +263,7 @@ onMounted(fetchRows);
         </ListBody>
 
         <template #footer>
-          <div class="p-3  border-top">
+          <div class="p-3 border-top">
             <GridPagination :per-page-options="perPageOptions" @change-per-page="handlePerPageChange" />
           </div>
         </template>

@@ -183,80 +183,67 @@ async function handleView(row) {
   modalStore.toggleModalUsage(true);
   const id = rowId(row);
 
-  if (!modalStore.useModal)
-    return router.push({ name: "hr/job-group/view", params: { id } });
+  if (!modalStore.useModal) return router.push({ name: "hr/job-group/view", params: { id } });
+  if (!id) return alertStore.show({ theme: "danger", type: "toast", message: "Record id not found." });
 
-  if (!id)
-    return alertStore.show({
-      theme: "danger",
-      type: "toast",
-      message: "Record id not found.",
-    });
+  // 1. OPEN MODAL INSTANTLY
+  openFormModal("View JobGroup", {}, true);
+  
+  // 💡 Ensure setLoading is called AFTER openModal, as openModal might reset state
+  modalStore.setLoading(true); 
 
-  // 1. OPEN MODAL INSTANTLY with loading state = true
-  openFormModal("View JobGroup", {}, true, true);
+  try {
+    // 2. FETCH DATA
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: "GET", autoFetch: false });
+    await request(); 
 
-  // 2. FETCH DATA AFTER opening the modal
-  const {
-    data: responseData,
-    request,
-    error,
-  } = useApi(withId(endpoints.view, id), { method: "GET", autoFetch: false });
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: "danger", type: "toast", message: "Failed to fetch record details." });
+    }
 
-  await request(); // Now this is valid because 'request' is defined above
-
-  if (error.value) {
-    modalStore.closeModal();
-    return alertStore.show({
-      theme: "danger",
-      type: "toast",
-      message: "Failed to fetch record details.",
-    });
+    // 3. INJECT DATA
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    // Ensure you assign it to the props that the open modal is watching
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    // 💡 Always turn off loading, even if the request fails
+    modalStore.setLoading(false); 
   }
-
-  // 3. INJECT DATA INTO THE OPEN MODAL
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  modalStore.props.formData = stripCrudSystemFields(payload.data || {});
-  modalStore.props.isLoading = false;
 }
+
 async function handleEdit(row) {
   modalMode.value = "edit";
   modalStore.toggleModalUsage(true);
   const id = rowId(row);
 
-  if (!modalStore.useModal)
-    return router.push({ name: "hr/job-group/update", params: { id } });
-  if (!id)
-    return alertStore.show({
-      theme: "danger",
-      type: "toast",
-      message: "Record id not found.",
-    });
+  if (!modalStore.useModal) return router.push({ name: "hr/job-group/update", params: { id } });
+  if (!id) return alertStore.show({ theme: "danger", type: "toast", message: "Record id not found." });
 
-  openFormModal("Edit JobGroup", {}, false, true);
+  // 1. OPEN MODAL INSTANTLY
+  openFormModal("Edit JobGroup", {}, false);
+  
+  // 💡 Turn loading on
+  modalStore.setLoading(true); 
 
-  const {
-    data: responseData,
-    request,
-    error,
-  } = useApi(withId(endpoints.view, id), { method: "GET", autoFetch: false });
-  await request();
+  try {
+    // 2. FETCH DATA
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: "GET", autoFetch: false });
+    await request();
 
-  if (error.value) {
-    modalStore.closeModal(); // Close the modal if the API fails
-    return alertStore.show({
-      theme: "danger",
-      type: "toast",
-      message: "Failed to fetch record details.",
-    });
+    if (error.value) {
+      modalStore.closeModal(); 
+      return alertStore.show({ theme: "danger", type: "toast", message: "Failed to fetch record details." });
+    }
+
+    // 3. INJECT DATA 
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    // 💡 Turn loading off
+    modalStore.setLoading(false); 
   }
-
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  modalStore.props.formData = stripCrudSystemFields(payload.data || {});
-  modalStore.props.isLoading = false; // Turn off the spinner!
-  // openFormModal("Edit JobGroup", payload.data || {}, false);
 }
-
 async function handleDelete(row) {
   const id = rowId(row);
   if (!id)

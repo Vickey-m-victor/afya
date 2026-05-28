@@ -159,7 +159,7 @@ function handleView(row) {
   router.push({ name: 'hr/employee/view', params: { id } });
 }
 
-function handleEdit(row) {
+async function handleEdit(row) {
   const stage = Number(row?.onboarding_stage ?? row?.onboarding_status?.current_stage ?? 0);
   const isIncompleteOnboarding = stage > 0 && stage < 5;
   const id = rowId(row);
@@ -168,9 +168,25 @@ function handleEdit(row) {
     router.push({ name: 'hr/employee/onboard', query: { id } });
     return;
   }
+  
   modalMode.value = 'edit';
   modalStore.toggleModalUsage(true);
-  openFormModal('Edit Employee', { ...row }, false);
+  
+  openFormModal('Edit Employee', {}, false);
+  modalStore.setLoading(true);
+
+  try {
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false);
+  }
 }
 
 async function handleDelete(row) {

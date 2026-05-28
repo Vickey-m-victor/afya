@@ -153,8 +153,9 @@ export const useModalStore = defineStore("modal", () => {
   function toggleModalUsage(value) {
     useModal.value = value;
   }
+
   function setLoading(val) {
-    isLoading.value = val; // Global toggle
+    isLoading.value = val;
   }
   return {
     // State
@@ -193,5 +194,7 @@ export const useModalStore = defineStore("modal", () => {
     closeModal,
     toggleModalUsage,
     setSubmitting,
+    setLoading,
+
   };
 });
