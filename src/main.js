@@ -6,7 +6,7 @@ import App from "./App.vue";
 import router from "@/router.js";
 
 // Auth store for initialization
-import { useAuthStore } from "~/iam/stores/auth.js";
+import { useAuthStore } from "@/stores/auth";
 
 // Template components
 import BaseBlock from "@/components/BaseBlock.vue";
@@ -18,9 +18,6 @@ import clickRipple from "@/directives/clickRipple";
 
 // Bootstrap framework
 import * as bootstrap from "bootstrap";
-import { setupAuthGuard } from "./router/guard";
-
-
 window.bootstrap = bootstrap;
 
 // Keep canonical hash-mode URLs and avoid duplicated path + hash URLs
@@ -49,10 +46,6 @@ const app = createApp(App);
 app.component("BaseBlock", BaseBlock);
 app.component("BaseBackground", BaseBackground);
 app.component("BasePageHeading", BasePageHeading);
-
-// Register Doccure global components
-import registerDoccureComponents from "@/themes/doccure/components.js";
-registerDoccureComponents(app);
 
 // Register global directives
 app.directive("click-ripple", clickRipple);
