@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeRouteLeave } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
-import { useAuthStore } from "~/iam/stores/auth.js";
+import { useAuthStore } from "@/stores/auth.js";
 
 import BaseNavigation from "@/components/BaseNavigation.vue";
 

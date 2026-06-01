@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
-import { useAuthStore } from "~/iam/stores/auth.js";
+import { useAuthStore } from "@/stores/auth.js";
 import { useModalStore } from "@/stores/modal";
 import ChangePasswordModal from "~/iam/components/ChangePasswordModal.vue";
 

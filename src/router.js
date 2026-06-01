@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import NProgress from "nprogress/nprogress.js";
 import moduleRoutes from "./moduleRoutes.js";
 import appConfig from "./config/app.js";
-import { useAuthStore } from "~/iam/stores/auth.js";
+import { useAuthStore } from "@/stores/auth.js";
 
 
 // Set all routes
