@@ -47,6 +47,8 @@ app.component("BaseBlock", BaseBlock);
 app.component("BaseBackground", BaseBackground);
 app.component("BasePageHeading", BasePageHeading);
 
+
+
 // Register global directives
 app.directive("click-ripple", clickRipple);
 

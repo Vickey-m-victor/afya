@@ -181,22 +181,6 @@ export default {
       to: "admin/settings/general",
       icon: "fa fa-cog",
     },
-
-    {
-      name: "Doccure Theme",
-      heading: true,
-    },
-    {
-      name: "Doccure Dashboard",
-      to: "DoctorDashboard",
-      icon: "fa fa-user-md",
-    },
-    {
-      name: "Doccure Test Page",
-      to: "DoctorTestPage",
-      icon: "fa fa-file-code",
-    },
-  
   ],
 
 
