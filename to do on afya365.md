@@ -112,3 +112,8 @@ generate payment voucher  to pay the supplier
 Endpoints to add
 Edit user details
 The endpoint to view which group the user belongs to.
+
+
+Can you see this page.../vue/template/doctor-dashboard in this code /var/www/html/afya365/vue...
+
+It is designed using doccure tempalte is it possible to create the same page in ┌──(victor㉿kali)-[/var/www/html/afya365/afya]  but using oneui styles and let the page look the same
