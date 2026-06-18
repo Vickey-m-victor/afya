@@ -133,65 +133,62 @@ function handleCreate() {
 async function handleView(row) {
   modalMode.value = 'view';
   modalStore.toggleModalUsage(true);
-
-  if (!modalStore.useModal) {
-    const id = rowId(row);
-    router.push({ name: 'hr/employer-type/view', params: { id } });
-    return;
-  }
-
   const id = rowId(row);
-  if (!id) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
-    return;
+
+  if (!modalStore.useModal) return router.push({ name: 'hr/employer-type/view', params: { id } });
+  if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
+
+  // 1. OPEN MODAL INSTANTLY
+  openFormModal('View EmployerType', {}, true);
+  modalStore.setLoading(true); // 💡 Global spinner ON
+
+  try {
+    // 2. FETCH DATA
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+
+    // 3. INJECT DATA INTO THE OPEN MODAL
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    // Ensure stripCrudSystemFields is imported from your helpers!
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {}); 
+  } finally {
+    modalStore.setLoading(false); // 💡 Global spinner OFF
   }
-
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-    method: 'GET',
-    autoFetch: false,
-  });
-
-  await request();
-
-  if (error.value) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    return;
-  }
-
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('View EmployerType', payload.data || {}, true);
 }
 
 async function handleEdit(row) {
   modalMode.value = 'edit';
   modalStore.toggleModalUsage(true);
-
-  if (!modalStore.useModal) {
-    const id = rowId(row);
-    router.push({ name: 'hr/employer-type/update', params: { id } });
-    return;
-  }
-
   const id = rowId(row);
-  if (!id) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
-    return;
+
+  if (!modalStore.useModal) return router.push({ name: 'hr/employer-type/update', params: { id } });
+  if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
+
+  // 1. OPEN MODAL INSTANTLY
+  openFormModal('Edit EmployerType', {}, false);
+  modalStore.setLoading(true); // 💡 Global spinner ON
+
+  try {
+    // 2. FETCH DATA
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+
+    // 3. INJECT DATA
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false); // 💡 Global spinner OFF
   }
-
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-    method: 'GET',
-    autoFetch: false,
-  });
-
-  await request();
-
-  if (error.value) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    return;
-  }
-
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('Edit EmployerType', payload.data || {}, false);
 }
 
 async function handleDelete(row) {

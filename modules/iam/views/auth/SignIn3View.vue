@@ -2,25 +2,24 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
-import { useAuthStore } from "@/stores/auth"; // Ensure this is the correct path
+import { useAuthStore } from "~/iam/stores/auth"; // Ensure this is the correct path
 import { useAlert } from "@/composables/alerts";
 
 const { toastSuccess, toastError } = useAlert();
 // Main stores and Router
 const store = useTemplateStore();
 const router = useRouter();
-const authStore = useAuthStore(); // Changed variable name for clarity
+const authStore = useAuthStore();
 
 // State variables
 const username = ref("");
 const password = ref("");
 const errors = ref({});
-const isLoading = ref(false); // Must be a ref to use in template
+const isLoading = ref(false);
 
-// On form submission
 async function onSubmit() {
-  errors.value = {}; // Reset errors
-  isLoading.value = true; // Use .value for refs
+  errors.value = {}; 
+  isLoading.value = true; 
 
   try {
     const response = await authStore.login({
@@ -28,22 +27,31 @@ async function onSubmit() {
       password: password.value,
     });
 
-    const successMessage =
-      response?.dataPayload?.alertify?.message || "Welcome back!";
+    // Save user state
+    authStore.setUserData({
+      username: response?.dataPayload?.data?.username || username.value,
+    });
+    localStorage.setItem("username", username.value);
 
+    // Dynamic Success Message
+    const successMessage = response?.dataPayload?.alertify?.message || response?.message || "Welcome back!";
     toastSuccess("Success", successMessage);
-    router.push({ name: "dashboard" });
+    
+    // Redirect to the dashboard
+    router.push({ name: "dashboard" }); 
+    
   } catch (error) {
-    // Handle useApi error structure (errorPayload directly, not nested in response.data)
-    if (error?.errorPayload?.errors) {
-      errors.value = error.errorPayload.errors;
+    // Handle validation errors (Checking both nested and direct errorPayload structures)
+    const validationErrors = error?.errorPayload?.errors || error?.response?.data?.errorPayload?.errors;
+    
+    if (validationErrors) {
+      errors.value = validationErrors;
     } else {
-      const backendMessage =
-        error?.errorPayload?.message ||
-        error?.message;
-      const fallbackMessage =
-        "Login failed. Please try again.";
-      toastError("Login failed", backendMessage || fallbackMessage);
+      // Safely extract the backend error message, fallback to default
+      const backendMessage = error?.errorPayload?.message || error?.response?.data?.message || error?.message;
+      const fallbackMessage = "Login failed. Please try again.";
+      
+      toastError("Login Failed", backendMessage || fallbackMessage);
     }
   } finally {
     isLoading.value = false;

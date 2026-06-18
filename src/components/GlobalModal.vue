@@ -1,7 +1,7 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, useSlots, watch } from 'vue';
-import { useModalStore } from '@/stores/modal';
-import { useOffcanvasStore } from '@/stores/offcanvas';
+import { computed, nextTick, onBeforeUnmount, ref, useSlots, watch } from "vue";
+import { useModalStore } from "@/stores/modal";
+import { useOffcanvasStore } from "@/stores/offcanvas";
 
 const modalStore = useModalStore();
 const offcanvasStore = useOffcanvasStore();
@@ -12,8 +12,8 @@ const dialogRef = ref(null);
 const lastActiveElement = ref(null);
 
 const sizeClass = computed(() => {
-  if (!modalStore.modalSize || modalStore.modalSize === 'md') {
-    return '';
+  if (!modalStore.modalSize || modalStore.modalSize === "md") {
+    return "";
   }
 
   return `modal-${modalStore.modalSize}`;
@@ -23,8 +23,12 @@ const isCloseDisabled = computed(
   () => modalStore.isSubmitting && modalStore.disableCloseWhileSubmitting
 );
 
-const hasConfirmHandler = computed(() => typeof modalStore.onConfirm === 'function');
-const hasCancelHandler = computed(() => typeof modalStore.onCancel === 'function');
+const hasConfirmHandler = computed(
+  () => typeof modalStore.onConfirm === "function"
+);
+const hasCancelHandler = computed(
+  () => typeof modalStore.onCancel === "function"
+);
 
 const shouldShowFooter = computed(() => {
   if (slots.footer) {
@@ -49,7 +53,11 @@ const shouldShowFooter = computed(() => {
 });
 
 const shouldShowCancelButton = computed(
-  () => modalStore.showCancel && (modalStore.showConfirm || hasConfirmHandler.value || hasCancelHandler.value)
+  () =>
+    modalStore.showCancel &&
+    (modalStore.showConfirm ||
+      hasConfirmHandler.value ||
+      hasCancelHandler.value)
 );
 
 const getFocusableElements = (rootEl) => {
@@ -61,7 +69,7 @@ const getFocusableElements = (rootEl) => {
     rootEl.querySelectorAll(
       'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
     )
-  ).filter((el) => !el.hasAttribute('aria-hidden'));
+  ).filter((el) => !el.hasAttribute("aria-hidden"));
 };
 
 const focusInitial = () => {
@@ -71,11 +79,14 @@ const focusInitial = () => {
   }
 
   let target = null;
-  if (typeof modalStore.initialFocus === 'string' && modalStore.initialFocus !== 'first') {
+  if (
+    typeof modalStore.initialFocus === "string" &&
+    modalStore.initialFocus !== "first"
+  ) {
     target = rootEl.querySelector(modalStore.initialFocus);
   }
 
-  if (!target && modalStore.initialFocus !== 'container') {
+  if (!target && modalStore.initialFocus !== "container") {
     const focusable = getFocusableElements(rootEl);
     target = focusable[0] || null;
   }
@@ -84,13 +95,13 @@ const focusInitial = () => {
     target = dialogRef.value;
   }
 
-  if (target && typeof target.focus === 'function') {
+  if (target && typeof target.focus === "function") {
     target.focus();
   }
 };
 
 const trapFocus = (event) => {
-  if (event.key !== 'Tab') {
+  if (event.key !== "Tab") {
     return;
   }
 
@@ -123,7 +134,11 @@ const handleKeydown = (event) => {
     return;
   }
 
-  if (event.key === 'Escape' && modalStore.closeOnEsc && !isCloseDisabled.value) {
+  if (
+    event.key === "Escape" &&
+    modalStore.closeOnEsc &&
+    !isCloseDisabled.value
+  ) {
     event.preventDefault();
     modalStore.closeModal();
     return;
@@ -143,7 +158,7 @@ const handleCancel = async () => {
     return;
   }
 
-  if (typeof modalStore.onCancel === 'function') {
+  if (typeof modalStore.onCancel === "function") {
     const result = await modalStore.onCancel();
     if (result === false) {
       return;
@@ -160,7 +175,7 @@ const handleConfirm = async () => {
     return;
   }
 
-  if (typeof modalStore.onConfirm !== 'function') {
+  if (typeof modalStore.onConfirm !== "function") {
     modalStore.closeModal();
     return;
   }
@@ -189,19 +204,23 @@ watch(
       lastActiveElement.value = document.activeElement;
       await nextTick();
       focusInitial();
-      document.addEventListener('keydown', handleKeydown);
+      document.addEventListener("keydown", handleKeydown);
       return;
     }
 
-    document.removeEventListener('keydown', handleKeydown);
-    if (modalStore.restoreFocus && lastActiveElement.value && lastActiveElement.value.focus) {
+    document.removeEventListener("keydown", handleKeydown);
+    if (
+      modalStore.restoreFocus &&
+      lastActiveElement.value &&
+      lastActiveElement.value.focus
+    ) {
       lastActiveElement.value.focus();
     }
   }
 );
 
 onBeforeUnmount(() => {
-  document.removeEventListener('keydown', handleKeydown);
+  document.removeEventListener("keydown", handleKeydown);
 });
 </script>
 
@@ -219,6 +238,7 @@ onBeforeUnmount(() => {
         :aria-describedby="modalStore.bodyId"
         :aria-hidden="false"
         @click.self="backdropClick"
+        style="background-color: rgba(0, 0, 0, 0.5)"
       >
         <div
           :class="[
@@ -233,9 +253,13 @@ onBeforeUnmount(() => {
           tabindex="-1"
         >
           <div class="modal-content">
-            <!-- Header -->
-            <div class="block-header block-header-default bg-body-light border-bottom">
-              <h3 :id="modalStore.titleId" class="block-title text-body-color">{{ modalStore.title }}</h3>
+            <div
+              class="block-header block-header-default bg-body-light border-bottom"
+            >
+              <h3 :id="modalStore.titleId" class="block-title text-body-color">
+                {{ modalStore.title }}
+              </h3>
+
               <div class="block-options">
                 <button
                   type="button"
@@ -250,8 +274,19 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Body with dynamic component -->
-            <div :id="modalStore.bodyId" :class="['modal-body', modalStore.bodyClass]">
+            <div
+              v-if="modalStore.isLoading"
+              class="modal-body text-center py-5"
+            >
+              <i class="fa fa-spinner fa-spin fa-3x text-primary"></i>
+              <p class="mt-3 text-muted">Fetching details...</p>
+            </div>
+
+            <div
+              v-else
+              :id="modalStore.bodyId"
+              :class="['modal-body', modalStore.bodyClass]"
+            >
               <component
                 v-if="modalStore.component"
                 :is="modalStore.component"
@@ -262,8 +297,10 @@ onBeforeUnmount(() => {
               </slot>
             </div>
 
-            <!-- Footer (optional) -->
-            <div v-if="shouldShowFooter" class="modal-footer border-top">
+            <div
+              v-if="shouldShowFooter && !modalStore.isLoading"
+              class="modal-footer border-top"
+            >
               <slot name="footer">
                 <button
                   v-if="shouldShowCancelButton"
@@ -281,7 +318,12 @@ onBeforeUnmount(() => {
                   :disabled="isCloseDisabled"
                   @click="handleConfirm"
                 >
-                  <span v-if="modalStore.isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    v-if="modalStore.isSubmitting"
+                    class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   {{ modalStore.confirmText }}
                 </button>
               </slot>
@@ -291,13 +333,11 @@ onBeforeUnmount(() => {
       </div>
     </Transition>
 
-    <!-- Backdrop -->
     <Transition name="backdrop">
       <div v-if="modalStore.isOpen" class="modal-backdrop fade show"></div>
     </Transition>
   </Teleport>
 </template>
-
 <style scoped>
 /* Modal transitions */
 .modal-enter-active,

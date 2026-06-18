@@ -63,7 +63,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
 <template>
   <form @submit.prevent="onSubmit" class="user-form">
 
-    <!-- Error banner -->
     <div
       v-if="error?.message || (typeof error === 'string' && error)"
       class="alert alert-danger d-flex align-items-center gap-2 mb-4 py-2 px-3"
@@ -73,14 +72,12 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
       <span class="fs-sm">{{ typeof error === "string" ? error : error.message }}</span>
     </div>
 
-    <!-- Account section -->
     <div class="mb-1">
       <p class="fs-xs fw-semibold text-muted text-uppercase tracking-wider mb-3">
         <i class="fa fa-user-circle me-1"></i> Account
       </p>
       <div class="row g-3">
 
-        <!-- Username -->
         <div class="col-md-6">
           <label class="form-label fw-medium" for="uf-username">
             Username <span v-if="!readonly" class="text-danger">*</span>
@@ -105,7 +102,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
           </div>
         </div>
 
-        <!-- Email Address -->
         <div class="col-md-6">
           <label class="form-label fw-medium" for="uf-email">
             Email Address <span v-if="!readonly" class="text-danger">*</span>
@@ -130,7 +126,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
           </div>
         </div>
 
-        <!-- Mobile Number -->
         <div class="col-md-6">
           <label class="form-label fw-medium" for="uf-mobile">
             Mobile <span v-if="!readonly" class="text-danger">*</span>
@@ -160,14 +155,12 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
 
     <hr class="my-4 opacity-10" />
 
-    <!-- Personal info section -->
     <div class="mb-1">
       <p class="fs-xs fw-semibold text-muted text-uppercase tracking-wider mb-3">
         <i class="fa fa-id-card me-1"></i> Personal Info
       </p>
       <div class="row g-3">
 
-        <!-- First Name -->
         <div class="col-md-4">
           <label class="form-label fw-medium" for="uf-firstname">
             First Name <span v-if="!readonly" class="text-danger">*</span>
@@ -186,7 +179,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
           </div>
         </div>
 
-        <!-- Middle Name -->
         <div class="col-md-4">
           <label class="form-label fw-medium" for="uf-middlename">
             Middle Name <span class="text-muted fw-normal fs-xs">(optional)</span>
@@ -205,7 +197,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
           </div>
         </div>
 
-        <!-- Last Name -->
         <div class="col-md-4">
           <label class="form-label fw-medium" for="uf-lastname">
             Last Name <span v-if="!readonly" class="text-danger">*</span>
@@ -227,7 +218,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
       </div>
     </div>
 
-    <!-- Password section (hidden when readonly or in edit mode) -->
     <template v-if="!readonly && isCreateMode">
       <hr class="my-4 opacity-10" />
 
@@ -237,7 +227,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
         </p>
         <div class="row g-3">
 
-          <!-- Password -->
           <div class="col-md-6">
             <label class="form-label fw-medium" for="uf-password">
               Password <span v-if="isCreateMode" class="text-danger">*</span>
@@ -270,7 +259,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
             </div>
           </div>
 
-          <!-- Confirm Password (create mode only) -->
           <div class="col-md-6" v-if="isCreateMode">
             <label class="form-label fw-medium" for="uf-confirm-password">
               Confirm Password <span class="text-danger">*</span>
@@ -304,7 +292,6 @@ const isSubmitting = computed(() => props.isLoading || loading.value);
       </div>
     </template>
 
-    <!-- Submit -->
     <div v-if="!hideSubmit" class="d-flex justify-content-end mt-4 pt-2 border-top">
       <button type="submit" class="btn btn-primary px-4" :disabled="isSubmitting">
         <i class="fa me-2" :class="isSubmitting ? 'fa-circle-notch fa-spin' : 'fa-check'"></i>

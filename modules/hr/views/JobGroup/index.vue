@@ -23,7 +23,7 @@ import {
   handleResponseAlert,
 } from "@/composables/useWarpHelpers";
 import Form from "./form.vue";
-
+import { formatCurrency } from "@/helpers/formatters.js"
 const modalStore = useModalStore();
 const alertStore = useAlertStore();
 const { confirmAction } = useAlert();
@@ -147,7 +147,13 @@ function handlePerPageChange(value) {
   fetchRows();
 }
 
-function openFormModal(title, formData = {}, readonly = false) {
+function openFormModal(
+  title,
+  formData = {},
+  readonly = false,
+  isLoading = false
+) {
+  // Added isLoading param
   modalStore.openModal({
     component: Form,
     title,
@@ -157,7 +163,7 @@ function openFormModal(title, formData = {}, readonly = false) {
       formData: stripCrudSystemFields(formData),
       error: "",
       fieldErrors: {},
-      isLoading: false,
+      isLoading: isLoading,
       readonly,
       hideSubmit: readonly,
       compact: true,
@@ -165,7 +171,6 @@ function openFormModal(title, formData = {}, readonly = false) {
     },
   });
 }
-
 function handleCreate() {
   modalMode.value = "create";
   modalStore.toggleModalUsage(true);
@@ -177,62 +182,68 @@ async function handleView(row) {
   modalMode.value = "view";
   modalStore.toggleModalUsage(true);
   const id = rowId(row);
-  if (!modalStore.useModal)
-    return router.push({ name: "hr/job-group/view", params: { id } });
-  if (!id)
-    return alertStore.show({
-      theme: "danger",
-      type: "toast",
-      message: "Record id not found.",
-    });
 
-  const {
-    data: responseData,
-    request,
-    error,
-  } = useApi(withId(endpoints.view, id), { method: "GET", autoFetch: false });
-  await request();
-  if (error.value)
-    return alertStore.show({
-      theme: "danger",
-      type: "toast",
-      message: "Failed to fetch record details.",
-    });
+  if (!modalStore.useModal) return router.push({ name: "hr/job-group/view", params: { id } });
+  if (!id) return alertStore.show({ theme: "danger", type: "toast", message: "Record id not found." });
 
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal("View JobGroup", payload.data || {}, true);
+  // 1. OPEN MODAL INSTANTLY
+  openFormModal("View JobGroup", {}, true);
+  
+  // 💡 Ensure setLoading is called AFTER openModal, as openModal might reset state
+  modalStore.setLoading(true); 
+
+  try {
+    // 2. FETCH DATA
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: "GET", autoFetch: false });
+    await request(); 
+
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: "danger", type: "toast", message: "Failed to fetch record details." });
+    }
+
+    // 3. INJECT DATA
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    // Ensure you assign it to the props that the open modal is watching
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    // 💡 Always turn off loading, even if the request fails
+    modalStore.setLoading(false); 
+  }
 }
 
 async function handleEdit(row) {
   modalMode.value = "edit";
   modalStore.toggleModalUsage(true);
   const id = rowId(row);
-  if (!modalStore.useModal)
-    return router.push({ name: "hr/job-group/update", params: { id } });
-  if (!id)
-    return alertStore.show({
-      theme: "danger",
-      type: "toast",
-      message: "Record id not found.",
-    });
 
-  const {
-    data: responseData,
-    request,
-    error,
-  } = useApi(withId(endpoints.view, id), { method: "GET", autoFetch: false });
-  await request();
-  if (error.value)
-    return alertStore.show({
-      theme: "danger",
-      type: "toast",
-      message: "Failed to fetch record details.",
-    });
+  if (!modalStore.useModal) return router.push({ name: "hr/job-group/update", params: { id } });
+  if (!id) return alertStore.show({ theme: "danger", type: "toast", message: "Record id not found." });
 
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal("Edit JobGroup", payload.data || {}, false);
+  // 1. OPEN MODAL INSTANTLY
+  openFormModal("Edit JobGroup", {}, false);
+  
+  // 💡 Turn loading on
+  modalStore.setLoading(true); 
+
+  try {
+    // 2. FETCH DATA
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: "GET", autoFetch: false });
+    await request();
+
+    if (error.value) {
+      modalStore.closeModal(); 
+      return alertStore.show({ theme: "danger", type: "toast", message: "Failed to fetch record details." });
+    }
+
+    // 3. INJECT DATA 
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    // 💡 Turn loading off
+    modalStore.setLoading(false); 
+  }
 }
-
 async function handleDelete(row) {
   const id = rowId(row);
   if (!id)
@@ -375,6 +386,21 @@ onMounted(fetchRows);
         <GridTable v-if="layout === 'table'">
           <GridHeaders />
           <GridBody>
+            <template #cell-min_salary="{ row }">
+              <div class="text-end">
+                KES {{ formatCurrency(row.min_salary) }}
+              </div>
+            </template>
+            <template #cell-max_salary="{ row }">
+              <div class="text-end">
+                KES {{ formatCurrency(row.max_salary) }}
+              </div>
+            </template>
+            <template #cell-default_salary="{ row }">
+              <div class="text-end">
+                KES {{ formatCurrency(row.default_salary) }}
+              </div>
+            </template>
             <template #cell-status="{ row }">
               <span
                 class="badge px-3 py-1 rounded-pill"
@@ -408,12 +434,22 @@ onMounted(fetchRows);
                 <p class="text-muted fs-sm mb-2">
                   {{ row.group_code }} | Level {{ row.level }}
                 </p>
-                <span 
-                class="badge px-3 py-1 m-1 rounded-pill" 
-                :class="row.status?.theme ? `bg-${row.status.theme}` : (row.status?.label === 'Active' ? 'bg-success' : 'bg-danger')"
-              >
-                {{ row.status?.label || row.status || 'Unknown' }}
-              </span>
+                <div class="fw-bold text-primary mb-2">
+                  {{ formatCurrency(row.min_salary) }} -
+                  {{ formatCurrency(row.max_salary) }}
+                </div>
+                <span
+                  class="badge px-3 py-1 m-1 rounded-pill"
+                  :class="
+                    row.status?.theme
+                      ? `bg-${row.status.theme}`
+                      : row.status?.label === 'Active'
+                        ? 'bg-success'
+                        : 'bg-danger'
+                  "
+                >
+                  {{ row.status?.label || row.status || "Unknown" }}
+                </span>
                 <span class="badge bg-success"
                   >{{ row.min_salary }} - {{ row.max_salary }}</span
                 >

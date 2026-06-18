@@ -133,65 +133,51 @@ function handleCreate() {
 async function handleView(row) {
   modalMode.value = 'view';
   modalStore.toggleModalUsage(true);
-
-  if (!modalStore.useModal) {
-    const id = rowId(row);
-    router.push({ name: 'hr/education-level/view', params: { id } });
-    return;
-  }
-
   const id = rowId(row);
-  if (!id) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
-    return;
+
+  if (!modalStore.useModal) return router.push({ name: 'hr/education-level/view', params: { id } });
+  if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
+
+  openFormModal('View EducationLevel', {}, true);
+  modalStore.setLoading(true);
+
+  try {
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false);
   }
-
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-    method: 'GET',
-    autoFetch: false,
-  });
-
-  await request();
-
-  if (error.value) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    return;
-  }
-
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('View EducationLevel', payload.data || {}, true);
 }
 
 async function handleEdit(row) {
   modalMode.value = 'edit';
   modalStore.toggleModalUsage(true);
-
-  if (!modalStore.useModal) {
-    const id = rowId(row);
-    router.push({ name: 'hr/education-level/update', params: { id } });
-    return;
-  }
-
   const id = rowId(row);
-  if (!id) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
-    return;
+
+  if (!modalStore.useModal) return router.push({ name: 'hr/education-level/update', params: { id } });
+  if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
+
+  openFormModal('Edit EducationLevel', {}, false);
+  modalStore.setLoading(true);
+
+  try {
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false);
   }
-
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-    method: 'GET',
-    autoFetch: false,
-  });
-
-  await request();
-
-  if (error.value) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    return;
-  }
-
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('Edit EducationLevel', payload.data || {}, false);
 }
 
 async function handleDelete(row) {

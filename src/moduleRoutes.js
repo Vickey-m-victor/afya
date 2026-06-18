@@ -7,7 +7,7 @@ import doctorRoutes from '~/doctor/router/index.js';
 
 export default [
   ...adminRoutes,
-  ...hrRoutes,
+  ...hrRoutes, 
   ...iamRoutes,
   ...mainRoutes,
   ...outpatientRoutes,

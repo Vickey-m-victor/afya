@@ -27,7 +27,7 @@ function decryptToken(encryptedToken) {
 
 // Async logout broadcast
 async function broadcastLogout() {
-    const { useAuthStore } = await import('@/stores/auth');
+    const { useAuthStore } = await import("@/stores/auth.js");
     const authStore = useAuthStore();
 
     authStore.logOutRequest();
@@ -91,7 +91,7 @@ axiosInstance.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                const { useAuthStore } = await import('@/stores/auth');
+                const { useAuthStore } = await import("@/stores/auth.js");
                 const authStore = useAuthStore();
 
                 const newToken = await authStore.refreshToken();

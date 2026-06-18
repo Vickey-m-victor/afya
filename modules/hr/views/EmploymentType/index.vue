@@ -120,7 +120,7 @@ function openFormModal(title, formData = {}, readonly = false) {
 
 function handleCreate() {
   modalMode.value = 'create';
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
+  modalStore.toggleModalUsage(true); 
 
   if (!modalStore.useModal) {
     router.push({ name: 'hr/employment-type/create' });
@@ -130,68 +130,66 @@ function handleCreate() {
   openFormModal('Create EmploymentType', {}, false);
 }
 
+// 💡 UPDATED: Instant Modal + Global Loading State
 async function handleView(row) {
   modalMode.value = 'view';
   modalStore.toggleModalUsage(true);
-
-  if (!modalStore.useModal) {
-    const id = rowId(row);
-    router.push({ name: 'hr/employment-type/view', params: { id } });
-    return;
-  }
-
   const id = rowId(row);
-  if (!id) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
-    return;
+
+  if (!modalStore.useModal) return router.push({ name: 'hr/employment-type/view', params: { id } });
+  if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
+
+  // 1. OPEN MODAL INSTANTLY
+  openFormModal('View EmploymentType', {}, true);
+  modalStore.setLoading(true); // 💡 Global spinner ON
+
+  try {
+    // 2. FETCH DATA
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+
+    // 3. INJECT DATA INTO THE OPEN MODAL
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false); // 💡 Global spinner OFF
   }
-
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-    method: 'GET',
-    autoFetch: false,
-  });
-
-  await request();
-
-  if (error.value) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    return;
-  }
-
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('View EmploymentType', payload.data || {}, true);
 }
 
+// 💡 UPDATED: Instant Modal + Global Loading State
 async function handleEdit(row) {
   modalMode.value = 'edit';
   modalStore.toggleModalUsage(true);
-
-  if (!modalStore.useModal) {
-    const id = rowId(row);
-    router.push({ name: 'hr/employment-type/update', params: { id } });
-    return;
-  }
-
   const id = rowId(row);
-  if (!id) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
-    return;
+
+  if (!modalStore.useModal) return router.push({ name: 'hr/employment-type/update', params: { id } });
+  if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
+
+  // 1. OPEN MODAL INSTANTLY
+  openFormModal('Edit EmploymentType', {}, false);
+  modalStore.setLoading(true); // 💡 Global spinner ON
+
+  try {
+    // 2. FETCH DATA
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+
+    // 3. INJECT DATA
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false); // 💡 Global spinner OFF
   }
-
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), {
-    method: 'GET',
-    autoFetch: false,
-  });
-
-  await request();
-
-  if (error.value) {
-    alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-    return;
-  }
-
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('Edit EmploymentType', payload.data || {}, false);
 }
 
 async function handleDelete(row) {
@@ -201,7 +199,9 @@ async function handleDelete(row) {
     return;
   }
 
-  const isRestore = row.is_deleted === 1;
+  // 💡 UPDATED: Boolean safety check for restores
+  const isRestore = row.is_deleted === 1 || row.is_deleted === true;
+  
   const result = await confirmAction(
     isRestore ? 'Restore this record?' : 'Delete this record?',
     isRestore ? 'The record will be restored and become active again.' : 'This action cannot be undone. The record will be permanently removed.'

@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeRouteLeave } from "vue-router";
 import { useTemplateStore } from "@/stores/template";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth.js";
 
 import BaseNavigation from "@/components/BaseNavigation.vue";
 
@@ -91,7 +91,7 @@ onBeforeRouteLeave(() => {
               <i class="fa fa-circle-notch text-primary"></i>
             </span>
             <span class="smini-hide fs-5 tracking-wider">
-              OneUI
+              Afya365
               <span class="fw-normal">Vue</span>
             </span>
           </RouterLink>

@@ -9,24 +9,9 @@ import AuditTrailDetailModal from "../../components/log/AuditTrailDetailModal.vu
 const modalStore = useModalStore();
 
 const {
-  searchQuery,
-  currentPage,
-  perPage,
-  sortBy,
-  sortDir,
-  totalCount,
-  totalPages,
-  perPageOptions,
-  setSearchDebounced,
-  setPage,
-  setPerPage,
-  setSort,
-  syncFromResponse,
-  buildQueryParams,
-} = useDataTable({
-  initialSortBy: "audit_time",
-  initialSortDir: "desc",
-});
+  searchQuery, currentPage, perPage, sortBy, sortDir, totalCount, totalPages, perPageOptions,
+  setSearchDebounced, setPage, setPerPage, setSort, syncFromResponse, buildQueryParams,
+} = useDataTable({ initialSortBy: "audit_time", initialSortDir: "desc" });
 
 const tableColumns = [
   { field: "audit_id", header: "ID", width: "80px", headerClass: "text-center", cellClass: "text-center" },
@@ -43,11 +28,7 @@ const loading = ref(false);
 
 const fetchAuditTrail = async () => {
   loading.value = true;
-  const { data: responseData, request } = useApi("/admin/audit/trail", {
-    method: "GET",
-    autoFetch: false,
-  });
-
+  const { data: responseData, request } = useApi("/admin/audit/trail", { method: "GET", autoFetch: false });
   try {
     await request(null, buildQueryParams());
     const payload = responseData.value?.dataPayload || responseData.value || {};
@@ -61,24 +42,10 @@ const fetchAuditTrail = async () => {
   }
 };
 
-function handleSearch(query) {
-  setSearchDebounced(query, fetchAuditTrail);
-}
-
-function handlePageChange(page) {
-  setPage(page);
-  fetchAuditTrail();
-}
-
-function handlePerPageChange(value) {
-  setPerPage(value);
-  fetchAuditTrail();
-}
-
-function handleSort(field) {
-  setSort(field);
-  fetchAuditTrail();
-}
+function handleSearch(query) { setSearchDebounced(query, fetchAuditTrail); }
+function handlePageChange(page) { setPage(page); fetchAuditTrail(); }
+function handlePerPageChange(value) { setPerPage(value); fetchAuditTrail(); }
+function handleSort(field) { setSort(field); fetchAuditTrail(); }
 
 function operationBadgeClass(operation) {
   if (operation === "CREATE") return "bg-success";
@@ -86,7 +53,6 @@ function operationBadgeClass(operation) {
   if (operation === "DELETE") return "bg-danger";
   return "bg-secondary";
 }
-
 function methodBadgeClass(method) {
   if (method === "GET") return "bg-info text-dark";
   if (method === "POST") return "bg-primary";
@@ -94,7 +60,6 @@ function methodBadgeClass(method) {
   if (method === "DELETE") return "bg-danger";
   return "bg-secondary";
 }
-
 function truncateValue(value, maxLength = 40) {
   if (value === null || value === undefined) return "-";
   const s = String(value);
@@ -102,12 +67,10 @@ function truncateValue(value, maxLength = 40) {
 }
 
 async function handleView(log) {
+  // 💡 Opens instantly with data from the row
   modalStore.openModal({
     component: AuditTrailDetailModal,
-    props: {
-      auditId: log.audit_id,
-      summary: log,
-    },
+    props: { auditId: log.audit_id, summary: log },
     title: `Audit Entry #${log.audit_id}`,
     size: "xl",
     centered: true,
@@ -119,9 +82,7 @@ async function handleView(log) {
   });
 }
 
-onMounted(() => {
-  fetchAuditTrail();
-});
+onMounted(() => fetchAuditTrail());
 </script>
 
 <template>
@@ -151,24 +112,9 @@ onMounted(() => {
       @change-per-page="handlePerPageChange"
       @change-sort="handleSort"
     >
-      <template #cell-operation="{ row }">
-        <span class="badge" :class="operationBadgeClass(row.operation)">
-          {{ row.operation || '-' }}
-        </span>
-      </template>
-
-      <template #cell-request_method="{ row }">
-        <span class="badge" :class="methodBadgeClass(row.request_method)">
-          {{ row.request_method || '-' }}
-        </span>
-      </template>
-
-      <template #cell-new_value="{ row }">
-        <span :title="row.new_value || ''">{{ truncateValue(row.new_value) }}</span>
-      </template>
+      <template #cell-operation="{ row }"><span class="badge" :class="operationBadgeClass(row.operation)">{{ row.operation || '-' }}</span></template>
+      <template #cell-request_method="{ row }"><span class="badge" :class="methodBadgeClass(row.request_method)">{{ row.request_method || '-' }}</span></template>
+      <template #cell-new_value="{ row }"><span :title="row.new_value || ''">{{ truncateValue(row.new_value) }}</span></template>
     </DataTable>
   </div>
 </template>
-
-<style scoped>
-</style>

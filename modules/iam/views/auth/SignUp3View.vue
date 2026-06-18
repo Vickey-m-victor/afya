@@ -11,54 +11,65 @@ import { required, minLength, email, sameAs } from "@vuelidate/validators";
 const store = useTemplateStore();
 const router = useRouter();
 
-// Input state variables
 const state = reactive({
+  first_name: null,
+  middle_name: null,
+  last_name: null,
+  email_address: null,
+  mobile_number: null,
   username: null,
-  email: null,
   password: null,
-  confirmPassword: null,
-  terms: null,
+  confirm_password: null,
+  terms: false,
 });
+
+// "first_name": "John",
+//   "middle_name": "Michael",
+//   "last_name": "Doe",
+//   "email_address": "john.doe@example.com",
+//   "mobile_number": "+2541700000000",
+//   "username": "johndoe",
+//   "password": "@dmiN1234$",
+//   "confirm_password": "@dmiN1234$"
 
 // Validation rules
-const rules = computed(() => {
-  return {
-    username: {
-      required,
-      minLength: minLength(3),
-    },
-    email: {
-      required,
-      email,
-    },
-    password: {
-      required,
-      minLength: minLength(5),
-    },
-    confirmPassword: {
-      required,
-      sameAs: sameAs(state.password),
-    },
-    terms: {
-      sameAs: sameAs(true),
-    },
-  };
-});
+// const rules = computed(() => {
+//   return {
+//     username: {
+//       required,
+//       minLength: minLength(3),
+//     },
+//     email: {
+//       required,
+//       email,
+//     },
+//     password: {
+//       required,
+//       minLength: minLength(5),
+//     },
+//     confirmPassword: {
+//       required,
+//       sameAs: sameAs(state.password),
+//     },
+//     terms: {
+//       sameAs: sameAs(true),
+//     },
+//   };
+// });
 
-// Use vuelidate
-const v$ = useVuelidate(rules, state);
 
 // On form submission
 async function onSubmit() {
-  const result = await v$.value.$validate();
-
-  if (!result) {
-    // notify user form is invalid
-    return;
+  // const result = await v$.value.$validate();
+  // if (!result) return;
+  
+  try {
+    await authStore.register(state);
+    toastSuccess("Account created successfully!");
+    router.push({ name: 'auth-signin3' });
+  } catch(error) {
+     toastError("Error", error.response?.data?.message || "Registration failed");
   }
-
-  // Go to dashboard
-  router.push({ name: "dashboard" });
 }
 </script>
 

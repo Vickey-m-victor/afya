@@ -17,24 +17,9 @@ const { confirmAction } = useAlert();
 const router = useRouter();
 
 const {
-  searchQuery,
-  currentPage,
-  perPage,
-  sortBy,
-  sortDir,
-  totalCount,
-  totalPages,
-  perPageOptions,
-  setSearchDebounced,
-  setPage,
-  setPerPage,
-  setSort,
-  syncFromResponse,
-  buildQueryParams,
-} = useDataTable({
-  initialSortBy: "user_id",
-  initialSortDir: "desc",
-});
+  searchQuery, currentPage, perPage, sortBy, sortDir, totalCount, totalPages, perPageOptions,
+  setSearchDebounced, setPage, setPerPage, setSort, syncFromResponse, buildQueryParams,
+} = useDataTable({ initialSortBy: "user_id", initialSortDir: "desc" });
 
 const tableColumns = [
   { field: "username", header: "Username", cellClass: "fw-semibold" },
@@ -49,26 +34,15 @@ const users = ref([]);
 const loading = ref(false);
 const togglingUser = ref(null);
 
-// ──────────────────── Data Fetching ────────────────────
-
 const fetchUsers = async () => {
   loading.value = true;
   try {
-    const { data: responseData, request, error } = useApi("/iam/users", {
-      method: "GET",
-      autoFetch: false,
-    });
-
+    const { data: responseData, request, error } = useApi("/iam/users", { method: "GET", autoFetch: false });
     await request(null, buildQueryParams());
     if (error.value) throw error.value;
-
     const payload = responseData.value?.dataPayload || responseData.value;
     syncFromResponse(payload);
-
-    const dataArray = Array.isArray(payload?.data)
-      ? payload.data
-      : Object.values(payload?.data || {});
-
+    const dataArray = Array.isArray(payload?.data) ? payload.data : Object.values(payload?.data || {});
     users.value = dataArray;
   } catch (error) {
     console.error("Failed to fetch users:", error);
@@ -77,227 +51,125 @@ const fetchUsers = async () => {
   }
 };
 
-// ──────────────────── Table Event Handlers ────────────────────
-
-function handleSearch(query) {
-  setSearchDebounced(query, fetchUsers);
-}
-
-function handlePageChange(page) {
-  setPage(page);
-  fetchUsers();
-}
-
-function handlePerPageChange(value) {
-  setPerPage(value);
-  fetchUsers();
-}
-
-function handleSort(field) {
-  setSort(field);
-  fetchUsers();
-}
-
-// ──────────────────── Alert Helpers ────────────────────
+function handleSearch(query) { setSearchDebounced(query, fetchUsers); }
+function handlePageChange(page) { setPage(page); fetchUsers(); }
+function handlePerPageChange(value) { setPerPage(value); fetchUsers(); }
+function handleSort(field) { setSort(field); fetchUsers(); }
 
 function handleResponseAlert(response, fallbackMessage) {
-  const payload =
-    response?.alertifyPayload ||
-    response?.dataPayload?.alertify ||
-    response?.data?.alertifyPayload ||
-    response?.data?.dataPayload?.alertify;
-  if (payload) {
-    alertStore.show(payload);
-  } else {
-    alertStore.show({ theme: "success", type: "toast", message: fallbackMessage });
-  }
+  const payload = response?.alertifyPayload || response?.dataPayload?.alertify || response?.data?.alertifyPayload || response?.data?.dataPayload?.alertify;
+  if (payload) alertStore.show(payload);
+  else alertStore.show({ theme: "success", type: "toast", message: fallbackMessage });
 }
 
-// ──────────────────── View User ────────────────────
-
+// 💡 FETCHES DATA: Using global loading logic!
 async function handleView(user) {
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
+  modalStore.toggleModalUsage(true); 
+  if (!modalStore.useModal) return router.push({ name: 'iam/users/view', params: { id: user.username } });
 
-  if (!modalStore.useModal) {
-    router.push({ name: 'iam/users/view', params: { id: user.username } });
-    return;
-  }
-
-  const { data: detailData, request } = useApi(`/iam/user/${user.username}`, {
-    method: "GET",
-    autoFetch: false,
-  });
-
-  await request();
-  const resData = detailData.value;
-  const fullUser = resData?.dataPayload?.data || resData?.dataPayload || resData?.data || user;
-
+  // 1. OPEN INSTANTLY
   modalStore.openModal({
     component: UserDetailsModal,
-    props: {
-      user: fullUser,
-      onRefresh: fetchUsers,
-    },
-    title: `User Details`,
-    size: "lg",
-    showFooter: false,
-    showConfirm: false,
-    showCancel: false,
+    props: { user: {}, onRefresh: fetchUsers }, // Give it an empty user to avoid undefined errors
+    title: `User Details`, size: "lg", showFooter: false, showConfirm: false, showCancel: false,
   });
+
+  modalStore.setLoading(true); // 💡 Spinner ON
+
+  try {
+    // 2. FETCH DATA
+    const { data: detailData, request } = useApi(`/iam/user/${user.username}`, { method: "GET", autoFetch: false });
+    await request();
+    
+    // 3. INJECT DATA
+    const resData = detailData.value;
+    const fullUser = resData?.dataPayload?.data || resData?.dataPayload || resData?.data || user;
+    modalStore.props.user = fullUser; 
+  } finally {
+    modalStore.setLoading(false); // 💡 Spinner OFF
+  }
 }
 
-// ──────────────────── Create User ────────────────────
-
 function handleCreate() {
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
-
-  if (!modalStore.useModal) {
-    router.push({ name: 'iam/users/create' });
-    return;
-  }
+  modalStore.toggleModalUsage(true); 
+  if (!modalStore.useModal) return router.push({ name: 'iam/users/create' });
 
   modalStore.openModal({
     component: UsersForm,
     props: {
-      formData: {
-        username: "",
-        first_name: "",
-        middle_name: "",
-        last_name: "",
-        email_address: "",
-        mobile_number: "",
-        password: "",
-        confirm_password: "",
-      },
-      fieldErrors: {},
-      isLoading: false,
-      readonly: false,
-      hideSubmit: false,
-      compact: true,
-      isCreateMode: true,
-      onSubmit: handleSubmit,
+      formData: { username: "", first_name: "", middle_name: "", last_name: "", email_address: "", mobile_number: "", password: "", confirm_password: "" },
+      fieldErrors: {}, isLoading: false, readonly: false, hideSubmit: false, compact: true, isCreateMode: true, onSubmit: handleSubmit,
     },
-    title: "Create New User",
-    size: "lg",
-    showFooter: false,
+    title: "Create New User", size: "lg", showFooter: false,
   });
 }
-
-// ──────────────────── Form Submit (Create only) ────────────────────
 
 async function handleSubmit(data) {
   modalStore.props.isLoading = true;
   modalStore.props.fieldErrors = {};
-
-  const { data: responseData, request, error } = useApi("/iam/user/create", {
-    method: "POST",
-    autoFetch: false,
-  });
+  const { data: responseData, request, error } = useApi("/iam/user/create", { method: "POST", autoFetch: false });
   await request(data);
-
   modalStore.props.isLoading = false;
 
   if (error.value) {
-    const errors =
-      typeof error.value === "object" && !Array.isArray(error.value) ? error.value : {};
-    modalStore.props.fieldErrors = errors;
+    modalStore.props.fieldErrors = typeof error.value === "object" && !Array.isArray(error.value) ? error.value : {};
     return;
   }
-
   handleResponseAlert(responseData.value, "User created successfully.");
   modalStore.closeModal();
   await fetchUsers();
 }
 
-// ──────────────────── Delete User ────────────────────
-
 async function handleDelete(user) {
-  const result = await confirmAction(
-    `Delete User "${user.username}"?`,
-    "This action cannot be undone. The user will be permanently removed from the system."
-  );
+  const result = await confirmAction(`Delete User "${user.username}"?`, "This action cannot be undone.");
   if (!result.isConfirmed) return;
-
   try {
-    const { data: responseData, request, error } = useApi(`/iam/user/${user.username}`, {
-      method: "DELETE",
-      autoFetch: false,
-    });
+    const { data: responseData, request, error } = useApi(`/iam/user/${user.username}`, { method: "DELETE", autoFetch: false });
     await request();
     if (error.value) throw error.value;
     handleResponseAlert(responseData.value, "User deleted successfully.");
     await fetchUsers();
   } catch (err) {
-    console.error("Failed to delete user:", err);
     alertStore.show({ theme: "error", type: "toast", message: "Failed to delete user." });
   }
 }
 
-// ──────────────────── Toggle Status ────────────────────
-
 async function handleToggleStatus(user) {
   const currentLabel = (user.status?.label || user.status || '').toString().toLowerCase();
   const newStatus = currentLabel === 'active' ? 'inactive' : 'active';
-
   togglingUser.value = user.username;
   try {
-    const { data: responseData, request, error } = useApi(`/iam/user/status/${user.username}`, {
-      method: "PATCH",
-      autoFetch: false,
-    });
+    const { data: responseData, request, error } = useApi(`/iam/user/status/${user.username}`, { method: "PATCH", autoFetch: false });
     await request({ status: newStatus });
     if (error.value) throw error.value;
     handleResponseAlert(responseData.value, `User ${newStatus === 'active' ? 'activated' : 'deactivated'}.`);
     await fetchUsers();
   } catch (err) {
-    console.error("Failed to toggle status:", err);
     alertStore.show({ theme: "danger", type: "toast", message: "Failed to update user status." });
   } finally {
     togglingUser.value = null;
   }
 }
 
-// ──────────────────── Ban User ────────────────────
-
 async function handleBan(user) {
-  const result = await confirmAction(
-    `Ban User "${user.username}"?`,
-    "This is a severe action. The user will be banned from the system."
-  );
+  const result = await confirmAction(`Ban User "${user.username}"?`, "This is a severe action. The user will be banned.");
   if (!result.isConfirmed) return;
-
   try {
-    const { data: responseData, request, error } = useApi(`/iam/user/ban/${user.username}`, {
-      method: "POST",
-      autoFetch: false,
-    });
+    const { data: responseData, request, error } = useApi(`/iam/user/ban/${user.username}`, { method: "POST", autoFetch: false });
     await request();
     if (error.value) throw error.value;
     handleResponseAlert(responseData.value, "User banned successfully.");
     await fetchUsers();
   } catch (err) {
-    console.error("Failed to ban user:", err);
     alertStore.show({ theme: "error", type: "toast", message: "Failed to ban user." });
   }
 }
 
-// ──────────────────── Manage Groups ────────────────────
-
 function handleManageGroups(user) {
   modalStore.openModal({
-    component: UserGroupToggle,
-    title: `Manage Groups — ${user.username}`,
-    size: "lg",
-    showFooter: false,
-    showConfirm: false,
-    props: {
-      username: user.username,
-    },
-    position: "center",
+    component: UserGroupToggle, title: `Manage Groups — ${user.username}`, size: "lg", showFooter: false, showConfirm: false, props: { username: user.username }, position: "center",
   });
 }
-
-// ──────────────────── Status Badge ────────────────────
 
 function statusBadgeClass(status) {
   if (status?.theme) return `bg-${status.theme}`;
@@ -308,14 +180,9 @@ function statusBadgeClass(status) {
   if (label === "banned") return "bg-danger";
   return "bg-info";
 }
+function statusLabel(status) { return status?.label || status || "Unknown"; }
 
-function statusLabel(status) {
-  return status?.label || status || "Unknown";
-}
-
-onMounted(() => {
-  fetchUsers();
-});
+onMounted(() => fetchUsers());
 </script>
 
 <template>
@@ -352,37 +219,20 @@ onMounted(() => {
     >
       <template #cell-username="{ row }">
         <div class="d-flex align-items-center">
-          <div
-            class="rounded-circle bg-body-light d-flex align-items-center justify-content-center me-2"
-            style="width: 32px; height: 32px; min-width: 32px;"
-          >
+          <div class="rounded-circle bg-body-light d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; min-width: 32px;">
             <i class="fa fa-user text-muted"></i>
           </div>
           <span>{{ row.username }}</span>
         </div>
       </template>
 
-      <template #cell-profile.first_name="{ row }">
-        {{ row.profile?.first_name || '-' }}
-      </template>
-
-      <template #cell-profile.last_name="{ row }">
-        {{ row.profile?.last_name || '-' }}
-      </template>
-
       <template #cell-profile.email_address="{ row }">
-        <span v-if="row.profile?.email_address">
-          <i class="fa fa-envelope text-muted me-1"></i>
-          {{ row.profile.email_address }}
-        </span>
+        <span v-if="row.profile?.email_address"><i class="fa fa-envelope text-muted me-1"></i>{{ row.profile.email_address }}</span>
         <span v-else class="text-muted">-</span>
       </template>
 
       <template #cell-profile.mobile_number="{ row }">
-        <span v-if="row.profile?.mobile_number">
-          <i class="fa fa-phone text-muted me-1"></i>
-          {{ row.profile.mobile_number }}
-        </span>
+        <span v-if="row.profile?.mobile_number"><i class="fa fa-phone text-muted me-1"></i>{{ row.profile.mobile_number }}</span>
         <span v-else class="text-muted">-</span>
       </template>
 
@@ -392,20 +242,11 @@ onMounted(() => {
           class="badge border-0 fs-xs py-1 px-3 rounded-pill d-inline-flex align-items-center gap-1"
           :class="statusBadgeClass(row.status)"
           :disabled="togglingUser === row.username"
-          :title="statusLabel(row.status) === 'Active' ? 'Click to deactivate' : 'Click to activate'"
           style="cursor: pointer;"
           @click="handleToggleStatus(row)"
         >
-          <span
-            v-if="togglingUser === row.username"
-            class="spinner-border spinner-border-sm"
-            style="width: 0.6rem; height: 0.6rem; border-width: 1.5px;"
-          ></span>
-          <i
-            v-else
-            class="fa fa-fw"
-            :class="statusLabel(row.status).toLowerCase() === 'active' ? 'fa-toggle-on' : 'fa-toggle-off'"
-          ></i>
+          <span v-if="togglingUser === row.username" class="spinner-border spinner-border-sm" style="width: 0.6rem; height: 0.6rem; border-width: 1.5px;"></span>
+          <i v-else class="fa fa-fw" :class="statusLabel(row.status).toLowerCase() === 'active' ? 'fa-toggle-on' : 'fa-toggle-off'"></i>
           {{ statusLabel(row.status) }}
         </button>
       </template>

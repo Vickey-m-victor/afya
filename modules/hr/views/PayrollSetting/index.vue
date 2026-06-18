@@ -107,31 +107,57 @@ function handleCreate() {
 }
 
 async function handleView(row) {
-  modalMode.value = 'view'; modalStore.toggleModalUsage(true);
+  modalMode.value = 'view';
+  modalStore.toggleModalUsage(true);
   const id = rowId(row);
+
   if (!modalStore.useModal) return router.push({ name: 'hr/payroll-setting/view', params: { id } });
   if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
 
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
-  await request();
-  if (error.value) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
-  
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('View PayrollSetting', payload.data || {}, true);
+  openFormModal('View PayrollSetting', {}, true);
+  modalStore.setLoading(true);
+
+  try {
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false);
+  }
 }
 
 async function handleEdit(row) {
-  modalMode.value = 'edit'; modalStore.toggleModalUsage(true);
+  modalMode.value = 'edit';
+  modalStore.toggleModalUsage(true);
   const id = rowId(row);
+
   if (!modalStore.useModal) return router.push({ name: 'hr/payroll-setting/update', params: { id } });
   if (!id) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Record id not found.' });
 
-  const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
-  await request();
-  if (error.value) return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+  openFormModal('Edit PayrollSetting', {}, false);
+  modalStore.setLoading(true);
 
-  const payload = responseData.value?.dataPayload || responseData.value || {};
-  openFormModal('Edit PayrollSetting', payload.data || {}, false);
+  try {
+    const { data: responseData, request, error } = useApi(withId(endpoints.view, id), { method: 'GET', autoFetch: false });
+    await request();
+
+    if (error.value) {
+      modalStore.closeModal();
+      return alertStore.show({ theme: 'danger', type: 'toast', message: 'Failed to fetch record details.' });
+    }
+
+    const payload = responseData.value?.dataPayload || responseData.value || {};
+    modalStore.props.formData = stripCrudSystemFields(payload.data || {});
+  } finally {
+    modalStore.setLoading(false);
+  }
 }
 
 async function handleDelete(row) {
@@ -247,7 +273,7 @@ onMounted(fetchRows);
         </ListBody>
 
         <template #footer>
-          <div class="p-3  border-top">
+          <div class="p-3 border-top">
             <GridPagination :per-page-options="perPageOptions" @change-per-page="handlePerPageChange" />
           </div>
         </template>

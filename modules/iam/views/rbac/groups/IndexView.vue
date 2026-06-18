@@ -16,24 +16,9 @@ const { confirmAction } = useAlert();
 const router = useRouter();
 
 const {
-  searchQuery,
-  currentPage,
-  perPage,
-  sortBy,
-  sortDir,
-  totalCount,
-  totalPages,
-  perPageOptions,
-  setSearchDebounced,
-  setPage,
-  setPerPage,
-  setSort,
-  syncFromResponse,
-  buildQueryParams,
-} = useDataTable({
-  initialSortBy: "group_name",
-  initialSortDir: "asc",
-});
+  searchQuery, currentPage, perPage, sortBy, sortDir, totalCount, totalPages, perPageOptions,
+  setSearchDebounced, setPage, setPerPage, setSort, syncFromResponse, buildQueryParams,
+} = useDataTable({ initialSortBy: "group_name", initialSortDir: "asc" });
 
 const tableColumns = [
   { field: "group_name", header: "Name", cellClass: "fw-semibold" },
@@ -44,30 +29,18 @@ const tableColumns = [
 
 const groups = ref([]);
 const loading = ref(false);
-
 const modalMode = ref("view");
 const selectedGroup = ref(null);
 
 const fetchGroups = async () => {
   loading.value = true;
   try {
-    const { data: responseData, request, error } = useApi("/iam/rbac/groups", {
-      method: "GET",
-      autoFetch: false,
-    });
-
+    const { data: responseData, request, error } = useApi("/iam/rbac/groups", { method: "GET", autoFetch: false });
     await request(null, buildQueryParams());
-    if (error.value) {
-      throw error.value;
-    }
-
+    if (error.value) throw error.value;
     const payload = responseData.value?.dataPayload || responseData.value;
     syncFromResponse(payload);
-
-    const dataArray = Array.isArray(payload?.data) 
-      ? payload.data 
-      : Object.values(payload?.data || {});
-    
+    const dataArray = Array.isArray(payload?.data) ? payload.data : Object.values(payload?.data || {});
     groups.value = dataArray;
   } catch (error) {
     console.error("Failed to fetch groups:", error);
@@ -76,182 +49,86 @@ const fetchGroups = async () => {
   }
 };
 
-function handleSearch(query) {
-  setSearchDebounced(query, fetchGroups);
-}
-
-function handlePageChange(page) {
-  setPage(page);
-  fetchGroups();
-}
-
-function handlePerPageChange(value) {
-  setPerPage(value);
-  fetchGroups();
-}
-
-function handleSort(field) {
-  setSort(field);
-  fetchGroups();
-}
+function handleSearch(query) { setSearchDebounced(query, fetchGroups); }
+function handlePageChange(page) { setPage(page); fetchGroups(); }
+function handlePerPageChange(value) { setPerPage(value); fetchGroups(); }
+function handleSort(field) { setSort(field); fetchGroups(); }
 
 function handleView(group) {
   modalMode.value = "view";
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
-
-  if (!modalStore.useModal) {
-    router.push({ name: 'iam/rbac/groups/view', params: { id: group.group_id } });
-    return;
-  }
+  modalStore.toggleModalUsage(true); 
+  if (!modalStore.useModal) return router.push({ name: 'iam/rbac/groups/view', params: { id: group.group_id } });
 
   modalStore.openModal({
     component: GroupsForm,
-    props: {
-      formData: { ...group },
-      fieldErrors: {},
-      isLoading: false,
-      readonly: true,
-      hideSubmit: true,
-      compact: true,
-      onSubmit: handleSubmit
-    },
-    title: "View Group",
-    size: "md",
-    showFooter: false,
-    showConfirm: false,
-    showCancel: false,
+    props: { formData: { ...group }, fieldErrors: {}, isLoading: false, readonly: true, hideSubmit: true, compact: true, onSubmit: handleSubmit },
+    title: "View Group", size: "md", showFooter: false, showConfirm: false, showCancel: false,
   });
 }
 
 function handleCreate() {
   modalMode.value = "create";
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
-
-  if (!modalStore.useModal) {
-    router.push({ name: 'iam/rbac/groups/create' });
-    return;
-  }
+  modalStore.toggleModalUsage(true); 
+  if (!modalStore.useModal) return router.push({ name: 'iam/rbac/groups/create' });
 
   modalStore.openModal({
     component: GroupsForm,
-    props: {
-      formData: {},
-      fieldErrors: {},
-      isLoading: false,
-      readonly: false,
-      hideSubmit: false,
-      compact: true,
-      onSubmit: handleSubmit
-    },
-    title: "Create Group",
-    size: "md",
-    showFooter: false,
+    props: { formData: {}, fieldErrors: {}, isLoading: false, readonly: false, hideSubmit: false, compact: true, onSubmit: handleSubmit },
+    title: "Create Group", size: "md", showFooter: false,
   });
 }
 
 function handleEdit(group) {
   modalMode.value = "edit";
-  modalStore.toggleModalUsage(true); // set to false to navigate to page
-
-  if (!modalStore.useModal) {
-    router.push({ name: 'iam/rbac/groups/update', params: { id: group.group_id } });
-    return;
-  }
+  modalStore.toggleModalUsage(true); 
+  if (!modalStore.useModal) return router.push({ name: 'iam/rbac/groups/update', params: { id: group.group_id } });
 
   modalStore.openModal({
     component: GroupsForm,
-    props: {
-      formData: { ...group },
-      fieldErrors: {},
-      isLoading: false,
-      readonly: false,
-      hideSubmit: false,
-      compact: true,
-      onSubmit: handleSubmit
-    },
-    title: "Edit Group",
-    size: "md",
-    showFooter: false,
+    props: { formData: { ...group }, fieldErrors: {}, isLoading: false, readonly: false, hideSubmit: false, compact: true, onSubmit: handleSubmit },
+    title: "Edit Group", size: "md", showFooter: false,
   });
 }
 
 async function handleDelete(group) {
-  const result = await confirmAction(
-    `Delete Group "${group.group_name}"?`,
-    "This will permanently remove the group and its role assignments."
-  );
+  const result = await confirmAction(`Delete Group "${group.group_name}"?`, "This will permanently remove the group and its role assignments.");
   if (!result.isConfirmed) return;
-
   try {
-    const { request, error } = useApi(`/iam/rbac/group/${group.group_id}`, {
-      method: "DELETE",
-      autoFetch: false,
-    });
-
+    const { request, error } = useApi(`/iam/rbac/group/${group.group_id}`, { method: "DELETE", autoFetch: false });
     await request();
-    if (error.value) {
-      throw error.value;
-    }
-
+    if (error.value) throw error.value;
     await fetchGroups();
   } catch (error) {
-    console.error("Failed to delete group:", error);
     alertStore.show({ theme: "error", type: "toast", message: "Failed to delete group." });
   }
 }
 
 function normalizeAssignmentItems(items) {
-  return Object.entries(items || {}).map(([id, item]) => ({
-    id,
-    label: item?.display_name || id,
-    type: item?.type || "",
-  }));
+  return Object.entries(items || {}).map(([id, item]) => ({ id, label: item?.display_name || id, type: item?.type || "" }));
 }
 
 function normalizeAlertify(payload, fallbackType, fallbackMessage) {
-  if (!payload) {
-    return {
-      type: fallbackType,
-      message: fallbackMessage,
-    };
-  }
-
-  const type = payload.theme || payload.type || fallbackType;
-  return {
-    type,
-    title: payload.title,
-    message: payload.message || fallbackMessage,
-    options: payload.options,
-  };
+  if (!payload) return { type: fallbackType, message: fallbackMessage };
+  return { type: payload.theme || payload.type || fallbackType, title: payload.title, message: payload.message || fallbackMessage, options: payload.options };
 }
-
 function handleResponseAlert(response, fallbackMessage) {
   const payload = response?.alertifyPayload || response?.dataPayload?.alertify || response?.data?.alertifyPayload || response?.data?.dataPayload?.alertify;
-  const normalized = normalizeAlertify(payload, "success", fallbackMessage);
-  alertStore.show(normalized);
+  alertStore.show(normalizeAlertify(payload, "success", fallbackMessage));
 }
-
 function handleErrorAlert(error, fallbackMessage) {
-  const payload = error?.alertifyPayload;
-  const normalized = normalizeAlertify(payload, "error", fallbackMessage);
-  alertStore.show(normalized);
+  alertStore.show(normalizeAlertify(error?.alertifyPayload, "error", fallbackMessage));
 }
 
 async function loadGroupAssignments(groupId) {
-  const { data: responseData, request, error } = useApi(`/iam/rbac/group/${groupId}`, {
-    method: "GET",
-    autoFetch: false,
-  });
+  const { data: responseData, request, error } = useApi(`/iam/rbac/group/${groupId}`, { method: "GET", autoFetch: false });
   await request();
   if (error.value) throw error.value;
   const groupData = responseData.value?.dataPayload?.data || {};
   const items = groupData.items || {};
-  return {
-    available: normalizeAssignmentItems(items.available),
-    assigned: normalizeAssignmentItems(items.assigned),
-  };
+  return { available: normalizeAssignmentItems(items.available), assigned: normalizeAssignmentItems(items.assigned) };
 }
 
+// 💡 FETCHES DATA: Using global loading logic!
 async function handleManageUsers(group) {
   selectedGroup.value = group;
 
@@ -259,106 +136,74 @@ async function handleManageUsers(group) {
     component: AssignmentManager,
     title: `Manage Roles: ${group.group_name || group.group_id}`,
     size: "xl",
-    showFooter: false,
-    showConfirm: false,
-    showCancel: false,
+    showFooter: false, showConfirm: false, showCancel: false,
     props: {
-      availableItems: [],
-      assignedItems: [],
-      isLoading: true,
-      isSubmitting: false,
-      availableLabel: "Available Roles",
-      assignedLabel: "Assigned Roles",
+      availableItems: [], assignedItems: [],
+      isSubmitting: false, availableLabel: "Available Roles", assignedLabel: "Assigned Roles",
       onAssign: async (selectedIds) => {
         modalStore.props.isSubmitting = true;
-        const { data: responseData, request, error } = useApi(
-          `/iam/rbac/group/assign/${group.group_id}`,
-          { method: "POST", autoFetch: false }
-        );
+        const { data: responseData, request, error } = useApi(`/iam/rbac/group/assign/${group.group_id}`, { method: "POST", autoFetch: false });
         await request({ roles: selectedIds });
-        if (error.value) {
-          handleErrorAlert(error.value, "Failed to assign roles.");
-        } else {
-          handleResponseAlert(responseData.value, "Roles assigned successfully.");
-          await fetchGroups();
-        }
+        if (error.value) handleErrorAlert(error.value, "Failed to assign roles.");
+        else { handleResponseAlert(responseData.value, "Roles assigned successfully."); await fetchGroups(); }
         await reloadGroupAssignmentsIntoModal(group.group_id);
       },
       onRemove: async (selectedIds) => {
         modalStore.props.isSubmitting = true;
-        const { data: responseData, request, error } = useApi(
-          `/iam/rbac/group/remove/${group.group_id}`,
-          { method: "POST", autoFetch: false }
-        );
+        const { data: responseData, request, error } = useApi(`/iam/rbac/group/remove/${group.group_id}`, { method: "POST", autoFetch: false });
         await request({ roles: selectedIds });
-        if (error.value) {
-          handleErrorAlert(error.value, "Failed to remove roles.");
-        } else {
-          handleResponseAlert(responseData.value, "Roles removed successfully.");
-          await fetchGroups();
-        }
+        if (error.value) handleErrorAlert(error.value, "Failed to remove roles.");
+        else { handleResponseAlert(responseData.value, "Roles removed successfully."); await fetchGroups(); }
         await reloadGroupAssignmentsIntoModal(group.group_id);
       },
     },
   });
 
-  await reloadGroupAssignmentsIntoModal(group.group_id);
+  modalStore.setLoading(true); // 💡 Spinner ON
+  try {
+    await reloadGroupAssignmentsIntoModal(group.group_id);
+  } finally {
+    modalStore.setLoading(false); // 💡 Spinner OFF
+  }
 }
 
 async function reloadGroupAssignmentsIntoModal(groupId) {
-  modalStore.props.isLoading = true;
   modalStore.props.isSubmitting = false;
   try {
     const data = await loadGroupAssignments(groupId);
     modalStore.props.availableItems = data.available;
     modalStore.props.assignedItems = data.assigned;
   } catch (err) {
-    console.error("Failed to reload group assignments:", err);
     modalStore.props.availableItems = [];
     modalStore.props.assignedItems = [];
-  } finally {
-    modalStore.props.isLoading = false;
   }
 }
 
 async function handleSubmit(data) {
   modalStore.props.isLoading = true;
   modalStore.props.fieldErrors = {};
-
   let apiError = null;
 
   if (modalMode.value === "create") {
-    const { request, error } = useApi("/iam/rbac/group", {
-      method: "POST",
-      autoFetch: false,
-    });
+    const { request, error } = useApi("/iam/rbac/group", { method: "POST", autoFetch: false });
     await request(data);
     apiError = error.value;
   } else if (modalMode.value === "edit") {
-    const { request, error } = useApi(`/iam/rbac/group/${data.group_id}`, {
-      method: "PUT",
-      autoFetch: false,
-    });
+    const { request, error } = useApi(`/iam/rbac/group/${data.group_id}`, { method: "PUT", autoFetch: false });
     await request(data);
     apiError = error.value;
   }
 
   modalStore.props.isLoading = false;
-
   if (apiError) {
-    const errors =
-      typeof apiError === "object" && !Array.isArray(apiError) ? apiError : {};
-    modalStore.props.fieldErrors = errors;
+    modalStore.props.fieldErrors = typeof apiError === "object" && !Array.isArray(apiError) ? apiError : {};
     return;
   }
-
   modalStore.closeModal();
   await fetchGroups();
 }
 
-onMounted(() => {
-  fetchGroups();
-});
+onMounted(() => fetchGroups());
 </script>
 
 <template>
@@ -393,23 +238,8 @@ onMounted(() => {
       @change-per-page="handlePerPageChange"
       @change-sort="handleSort"
     >
-      <template #cell-group_name="{ row }">
-        <!-- <i class="fa fa-users text-info me-2"></i> -->
-        {{ row.group_name }}
-      </template>
-
-      <template #cell-group_id="{ row }">
-        <code class="text-muted">{{ row.group_id }}</code>
-      </template>
-
-      <template #cell-description="{ row }">
-        {{ row.description || '-' }}
-      </template>
-
-      <template #cell-ruleName="{ row }">
-        {{ row.ruleName || '-' }}
-      </template>
+      <template #cell-group_name="{ row }">{{ row.group_name }}</template>
+      <template #cell-group_id="{ row }"><code class="text-muted">{{ row.group_id }}</code></template>
     </DataTable>
-
   </div>
 </template>

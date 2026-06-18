@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import NProgress from "nprogress/nprogress.js";
 import moduleRoutes from "./moduleRoutes.js";
 import appConfig from "./config/app.js";
-import { useAuthStore } from "./stores/auth.js";
+import { useAuthStore } from "@/stores/auth.js";
 
 
 // Set all routes
@@ -38,6 +38,14 @@ NProgress.configure({ showSpinner: false });
 
 // Authentication Guard
 router.beforeEach((to, from, next) => {
+  const toLayout = to.meta?.layout || 'default';
+  const fromLayout = from.meta?.layout || 'default';
+
+  if (from.name && toLayout !== fromLayout) {
+    window.location.href = to.fullPath;
+    return;
+  }
+  
   const authStore = useAuthStore();
   const safeRoutes = appConfig.safeRoutes || [];
   const routePath = to.path.replace(/^\//, ""); // Normalize path for comparison
