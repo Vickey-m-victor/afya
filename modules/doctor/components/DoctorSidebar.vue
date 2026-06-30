@@ -18,7 +18,7 @@ const menuItems = [
   },
   {
     name: "Appointments",
-    to: "#",
+    to: "doctor-appointments",
     icon: "fa fa-calendar-check",
   },
   {
