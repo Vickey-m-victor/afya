@@ -275,4 +275,12 @@ function openChangePasswordModal() {
 .bg-body-light {
   background-color: #f8f9fa !important;
 }
+
+/* Sticky sidebar layout */
+.stickysidebar {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 90px;
+  padding-bottom: 1px;
+}
 </style>

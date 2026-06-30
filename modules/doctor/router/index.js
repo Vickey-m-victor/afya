@@ -12,5 +12,11 @@ export default [
     name: 'doctor-appointments',
     component: () => import('../views/AppointmentsView.vue'),
     meta: { title: 'Doctor Appointments', layout: layout }
+  },
+  {
+    path: '/doctor/appointment-start',
+    name: 'doctor-appointment-start',
+    component: () => import('../views/DoctorAppointmentStartView.vue'),
+    meta: { title: 'Doctor Start Appointment', layout: layout }
   }
 ];

@@ -44,7 +44,7 @@
           </ul>
         </li>
         <li class="appointment-start">
-          <a href="javascript:void(0);" class="start-link text-decoration-underline text-dark fw-bold">Start Now</a>
+          <RouterLink :to="{ name: 'doctor-appointment-start' }" class="start-link text-decoration-underline text-dark fw-bold">Start Now</RouterLink>
         </li>
       </ul>
     </div>
