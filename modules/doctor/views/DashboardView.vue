@@ -3,6 +3,13 @@ import { reactive, ref } from "vue";
 import BaseBlock from "@/components/BaseBlock.vue";
 import VueApexCharts from "vue3-apexcharts";
 import DoctorSidebar from "../components/DoctorSidebar.vue";
+import DoctorBreadcrumb from "../components/DoctorBreadcrumb.vue";
+
+const breadcrumbItems = [
+  { icon: "fa fa-home", to: { name: "doctor-dashboard" } },
+  { name: "Doctor" },
+  { name: "Dashboard", active: true }
+];
 
 // Chart data
 const revenueChartOptions = {
@@ -182,24 +189,7 @@ const clinics = [
   <!-- Page Content -->
   <div class="bg-body-light">
     <!-- Breadcrumb Area -->
-    <div class="custom-breadcrumb-bar border-bottom">
-      <div class="content content-full py-4 text-center">
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb justify-content-center mb-2">
-            <li class="breadcrumb-item"><a href="javascript:void(0)" class="text-primary"><i class="fa fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="javascript:void(0)" class="text-primary">Doctor</a></li>
-            <li class="breadcrumb-item active text-dark fw-medium" aria-current="page">Dashboard</li>
-          </ol>
-        </nav>
-        <h1 class="h2 fw-bold mb-0 text-dark" style="color: #0c1a52 !important;">Dashboard</h1>
-      </div>
-      <div class="breadcrumb-bg">
-        <img src="/assets/media/photos/breadcrumb-bg-01.png" alt="img" class="breadcrumb-bg-01" />
-        <img src="/assets/media/photos/breadcrumb-bg-02.png" alt="img" class="breadcrumb-bg-02" />
-        <img src="/assets/media/photos/breadcrumb-icon.png" alt="img" class="breadcrumb-bg-03" />
-        <img src="/assets/media/photos/breadcrumb-icon.png" alt="img" class="breadcrumb-bg-04" />
-      </div>
-    </div>
+    <DoctorBreadcrumb title="Dashboard" :items="breadcrumbItems" />
 
     <!-- Main Content -->
     <div class="content content-boxed pb-5 mt-4">
@@ -649,50 +639,7 @@ const clinics = [
   color: #0665d0;
 }
 
-/* Custom Breadcrumb Styles matching Doccure */
-.custom-breadcrumb-bar {
-  background: #f4f8fb;
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
-}
-.custom-breadcrumb-bar .content {
-  position: relative;
-  z-index: 2;
-}
-.breadcrumb-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  pointer-events: none;
-}
-.breadcrumb-bg .breadcrumb-bg-01 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  max-width: 15%;
-}
-.breadcrumb-bg .breadcrumb-bg-02 {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  max-width: 25%;
-}
-.breadcrumb-bg .breadcrumb-bg-03 {
-  position: absolute;
-  top: 20%;
-  left: 20%;
-  width: 15px;
-}
-.breadcrumb-bg .breadcrumb-bg-04 {
-  position: absolute;
-  bottom: 20%;
-  right: 25%;
-  width: 12px;
-}
+
 
 /* Upcoming Appointment Card matching Doccure */
 .upcoming-appointment-card {
