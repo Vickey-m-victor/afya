@@ -47,17 +47,17 @@
               </li>
               <li class="appointment-info mt-3 mt-md-0">
                 <div class="person-info mb-2">
-                  <p class="mb-1 text-muted fs-xs fw-semibold uppercase">Person with patient</p>
+                  <p class="mb-1 text-muted fs-xs fw-semibold text-uppercase">Person with patient</p>
                   <span class="badge bg-light text-dark border px-2 py-1">Andrew (45)</span>
                 </div>
                 <div class="person-info">
-                  <p class="mb-1 text-muted fs-xs fw-semibold uppercase">Type of Appointment</p>
+                  <p class="mb-1 text-muted fs-xs fw-semibold text-uppercase">Type of Appointment</p>
                   <span class="badge bg-light text-dark border px-2 py-1"><i class="fa fa-hospital me-1 text-success"></i>Direct Visit</span>
                 </div>
               </li>
               <li class="appointment-action mt-3 mt-md-0 text-md-end">
                 <div class="detail-badge-info mb-2">
-                  <span class="badge bg-warning text-dark px-3 py-1 rounded">Upcoming</span>
+                  <span class="badge bg-warning text-white px-3 py-1 rounded" style="color: #fff !important;">Upcoming</span>
                 </div>
                 <div class="consult-fees">
                   <h6 class="mb-0 fw-bold text-dark fs-sm">Consultation Fees: $200</h6>
@@ -83,7 +83,7 @@
               </li>
               <li>
                 <div class="start-btn mt-1">
-                  <span class="btn btn-secondary btn-sm px-3 py-1 fw-bold cursor-default" style="cursor: default;">Inprogress</span>
+                  <span class="btn btn-secondary btn-sm px-3 py-1 fw-bold cursor-default text-white" style="cursor: default; color: #fff !important;">Inprogress</span>
                 </div>
               </li>
             </ul>
@@ -442,8 +442,10 @@ onUnmounted(() => {
   justify-content: space-between;
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 10px;
   flex-wrap: wrap;
+  gap: 24px;
+  
 }
 @media (max-width: 991.98px) {
   .appointment-detail-card > ul {
@@ -472,6 +474,7 @@ onUnmounted(() => {
   margin: 20px 0 0 0;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   flex-wrap: wrap;
+  gap: 20px;
 }
 @media (max-width: 767.98px) {
   .detail-card-bottom-info {

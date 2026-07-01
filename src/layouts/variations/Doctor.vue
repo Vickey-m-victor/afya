@@ -86,7 +86,7 @@ function openChangePasswordModal() {
       <div class="d-flex align-items-center">
         <!-- Logo -->
         <RouterLink :to="{ name: 'doctor-dashboard' }" class="d-flex align-items-center me-4">
-          <img src="/assets/media/logo.svg" alt="Doccure Logo" style="height: 34px;" />
+          <img src="/assets/media/afya.png" alt="Doccure Logo" style="height: 34px;" />
         </RouterLink>
 
         <!-- Global Search Form -->
