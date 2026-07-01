@@ -80,7 +80,7 @@ function openChangePasswordModal() {
 </script>
 
 <template>
-  <BaseLayout>
+  <BaseLayout class="layout-doctor-theme">
     <!-- Left Section of the Header -->
     <template #header-content-left>
       <div class="d-flex align-items-center">
@@ -261,23 +261,23 @@ function openChangePasswordModal() {
 
 <style>
 /* Header styling overrides for clean white header matching Doccure */
-#page-header {
+.layout-doctor-theme #page-header {
   background-color: #ffffff !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
   border-bottom: 1px solid #f0f2f5 !important;
 }
 
-#page-header .content-header {
+.layout-doctor-theme #page-header .content-header {
   height: 70px !important;
 }
 
 /* Style the body-light bg in the page content */
-.bg-body-light {
+.layout-doctor-theme .bg-body-light {
   background-color: #f8f9fa !important;
 }
 
 /* Sticky sidebar layout */
-.stickysidebar {
+.layout-doctor-theme .stickysidebar {
   position: -webkit-sticky;
   position: sticky;
   top: 90px;
