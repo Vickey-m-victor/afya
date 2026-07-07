@@ -1,0 +1,95 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Admin Module",
+        "description": "API documentation for admin module",
+        "contact": {
+            "name": "Ananda Douglas",
+            "email": "douglasdaggs@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8082/v2",
+            "description": "API Development Server"
+        },
+        {
+            "url": "https://afya365.com/v2",
+            "description": "API Staging Server"
+        }
+    ],
+    "paths": {
+        "/admin/logs/access": {
+            "get": {
+                "tags": [
+                    "Access Logs"
+                ],
+                "summary": "Get Logs",
+                "description": "Returns a list of Access logs",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 25
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Global search query to filter logs",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data Payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "dataPayload": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "access_id": {
+                                                                "title": "Access Id",
+                                                                "description": "No description",
+                                                                "type": "integer",
+                                                                "example": "xxx-xxx"
+                                                            },
+                                                            "user": {
+                                                                "title": "User ",
+                                                                "description": "User who accessed",
+                                                                "type": "string",
+                                                                "example": "System Admin"
+                                                            },
+                                                            "description": {
+                                                                "title": "Description",
+                                                                "description": "Show what action was performed",
+                                                                "type": "string",
+                                                                "example": "Visited page: /admin/dashboard"
+                                                            },
+                                                            "ip_address": {
+                                                                "title": "Ip Address",
+                                                                "description": "IP address of the user",

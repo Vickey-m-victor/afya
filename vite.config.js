@@ -30,10 +30,8 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      // This tells Vite to process this SCSS file as a separate output
       input: {
-        main: fileURLToPath(new URL('./index.html', import.meta.url)),
-        doccureCSS: fileURLToPath(new URL('./src/themes/doccure/assets/scss/main.scss', import.meta.url))
+        main: fileURLToPath(new URL('./index.html', import.meta.url))
       }
     }
   }

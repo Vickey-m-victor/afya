@@ -36,336 +36,148 @@ function printReceipt() {
 </script>
 
 <template>
-  <div class="receipt-page">
-    <!-- Controls (hidden in print) -->
-    <div class="receipt-controls no-print">
-      <RouterLink :to="{ name: 'billing/queue' }" class="ctrl-btn">
-        <i class="fa fa-arrow-left me-2"></i>Back to Queue
+  <BasePageHeading title="Receipt" :subtitle="`Receipt No. ${receipt.receipt_no}`" class="no-print">
+    <template #extra>
+      <RouterLink :to="{ name: 'billing/queue' }" class="btn btn-sm btn-alt-secondary me-2">
+        <i class="fa fa-arrow-left me-1"></i> Back to Queue
       </RouterLink>
-      <button class="ctrl-btn ctrl-btn-primary" @click="printReceipt">
-        <i class="fa fa-print me-2"></i>Print Receipt
+      <button class="btn btn-sm btn-primary" @click="printReceipt">
+        <i class="fa fa-print me-1"></i> Print Receipt
       </button>
-    </div>
+    </template>
+  </BasePageHeading>
 
-    <!-- Receipt Card -->
-    <div class="receipt-card">
-      <!-- Header -->
-      <div class="receipt-header">
-        <div class="receipt-logo">
-          <i class="fa fa-hospital-alt"></i>
-        </div>
-        <div class="receipt-facility">
-          <h2>{{ receipt.facility.name }}</h2>
-          <p>{{ receipt.facility.address }}</p>
-          <p>{{ receipt.facility.phone }}</p>
-        </div>
-        <div class="receipt-badge">
-          <i class="fa fa-check-circle me-1"></i> PAID
-        </div>
-      </div>
-
-      <div class="receipt-divider dashed"></div>
-
-      <!-- Meta info -->
-      <div class="receipt-meta-grid">
-        <div class="meta-block">
-          <span class="meta-label">Receipt No.</span>
-          <span class="meta-val">{{ receipt.receipt_no }}</span>
-        </div>
-        <div class="meta-block">
-          <span class="meta-label">Invoice Ref.</span>
-          <span class="meta-val">{{ receipt.invoice_id }}</span>
-        </div>
-        <div class="meta-block">
-          <span class="meta-label">Date &amp; Time</span>
-          <span class="meta-val">{{ receipt.paid_at }}</span>
-        </div>
-        <div class="meta-block">
-          <span class="meta-label">Cashier</span>
-          <span class="meta-val">{{ receipt.cashier }}</span>
-        </div>
-        <div class="meta-block">
-          <span class="meta-label">Patient</span>
-          <span class="meta-val">{{ receipt.patient.name }}</span>
-        </div>
-        <div class="meta-block">
-          <span class="meta-label">MRN</span>
-          <span class="meta-val">{{ receipt.patient.mrn }}</span>
-        </div>
-      </div>
-
-      <div class="receipt-divider dashed"></div>
-
-      <!-- Line Items -->
-      <div class="receipt-items">
-        <div class="items-head">
-          <span>Description</span>
-          <span class="text-end">Amount</span>
-        </div>
-        <div v-for="(item, i) in receipt.items" :key="i" class="item-row">
-          <div class="item-row-desc">
-            {{ item.description }}
-            <span v-if="item.note" class="item-note">{{ item.note }}</span>
+  <div class="content">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="receipt-card p-4 p-sm-5 bg-white rounded border shadow-sm">
+          <!-- Facility Header -->
+          <div class="d-flex align-items-start gap-3 mb-4">
+            <div class="item item-circle bg-primary text-white" style="width: 48px; height: 48px;">
+              <i class="fa fa-hospital-alt fs-5"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h2 class="fs-sm fw-bold text-dark mb-1">{{ receipt.facility.name }}</h2>
+              <p class="fs-xs text-muted mb-0">{{ receipt.facility.address }}</p>
+              <p class="fs-xs text-muted mb-0">{{ receipt.facility.phone }}</p>
+            </div>
+            <span class="badge bg-success-light text-success px-3 py-2 rounded-pill fw-bold">
+              <i class="fa fa-check-circle me-1"></i> PAID
+            </span>
           </div>
-          <span class="text-end fw-600">
-            {{ item.amount > 0 ? 'KES ' + fmt(item.amount) : 'Covered' }}
-          </span>
-        </div>
-      </div>
 
-      <div class="receipt-divider"></div>
+          <hr class="border-top border-dashed my-3" />
 
-      <!-- Totals -->
-      <div class="receipt-totals">
-        <div class="total-row">
-          <span>Subtotal</span>
-          <span>KES {{ fmt(receipt.subtotal) }}</span>
-        </div>
-        <div class="total-row text-purple">
-          <span>NHIF Scheme Cover</span>
-          <span>- KES {{ fmt(receipt.scheme_cover) }}</span>
-        </div>
-        <div class="total-row total-paid">
-          <span>TOTAL PAID</span>
-          <span>KES {{ fmt(receipt.total_paid) }}</span>
-        </div>
-      </div>
+          <!-- Meta Grid -->
+          <div class="row g-3 fs-sm my-2">
+            <div class="col-6">
+              <span class="text-uppercase text-muted fs-xs fw-bold d-block mb-1">Receipt No.</span>
+              <span class="fw-bold text-dark fs-xs">{{ receipt.receipt_no }}</span>
+            </div>
+            <div class="col-6">
+              <span class="text-uppercase text-muted fs-xs fw-bold d-block mb-1">Invoice Ref.</span>
+              <span class="fw-bold text-dark fs-xs">{{ receipt.invoice_id }}</span>
+            </div>
+            <div class="col-6">
+              <span class="text-uppercase text-muted fs-xs fw-bold d-block mb-1">Date &amp; Time</span>
+              <span class="fw-semibold text-dark fs-xs">{{ receipt.paid_at }}</span>
+            </div>
+            <div class="col-6">
+              <span class="text-uppercase text-muted fs-xs fw-bold d-block mb-1">Cashier</span>
+              <span class="fw-semibold text-dark fs-xs">{{ receipt.cashier }}</span>
+            </div>
+            <div class="col-6">
+              <span class="text-uppercase text-muted fs-xs fw-bold d-block mb-1">Patient</span>
+              <span class="fw-bold text-dark fs-xs">{{ receipt.patient.name }}</span>
+            </div>
+            <div class="col-6">
+              <span class="text-uppercase text-muted fs-xs fw-bold d-block mb-1">MRN</span>
+              <span class="fw-semibold text-dark fs-xs">{{ receipt.patient.mrn }}</span>
+            </div>
+          </div>
 
-      <div class="receipt-divider dashed"></div>
+          <hr class="border-top border-dashed my-3" />
 
-      <!-- Payment method -->
-      <div class="receipt-payment-block">
-        <div class="payment-method-row">
-          <i class="fa fa-mobile-alt text-green me-2"></i>
-          <span class="fw-700">{{ receipt.payment_method }}</span>
-          <span class="text-muted ms-2">Ref: {{ receipt.reference }}</span>
-        </div>
-        <div class="receipt-success-note">
-          <i class="fa fa-check-circle me-1"></i>
-          Payment confirmed. Patient may proceed.
-        </div>
-      </div>
+          <!-- Line Items -->
+          <div class="my-3">
+            <div class="d-flex justify-content-between border-bottom pb-2 mb-2 text-uppercase text-muted fs-xs fw-bold">
+              <span>Description</span>
+              <span class="text-end">Amount</span>
+            </div>
+            <div v-for="(item, i) in receipt.items" :key="i" class="d-flex justify-content-between align-items-start py-2 fs-sm border-bottom border-light">
+              <div class="flex-grow-1 text-dark fw-semibold">
+                {{ item.description }}
+                <span v-if="item.note" class="d-block fs-xs text-purple fw-normal mt-1">{{ item.note }}</span>
+              </div>
+              <span class="fw-bold text-dark ms-3">
+                {{ item.amount > 0 ? 'KES ' + fmt(item.amount) : 'Covered' }}
+              </span>
+            </div>
+          </div>
 
-      <div class="receipt-divider dashed"></div>
+          <!-- Totals -->
+          <div class="my-3">
+            <div class="d-flex justify-content-between py-1 fs-sm">
+              <span class="text-muted">Subtotal</span>
+              <span class="fw-semibold text-dark">KES {{ fmt(receipt.subtotal) }}</span>
+            </div>
+            <div class="d-flex justify-content-between py-1 fs-sm text-purple">
+              <span>NHIF Scheme Cover</span>
+              <span class="fw-bold">- KES {{ fmt(receipt.scheme_cover) }}</span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-top mt-2 fs-5">
+              <span class="fw-bold text-dark">TOTAL PAID</span>
+              <span class="fw-bold text-primary">KES {{ fmt(receipt.total_paid) }}</span>
+            </div>
+          </div>
 
-      <!-- Footer -->
-      <div class="receipt-footer">
-        <p>Thank you for choosing {{ receipt.facility.name }}.</p>
-        <p>This is an official receipt. Please keep for your records.</p>
-        <div class="receipt-barcode">
-          |||  ||||||  |||  |||||  |||  ||||||  |||
+          <hr class="border-top border-dashed my-3" />
+
+          <!-- Payment Block -->
+          <div class="bg-body-light p-3 rounded mb-3">
+            <div class="d-flex align-items-center fs-sm fw-bold text-dark mb-2">
+              <i class="fa fa-mobile-alt text-success me-2 fs-5"></i>
+              <span>{{ receipt.payment_method }}</span>
+              <span class="text-muted fw-semibold ms-2">Ref: {{ receipt.reference }}</span>
+            </div>
+            <div class="alert alert-success fs-xs fw-semibold p-2 mb-0 d-flex align-items-center">
+              <i class="fa fa-check-circle me-2"></i>
+              Payment confirmed. Patient may proceed.
+            </div>
+          </div>
+
+          <hr class="border-top border-dashed my-3" />
+
+          <!-- Footer -->
+          <div class="text-center text-muted fs-xs">
+            <p class="mb-1">Thank you for choosing {{ receipt.facility.name }}.</p>
+            <p class="mb-3">This is an official receipt. Please keep for your records.</p>
+            <div class="fs-xs letter-spacing-2 text-dark font-monospace mb-1">
+              |||  ||||||  |||  |||||  |||  ||||||  |||
+            </div>
+            <p class="mb-0 fw-bold">{{ receipt.receipt_no }}</p>
+          </div>
         </div>
-        <p class="receipt-barcode-label">{{ receipt.receipt_no }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.receipt-page {
-  min-height: 100vh;
-  background: #f5f7fa;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 16px;
-  font-family: "Inter", sans-serif;
+.border-dashed {
+  border-top-style: dashed !important;
 }
-
-/* Controls */
-.receipt-controls {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-  width: 100%;
-  max-width: 560px;
-}
-.ctrl-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 9px 16px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: 1.5px solid #e2e8f0;
-  background: #fff;
-  color: #334155;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.ctrl-btn:hover { background: #f8fafc; }
-.ctrl-btn-primary {
-  background: #0e82fd;
-  color: #fff;
-  border-color: #0e82fd;
-  box-shadow: 0 4px 12px rgba(14,130,253,0.25);
-  margin-left: auto;
-}
-.ctrl-btn-primary:hover { background: #0565cc; color: #fff; }
-
-/* Receipt card */
-.receipt-card {
-  width: 100%;
-  max-width: 560px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
-  overflow: hidden;
-  padding: 32px 28px;
-}
-
-/* Header */
-.receipt-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.receipt-logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #0e82fd, #22ccff);
-  color: #fff;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.receipt-facility { flex: 1; }
-.receipt-facility h2 { font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0 0 2px; }
-.receipt-facility p { font-size: 0.72rem; color: #94a3b8; margin: 0; line-height: 1.5; }
-.receipt-badge {
-  background: #dcfce7;
-  color: #16a34a;
-  font-size: 0.78rem;
-  font-weight: 800;
-  padding: 5px 12px;
-  border-radius: 99px;
-  flex-shrink: 0;
-}
-
-/* Dividers */
-.receipt-divider {
-  border: none;
-  border-top: 1.5px solid #e2e8f0;
-  margin: 18px 0;
-}
-.dashed { border-top-style: dashed; }
-
-/* Meta */
-.receipt-meta-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.meta-block { display: flex; flex-direction: column; gap: 2px; }
-.meta-label { font-size: 0.68rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
-.meta-val { font-size: 0.82rem; font-weight: 600; color: #0f172a; }
-
-/* Items */
-.receipt-items { }
-.items-head {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f1f5f9;
-  margin-bottom: 4px;
-}
-.item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f8fafc;
-  font-size: 0.82rem;
-  color: #334155;
-}
-.item-row:last-child { border-bottom: none; }
-.item-row-desc { flex: 1; }
-.item-note {
-  display: block;
-  font-size: 0.68rem;
-  color: #9333ea;
-  font-style: italic;
-  margin-top: 2px;
-}
-
-/* Totals */
-.receipt-totals { }
-.total-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: #334155;
-  padding: 6px 0;
-}
-.text-purple { color: #9333ea; }
-.total-paid {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #0f172a;
-  border-top: 2px solid #f1f5f9;
-  margin-top: 8px;
-  padding-top: 10px;
-}
-
-/* Payment */
-.receipt-payment-block { }
-.payment-method-row {
-  display: flex;
-  align-items: center;
-  font-size: 0.85rem;
-  color: #334155;
-  margin-bottom: 10px;
-}
-.text-green { color: #16a34a; }
-.fw-700 { font-weight: 700; }
-.text-muted { color: #94a3b8; }
-.ms-2 { margin-left: 8px; }
-.receipt-success-note {
-  background: #f0fdf4;
-  color: #16a34a;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 10px 14px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-}
-
-/* Footer */
-.receipt-footer {
-  text-align: center;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  line-height: 1.7;
-}
-.receipt-barcode {
-  font-size: 0.65rem;
-  letter-spacing: 2px;
-  color: #334155;
-  margin: 12px 0 4px;
-}
-.receipt-barcode-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #64748b;
-  letter-spacing: 0.1em;
-}
-
-/* Print styles */
 @media print {
-  .no-print { display: none !important; }
-  .receipt-page { background: #fff; padding: 0; }
-  .receipt-card { box-shadow: none; border-radius: 0; }
+  .no-print {
+    display: none !important;
+  }
+  .content {
+    padding: 0 !important;
+  }
+  .receipt-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
 }
 </style>
