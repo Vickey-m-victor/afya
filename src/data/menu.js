@@ -43,6 +43,37 @@ export default {
       ],
     },
     {
+      name: "Pharmacy",
+      heading: true,
+    },
+    {
+      name: "Pharmacy Desk",
+      icon: "fa-solid fa-prescription-bottle-medical",
+      subActivePaths: "/pharmacy",
+      sub: [
+        {
+          name: "Dashboard",
+          to: "pharmacy/dashboard",
+          icon: "fa-solid fa-chart-line",
+        },
+        {
+          name: "Dispensing Desk",
+          to: "pharmacy/dispensing",
+          icon: "fa-solid fa-file-prescription",
+        },
+        {
+          name: "Medicine Catalog",
+          to: "pharmacy/inventory",
+          icon: "fa-solid fa-boxes-stacked",
+        },
+        {
+          name: "Receive Stock",
+          to: "pharmacy/inventory/receive",
+          icon: "fa-solid fa-truck-loading",
+        },
+      ],
+    },
+    {
       name: "IAM",
       heading: true,
     },
