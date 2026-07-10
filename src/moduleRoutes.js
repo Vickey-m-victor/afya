@@ -6,6 +6,7 @@ import outpatientRoutes from '~/outpatient/router/index.js';
 import doctorRoutes from '~/doctor/router/index.js';
 import billingRoutes from '~/billing/router/index.js';
 import pharmacyRoutes from '~/pharmacy/router/index.js';
+import laboratoryRoutes from '~/laboratory/router/index.js';
 
 export default [
   ...adminRoutes,
@@ -16,4 +17,5 @@ export default [
   ...doctorRoutes,
   ...billingRoutes,
   ...pharmacyRoutes,
+  ...laboratoryRoutes,
 ];

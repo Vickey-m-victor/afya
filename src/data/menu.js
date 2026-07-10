@@ -74,6 +74,37 @@ export default {
       ],
     },
     {
+      name: "Laboratory",
+      heading: true,
+    },
+    {
+      name: "Laboratory Desk",
+      icon: "fa-solid fa-flask",
+      subActivePaths: "/laboratory",
+      sub: [
+        {
+          name: "Dashboard",
+          to: "laboratory/dashboard",
+          icon: "fa-solid fa-chart-line",
+        },
+        {
+          name: "Lab Worklist",
+          to: "laboratory/worklist",
+          icon: "fa-solid fa-vial-medical",
+        },
+        {
+          name: "Reagent Catalog",
+          to: "laboratory/inventory",
+          icon: "fa-solid fa-boxes-stacked",
+        },
+        {
+          name: "Receive Reagents",
+          to: "laboratory/inventory/receive",
+          icon: "fa-solid fa-truck-loading",
+        },
+      ],
+    },
+    {
       name: "IAM",
       heading: true,
     },
